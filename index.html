@@ -69,7 +69,14 @@
         </nav>
 
         <div class="ml-auto hidden items-center gap-2 lg:flex">
-          <a href="#contact" class="rounded-full px-3 py-2 text-sm font-semibold text-brand-graphite hover:bg-brand-grey/60">Sales</a>
+          <div class="relative group">
+            <button type="button" class="rounded-full px-3 py-2 text-sm font-semibold text-brand-graphite hover:bg-brand-grey/60 flex items-center gap-1">Log in <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:rotate-180 transition-transform duration-200"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="hidden group-hover:block absolute right-0 top-full pt-1 w-56 bg-brand-whitefr border border-brand-grey/80 rounded-xl shadow-brand-lg z-50 overflow-hidden">
+              <a href="https://admin.helixhealth.app/login" class="block px-4 py-3.5 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition first:rounded-t-xl border-b border-brand-grey/40">Helix Admin Dashboard</a>
+              <a href="https://analytics.helixhealth.app/login?from=%2F" class="block px-4 py-3.5 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition border-b border-brand-grey/40">Helix Analytics</a>
+              <button type="button" class="w-full text-left px-4 py-3.5 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition last:rounded-b-xl">Helix Webapp</button>
+            </div>
+          </div>
           <button type="button" data-open-demo class="helix-btn helix-btn--primary">Request a demo</button>
         </div>
 
@@ -96,7 +103,12 @@
         <a href="#compare" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Vs pagers</a>
         <a href="#security" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Security</a>
         <a href="#contact" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Contact</a>
-        <a href="#contact" class="rounded-xl px-4 py-3 text-sm font-semibold hover:bg-brand-off" data-close-nav>Sales</a>
+        <div class="pt-3 border-t border-brand-grey mt-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-brand-pewter px-4 py-3">Log in</p>
+          <a href="https://admin.helixhealth.app/login" class="block px-4 py-3 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition rounded-lg" data-close-nav>Helix Admin Dashboard</a>
+          <a href="https://analytics.helixhealth.app/login?from=%2F" class="block px-4 py-3 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition rounded-lg" data-close-nav>Helix Analytics</a>
+          <button type="button" class="w-full text-left px-4 py-3 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition rounded-lg">Helix Webapp</button>
+        </div>
       </nav>
       <div class="mt-auto border-t border-brand-grey p-5">
         <button type="button" data-open-demo class="helix-btn helix-btn--primary helix-btn--block justify-center" data-close-nav>Request a demo</button>
