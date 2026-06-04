@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helix Admin - Facility Submissions</title>
+  <link rel="icon" href="../brand-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="login-card">
+        <div class="login-logo">
+          <img src="../assets/helix-logo.svg" width="38" height="32" alt="Helix Health" />
+          <h1>Helix Admin</h1>
+        </div>
+        <form id="login-form">
+          <div class="field-group">
+            <label for="admin-email">Email</label>
+            <input type="email" id="admin-email" class="field" placeholder="admin@helix.health" required />
+          </div>
+          <div class="field-group">
+            <label for="admin-password">Password</label>
+            <input type="password" id="admin-password" class="field" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="btn primary full">Sign In</button>
+        </form>
+        <p class="login-hint">Demo: any email/password works</p>
+      </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-screen" class="screen hidden">
+      <!-- Header -->
+      <header class="admin-header">
+        <div class="header-left">
+          <div class="logo">
+            <img src="../assets/helix-logo.svg" width="32" height="27" alt="Helix Health" />
+            <span>Helix Admin</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="btn ghost" id="refresh-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+            Refresh
+          </button>
+          <button class="btn secondary" id="export-all-btn">Export All</button>
+          <div class="user-menu">
+            <span id="admin-user">Admin</span>
+            <button class="btn ghost sm" id="logout-btn">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="admin-main">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon total">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-total">0</span>
+              <span class="stat-label">Total Facilities</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon pending">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-pending">0</span>
+              <span class="stat-label">Pending Review</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon approved">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-approved">0</span>
+              <span class="stat-label">Approved</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon uploads">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-uploads">0</span>
+              <span class="stat-label">Files Attached</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Toolbar -->
+        <div class="filters-toolbar">
+          <div class="filter-group">
+            <input type="text" id="search-input" class="field" placeholder="Search facilities..." />
+          </div>
+          <div class="filter-group">
+            <select id="status-filter" class="field">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="incomplete">Incomplete</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select id="region-filter" class="field">
+              <option value="">All Regions</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select id="type-filter" class="field">
+              <option value="">All Types</option>
+            </select>
+          </div>
+          <div class="filter-group date-range">
+            <input type="date" id="date-from" class="field" placeholder="From" />
+            <span>to</span>
+            <input type="date" id="date-to" class="field" placeholder="To" />
+          </div>
+          <button class="btn ghost" id="clear-filters">Clear</button>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container">
+          <table class="data-table" id="facilities-table">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="facility_name">
+                  Facility Name
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th class="sortable" data-sort="facility_email">
+                  Email
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th class="sortable" data-sort="region">
+                  Region
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th class="sortable" data-sort="city">
+                  City
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th class="sortable" data-sort="facility_type">
+                  Type
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th class="sortable" data-sort="submitted_at">
+                  Submitted
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th class="sortable" data-sort="status">
+                  Status
+                  <span class="sort-icon">↕</span>
+                </th>
+                <th>Files</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Rows populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <div class="page-info">
+            Showing <span id="page-start">0</span> - <span id="page-end">0</span> of <span id="page-total">0</span>
+          </div>
+          <div class="page-controls">
+            <button class="btn ghost" id="prev-page" disabled>← Previous</button>
+            <div class="page-numbers" id="page-numbers"></div>
+            <button class="btn ghost" id="next-page" disabled>Next →</button>
+          </div>
+          <div class="per-page">
+            <select id="per-page" class="field sm">
+              <option value="10">10 per page</option>
+              <option value="25" selected>25 per page</option>
+              <option value="50">50 per page</option>
+              <option value="100">100 per page</option>
+            </select>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Detail Drawer -->
+    <div id="detail-modal" class="drawer-overlay hidden">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <div class="drawer-header-top">
+            <div class="drawer-facility-badge">
+              <div class="facility-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/>
+                </svg>
+              </div>
+              <div class="drawer-title-group">
+                <h2 id="detail-title">Facility Details</h2>
+                <p class="drawer-subtitle" id="detail-subtitle"></p>
+              </div>
+            </div>
+            <button class="drawer-close-btn" id="close-detail" aria-label="Close drawer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="drawer-meta-bar" id="drawer-meta"></div>
+        </div>
+        <div class="drawer-body" id="detail-body"></div>
+        <div class="drawer-footer">
+          <button class="btn-export" id="detail-export">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export JSON
+          </button>
+          <div class="drawer-actions">
+            <button class="action-btn action-reject" id="status-rejected">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Reject
+            </button>
+            <button class="action-btn action-pending" id="status-pending">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              Pending
+            </button>
+            <button class="action-btn action-approve" id="status-approved">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Approve
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- <script>window.HELIX_API_BASE = "http://localhost:8000/api/v1";</script> -->
+  <script src="api.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -679,7 +679,9 @@ section { padding: clamp(56px, 8vw, 112px) 0; }
   display: flex;
   align-items: stretch;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
   background: var(--bg-soft);
@@ -955,6 +957,43 @@ section { padding: clamp(56px, 8vw, 112px) 0; }
   animation: slideUp 260ms var(--ease-out);
 }
 .upload-panel.empty { display: none; }
+
+.sidebar-files-heading {
+  margin: 22px 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-subtle);
+}
+.sidebar-files-note {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  line-height: 1.35;
+}
+.upload-step-btn .t-label { font-size: 12.5px; }
+
+.dataset-nav {
+  margin-top: 36px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-soft);
+}
+.dataset-nav-label {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+.dataset-nav-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dataset-nav-grid--uploads { margin-top: 4px; margin-bottom: 14px; }
+.dataset-nav-all { margin-top: 4px; }
 .upload-panel-head {
   display: flex;
   justify-content: space-between;
@@ -1588,6 +1627,40 @@ input.invalid, textarea.invalid, select.invalid {
 .modal h3 { margin: 0 0 8px; font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: -0.02em; }
 .modal p { color: var(--ink-muted); margin: 0 0 20px; }
 .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+.modal-email-input-wrapper {
+  margin-bottom: 20px;
+}
+
+.modal-email-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--ink);
+  transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+}
+
+.modal-email-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.modal-email-input::placeholder {
+  color: var(--ink-subtle);
+}
+
+.modal-email-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--danger);
+  font-weight: 500;
+}
 
 /* Scroll reveal */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }

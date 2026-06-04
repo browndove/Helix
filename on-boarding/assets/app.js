@@ -119,6 +119,28 @@
   }
 
   let saveTimer = null;
+  let apiSaveTimer = null;
+
+  async function syncToApi() {
+    if (!window.HelixOnboardingApi?.enabled()) return;
+    const payload = buildSubmissionPayload();
+    try {
+      if (state.meta.server_submission_id) {
+        await HelixOnboardingApi.updateSubmission(state.meta.server_submission_id, {
+          portal_phase: payload.portal_phase,
+          answers: payload.answers,
+          uploads: payload.uploads,
+        });
+      } else {
+        const created = await HelixOnboardingApi.createSubmission(payload);
+        state.meta.server_submission_id = created.id;
+        scheduleSave();
+      }
+    } catch (err) {
+      console.warn("API sync failed:", err);
+    }
+  }
+
   function scheduleSave() {
     setSaveStatus("saving");
     clearTimeout(saveTimer);
@@ -132,6 +154,10 @@
         setSaveStatus("error");
       }
     }, 350);
+    if (window.HelixOnboardingApi?.enabled()) {
+      clearTimeout(apiSaveTimer);
+      apiSaveTimer = setTimeout(syncToApi, 800);
+    }
   }
 
   function setSaveStatus(status) {
@@ -361,26 +387,32 @@
     if (!nav) return;
     const phase = getPortalPhase();
     const clPct = overallProgress().pct;
-    nav.innerHTML = `
+
+    const checklistBtn = `
       <button type="button" role="tab" aria-selected="${phase === PHASE_CHECKLIST}" aria-controls="workspace"
               class="portal-step ${phase === PHASE_CHECKLIST ? "active" : ""}" data-phase="${PHASE_CHECKLIST}">
         <span class="ps-num">Step 1</span>
         <span class="ps-label">Facility checklist</span>
-        <span class="ps-meta">${clPct}% · required before submit</span>
-      </button>
-      ${DATA_UPLOAD_STEPS.map((s, i) => {
-        const up = state.uploads[s.uploadKey];
-        const active = phase === s.uploadKey;
-        return `
-          <button type="button" role="tab" aria-selected="${active}" aria-controls="workspace"
-                  class="portal-step ${active ? "active" : ""} ${up ? "has-file" : ""}"
-                  data-phase="${escapeAttr(s.uploadKey)}">
-            <span class="ps-num">Step ${i + 2}</span>
-            <span class="ps-label"><span class="ps-dot" aria-hidden="true"></span>${escapeHtml(s.shortLabel)}</span>
-            <span class="ps-meta">${up ? escapeHtml(shortenName(up.fileName)) : "No file attached"}</span>
-          </button>`;
-      }).join("")}
-    `;
+        <span class="ps-meta">${clPct}% · required to submit</span>
+      </button>`;
+
+    const uploadBtns = DATA_UPLOAD_STEPS.map((step, i) => {
+      const stepNum = i + 2;
+      const active = phase === step.uploadKey;
+      const hasFile = !!state.uploads[step.uploadKey];
+      const meta = hasFile
+        ? escapeHtml(shortenName(state.uploads[step.uploadKey].fileName, 22))
+        : "Optional · attach when ready";
+      return `
+        <button type="button" role="tab" aria-selected="${active}" aria-controls="workspace"
+                class="portal-step ${active ? "active" : ""} ${hasFile ? "has-file" : ""}" data-phase="${escapeAttr(step.uploadKey)}">
+          <span class="ps-num">Step ${stepNum}</span>
+          <span class="ps-label"><span class="ps-dot" aria-hidden="true"></span>${escapeHtml(step.shortLabel)}</span>
+          <span class="ps-meta">${meta}</span>
+        </button>`;
+    }).join("");
+
+    nav.innerHTML = checklistBtn + uploadBtns;
     nav.querySelectorAll("[data-phase]").forEach(btn => {
       btn.addEventListener("click", () => switchPortalPhase(btn.dataset.phase));
     });
@@ -444,6 +476,7 @@
     staff_systems:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2 0 4 .8 5.5 2"/></svg>`,
     review:           `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2 0 4 .8 5.5 2"/></svg>`,
     check:            `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>`,
+    upload:           `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>`,
     chev:             `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
     search:           `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>`,
     copy:             `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`,
@@ -453,6 +486,33 @@
   // ------------------------------------------------------------------
   // Sidebar rendering
   // ------------------------------------------------------------------
+  function renderDataFilesNav() {
+    const host = el("#data-files-nav");
+    if (!host) return;
+    const phase = getPortalPhase();
+    host.innerHTML = DATA_UPLOAD_STEPS.map((step, i) => {
+      const hasFile = !!state.uploads[step.uploadKey];
+      const active = phase === step.uploadKey;
+      return `
+        <button type="button" class="tab-btn upload-step-btn ${active ? "active" : ""} ${hasFile ? "complete" : ""}"
+                data-phase="${escapeAttr(step.uploadKey)}" title="${escapeAttr(step.stepLabel)}">
+          <span class="t-ico">${ICONS.upload}</span>
+          <span class="t-label">Step ${i + 2} · ${escapeHtml(step.shortLabel)}</span>
+          <span class="t-count">${hasFile ? "File" : "—"}</span>
+          <span class="t-check">${ICONS.check}</span>
+        </button>`;
+    }).join("") + `
+      <button type="button" class="btn sm secondary" style="width:100%;margin-top:10px;" data-go-templates-all>
+        View all Templates
+      </button>`;
+    host.querySelectorAll("[data-phase]").forEach(b => {
+      b.addEventListener("click", () => switchPortalPhase(b.dataset.phase));
+    });
+    host.querySelector("[data-go-templates-all]")?.addEventListener("click", () => {
+      setView("templates");
+    });
+  }
+
   function renderSidebar() {
     const list = el("#tab-list");
     const rules = el("#rules-list");
@@ -494,6 +554,7 @@
       });
       const extraRules = [...(tpl.rules || []), ...(UPLOAD_SIDEBAR_RULES || [])];
       if (rules) rules.innerHTML = extraRules.map(r => `<li>${escapeHtml(r)}</li>`).join("");
+      renderDataFilesNav();
       return;
     }
 
@@ -539,6 +600,8 @@
     list.querySelectorAll("[data-review]").forEach(b => {
       b.addEventListener("click", () => openReview());
     });
+
+    renderDataFilesNav();
   }
 
   function switchSection(id) {
@@ -577,6 +640,22 @@
       savedAt: new Date().toISOString(),
       validation: { ok: validation.ok, message: validation.message },
     };
+    if (window.HelixOnboardingApi?.enabled()) {
+      try {
+        if (!state.meta.server_submission_id) {
+          const created = await HelixOnboardingApi.createSubmission(buildSubmissionPayload());
+          state.meta.server_submission_id = created.id;
+        }
+        const updated = await HelixOnboardingApi.uploadFile(
+          state.meta.server_submission_id,
+          uploadKey,
+          file
+        );
+        state.uploads[uploadKey] = updated.uploads_meta?.[uploadKey] || state.uploads[uploadKey];
+      } catch (err) {
+        toast(err.message || "Upload to server failed — saved locally only.", "warn");
+      }
+    }
     scheduleSave();
     renderPortalSteps();
     renderSidebar();
@@ -599,7 +678,7 @@
     return `
       <header class="workspace-header">
         <div>
-          <span class="eyebrow">Step ${idx + 2} of ${DATA_UPLOAD_STEPS.length + 1}</span>
+          <span class="eyebrow">Stage ${idx + 2} of ${DATA_UPLOAD_STEPS.length + 1}</span>
           <h1>${escapeHtml(step.stepLabel)}</h1>
           <p class="upload-intro">${escapeHtml(step.intro)}</p>
         </div>
@@ -619,11 +698,11 @@
                 data-col-required="${c.required ? "1" : "0"}">${escapeHtml(c.name)}</span>`).join("")}
       </div>
 
-      <div class="upload-dropzone" data-dropzone tabindex="0" role="button" aria-label="Choose file">
-        <strong>Drop a file here or click to browse</strong>
-        <span>CSV recommended for instant checks · Excel (.xlsx, .xls) accepted</span>
+      <div class="upload-dropzone" tabindex="0" role="button" aria-label="Upload ${escapeAttr(step.shortLabel)} file" data-upload-dropzone>
+        <input type="file" accept=".csv,.xlsx,.xls,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden data-file-input />
+        <strong>${meta ? "Replace file" : "Drop CSV or Excel here"}</strong>
+        <span>${meta ? "Choose a new file to replace the current attachment" : "or click to browse · CSV files get instant header checks"}</span>
       </div>
-      <input type="file" hidden data-upload-input accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
       <div class="upload-panel ${meta ? "" : "empty"}" data-upload-panel>
         ${meta ? `
@@ -639,6 +718,7 @@
               ${escapeHtml(v.message)}
             </div>` : ""}
           <div class="upload-actions">
+            <button type="button" class="btn sm secondary" data-jump-templates="${escapeAttr(step.templateId)}">View ${escapeHtml(tpl.name)} template</button>
             ${hasSessionFile ? `<button type="button" class="btn sm secondary" data-recheck-csv>Re-check headers</button>` : ""}
             <button type="button" class="btn sm secondary" data-dl-template-csv>Download CSV template</button>
           </div>
@@ -646,10 +726,10 @@
       </div>
 
       <div class="action-bar" style="margin-top:28px;">
-        <span class="summary">Does not block Step 1 submit.</span>
+        <span class="summary">Stage ${idx + 2} of ${DATA_UPLOAD_STEPS.length + 1}</span>
         <span class="spacer"></span>
-        <button type="button" class="btn ghost sm" data-upload-prev>${idx <= 0 ? "← Facility checklist" : `← ${escapeHtml(DATA_UPLOAD_STEPS[idx - 1].shortLabel)}`}</button>
-        <button type="button" class="btn sm" data-upload-next>${idx >= DATA_UPLOAD_STEPS.length - 1 ? "Finish · back to checklist" : `Next · ${escapeHtml(DATA_UPLOAD_STEPS[idx + 1].shortLabel)}`}</button>
+        <button type="button" class="btn ghost sm" data-upload-prev>${idx <= 0 ? "← Back to Step 1" : `← Previous Stage`}</button>
+        <button type="button" class="btn sm" data-upload-next>${idx >= DATA_UPLOAD_STEPS.length - 1 ? "Finish · Back to Step 1" : `Next Stage →`}</button>
       </div>
     `;
   }
@@ -657,28 +737,6 @@
   function wireUploadWorkspace(uploadKey) {
     const step = DATA_UPLOAD_STEPS.find(s => s.uploadKey === uploadKey);
     const tpl = TEMPLATES.find(t => t.id === step.templateId);
-    const dz = el("[data-dropzone]");
-    const input = el("[data-upload-input]");
-
-    dz?.addEventListener("click", () => input?.click());
-    dz?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input?.click(); }
-    });
-    ["dragenter", "dragover"].forEach(ev => {
-      dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("drag"); });
-    });
-    ["dragleave", "drop"].forEach(ev => {
-      dz?.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("drag"); });
-    });
-    dz?.addEventListener("drop", (e) => {
-      const f = e.dataTransfer?.files?.[0];
-      if (f) ingestUploadFile(uploadKey, tpl, f);
-    });
-    input?.addEventListener("change", () => {
-      const f = input.files?.[0];
-      if (f) ingestUploadFile(uploadKey, tpl, f);
-      input.value = "";
-    });
 
     el("[data-clear-upload]")?.addEventListener("click", () => {
       state.uploads[uploadKey] = null;
@@ -705,6 +763,31 @@
     });
 
     el("[data-dl-template-csv]")?.addEventListener("click", () => downloadTemplateCsv(tpl));
+
+    el("[data-jump-templates]")?.addEventListener("click", (ev) => {
+      currentTemplateId = ev.currentTarget.dataset.jumpTemplates || step.templateId;
+      setView("templates");
+    });
+
+    const dropzone = el("[data-upload-dropzone]");
+    const fileInput = el("[data-file-input]");
+    const onFiles = (files) => {
+      const file = files && files[0];
+      if (!file) return;
+      ingestUploadFile(uploadKey, tpl, file);
+    };
+    fileInput?.addEventListener("change", () => onFiles(fileInput.files));
+    dropzone?.addEventListener("click", () => fileInput?.click());
+    dropzone?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput?.click(); }
+    });
+    dropzone?.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("drag"); });
+    dropzone?.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+    dropzone?.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("drag");
+      onFiles(e.dataTransfer?.files);
+    });
 
     el("[data-upload-prev]")?.addEventListener("click", () => {
       const idx = DATA_UPLOAD_STEPS.findIndex(s => s.uploadKey === uploadKey);
@@ -769,7 +852,7 @@
     const summary = total > 0
       ? `${done} / ${total} required answered in this section`
       : `Optional section`;
-    const nextLabel = isLast ? "Review & submit" : `Next: ${SECTIONS[idx + 1].title}`;
+    const nextLabel = isLast ? "Next: Stage 2" : `Next: ${SECTIONS[idx + 1].title}`;
     return `
       <div class="action-bar">
         <span class="summary">${escapeHtml(summary)}</span>
@@ -1061,8 +1144,13 @@
     const next = el("[data-go-next]");
     if (next) next.addEventListener("click", () => {
       const idx = SECTIONS.findIndex(s => s.id === currentSection);
-      if (idx < SECTIONS.length - 1) switchSection(SECTIONS[idx + 1].id);
-      else openReview();
+      if (idx < SECTIONS.length - 1) {
+        switchSection(SECTIONS[idx + 1].id);
+      } else {
+        const firstUploadKey = DATA_UPLOAD_STEPS[0]?.uploadKey;
+        if (firstUploadKey) switchPortalPhase(firstUploadKey);
+        else openReview();
+      }
     });
   }
 
@@ -1477,12 +1565,30 @@
       message:
         "We'll download a JSON copy for your records. In production, your integration layer should receive this payload and notify the Helix onboarding team.",
       confirmText: "Submit now",
-      onConfirm: () => {
+      onConfirm: async () => {
         state.meta.submitted    = true;
         state.meta.submitted_at = new Date().toISOString();
         scheduleSave();
+        const payload = buildSubmissionPayload();
         downloadSubmission();
-        toast("Recorded locally — JSON downloaded. Hook your backend to notify Helix.", "success");
+        if (window.HelixOnboardingApi?.enabled()) {
+          try {
+            let id = state.meta.server_submission_id;
+            if (!id) {
+              const created = await HelixOnboardingApi.createSubmission(payload);
+              id = created.id;
+              state.meta.server_submission_id = id;
+            } else {
+              await HelixOnboardingApi.replaceSubmission(id, payload);
+            }
+            await HelixOnboardingApi.submit(id);
+            toast("Submitted to Helix. JSON copy downloaded for your records.", "success");
+          } catch (err) {
+            toast(err.message || "Server submit failed — draft saved locally.", "warn");
+          }
+        } else {
+          toast("Recorded locally — JSON downloaded.", "success");
+        }
         renderWorkspace();
         renderSidebar();
       },
@@ -1610,6 +1716,7 @@
             <div class="tpl-btn-row">
               <button class="btn sm secondary" data-copy-cols="${escapeAttr(tpl.id)}" title="Copy header row as tab-separated values">Copy headers</button>
               <button class="btn sm" data-download-csv="${escapeAttr(tpl.id)}" title="Download the ${escapeHtml(tpl.name)} template as a CSV">Download CSV</button>
+              <button class="btn sm secondary" data-go-portal-upload="${escapeAttr(tpl.id)}" title="Open the upload step for ${escapeHtml(tpl.name)}">Attach file in portal</button>
             </div>
           </div>
         </header>
@@ -1679,6 +1786,14 @@
         const tpl = TEMPLATES.find(t => t.id === btn.dataset.downloadCsv);
         if (!tpl) return;
         downloadTemplateCsv(tpl);
+      });
+    });
+    els("[data-go-portal-upload]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const uploadKey = btn.dataset.goPortalUpload;
+        if (!DATA_UPLOAD_STEPS.some(s => s.uploadKey === uploadKey)) return;
+        setView("portal");
+        switchPortalPhase(uploadKey);
       });
     });
 
@@ -1915,9 +2030,18 @@
           }, 40);
           return;
         }
+        const portalPhase = a.dataset.phase;
+        const tplId = a.dataset.tpl;
+
         if (dest === "portal" || dest === "landing" || dest === "templates") {
           ev.preventDefault();
+          if (tplId && TEMPLATES.some(t => t.id === tplId)) {
+            currentTemplateId = tplId;
+          }
           setView(dest);
+          if (dest === "portal" && portalPhase && isValidPortalPhase(portalPhase)) {
+            switchPortalPhase(portalPhase);
+          }
           // Close mobile menu if open
           const drawer = document.getElementById("nav-drawer");
           const scrim = document.getElementById("nav-scrim");
@@ -2015,6 +2139,16 @@
 
     if (location.hash === "#portal") setView("portal");
     else if (location.hash === "#templates") setView("templates");
+    else if (location.hash.startsWith("#portal-")) {
+      const uploadKey = location.hash.slice("#portal-".length);
+      setView("portal");
+      if (isValidPortalPhase(uploadKey)) switchPortalPhase(uploadKey);
+    }
+    else if (location.hash.startsWith("#templates-")) {
+      const tplId = location.hash.slice("#templates-".length);
+      if (TEMPLATES.some(t => t.id === tplId)) currentTemplateId = tplId;
+      setView("templates");
+    }
     else setView("landing");
 
     // Fade action bar while idle / scrolling

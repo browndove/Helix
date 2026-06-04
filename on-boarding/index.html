@@ -14,7 +14,7 @@
   <meta name="twitter:title" content="Helix Health — Facility Pre-Onboarding Portal" />
   <meta name="twitter:description" content="Guided facility onboarding checklist with Helix-aligned templates and offline-safe drafts." />
   <!-- Replace og:url & og:image when you deploy -->
-  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <link rel="icon" type="image/svg+xml" href="../brand-logo.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://flagcdn.com" crossorigin />
@@ -191,6 +191,25 @@
         <p>Helix-aligned tables with hover guidance, plus CSV / Excel uploads with header checks — wire your API when you connect infrastructure.</p>
       </div>
     </div>
+
+    <div class="dataset-nav reveal" aria-label="Template datasets and upload steps">
+      <p class="dataset-nav-label">Open a template reference or jump straight to an upload step</p>
+      <div class="dataset-nav-grid">
+        <button type="button" class="btn sm secondary" data-go="templates" data-tpl="departments">Departments</button>
+        <button type="button" class="btn sm secondary" data-go="templates" data-tpl="units">Units</button>
+        <button type="button" class="btn sm secondary" data-go="templates" data-tpl="staff">Staff</button>
+        <button type="button" class="btn sm secondary" data-go="templates" data-tpl="roles">Roles</button>
+        <button type="button" class="btn sm secondary" data-go="templates" data-tpl="patients">Patients</button>
+      </div>
+      <div class="dataset-nav-grid dataset-nav-grid--uploads">
+        <button type="button" class="btn sm" data-go="portal" data-phase="departments">Upload · Departments</button>
+        <button type="button" class="btn sm" data-go="portal" data-phase="units">Upload · Units</button>
+        <button type="button" class="btn sm" data-go="portal" data-phase="staff">Upload · Staff</button>
+        <button type="button" class="btn sm" data-go="portal" data-phase="roles">Upload · Roles</button>
+        <button type="button" class="btn sm" data-go="portal" data-phase="patients">Upload · Patients</button>
+      </div>
+      <button type="button" class="btn sm ghost dataset-nav-all" data-go="templates">View all Templates</button>
+    </div>
   </div>
 </section>
 
@@ -304,6 +323,10 @@
     <h4 class="sidebar-dynamic-heading">Sections</h4>
     <div class="tab-list" id="tab-list"></div>
 
+    <h4 class="sidebar-files-heading">Data file uploads</h4>
+    <p class="sidebar-files-note">Steps 2–6 · optional before submit</p>
+    <div class="tab-list" id="data-files-nav"></div>
+
     <div class="rules">
       <strong id="rules-heading" style="color:var(--ink); font-weight:600;">How this works</strong>
       <ul id="rules-list"></ul>
@@ -409,7 +432,9 @@
   syncInert();
 })();
 </script>
+<!-- <script>window.HELIX_API_BASE = "http://localhost:8000/api/v1";</script> -->
 <script src="assets/data.js"></script>
+<script src="assets/api-client.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
