@@ -85,6 +85,34 @@
         body: JSON.stringify({ status }),
       });
     },
+    async sendReminder(id) {
+      return request(`/admin/reminders/send-to-facility/${id}`, { method: "POST" });
+    },
+    async downloadFile(submissionId, uploadKey, filename) {
+      const url = `${base()}/admin/submissions/${submissionId}/files/${uploadKey}/download`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let detail = text;
+        try {
+          detail = JSON.parse(text).detail || text;
+        } catch {
+          /* keep text */
+        }
+        throw new Error(typeof detail === "string" ? detail : "Download failed");
+      }
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = filename || `${uploadKey}-export`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    },
   };
 
   global.HelixAdminApi = api;

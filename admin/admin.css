@@ -787,8 +787,9 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
 .drawer-meta-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 0 18px;
 }
 
 .meta-chip {
@@ -819,6 +820,33 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
+}
+
+.meta-value.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.meta-id-chip {
+  margin-left: auto;
+}
+
+.meta-chip.meta-highlight {
+  background: rgba(13, 148, 136, 0.08);
+  border-color: rgba(13, 148, 136, 0.25);
+}
+
+.muted-cell {
+  color: var(--ink-subtle);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.last-submit-cell {
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 /* Completion Ring */
@@ -1081,6 +1109,24 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   opacity: 0.45;
 }
 
+.contact-link {
+  color: #0d9488;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+.section-empty {
+  text-align: center;
+  padding: 12px 8px;
+  color: var(--ink-subtle);
+  font-size: 13px;
+  font-style: italic;
+}
+
 /* ======================== */
 /* Staffing Grid             */
 /* ======================== */
@@ -1219,6 +1265,27 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   font-size: 13px;
 }
 
+.file-download-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--ink-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 180ms var(--ease);
+}
+
+.file-download-btn:hover {
+  background: rgba(13, 148, 136, 0.08);
+  border-color: rgba(13, 148, 136, 0.35);
+  color: #0d9488;
+}
+
 /* ======================== */
 /* Drawer Footer             */
 /* ======================== */
@@ -1226,12 +1293,21 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 16px 28px;
   border-top: 1px solid var(--line);
   background: var(--bg-elevated);
 }
 
-.btn-export {
+.drawer-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-export,
+.btn-reminder {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1247,10 +1323,27 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   transition: all 180ms var(--ease);
 }
 
-.btn-export:hover {
+.btn-export:hover,
+.btn-reminder:hover:not(:disabled) {
   background: var(--bg-sunken);
   color: var(--ink);
   border-color: var(--ink-subtle);
+}
+
+.btn-reminder {
+  color: #0d9488;
+  border-color: rgba(13, 148, 136, 0.35);
+  background: rgba(13, 148, 136, 0.06);
+}
+
+.btn-reminder:hover:not(:disabled) {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+}
+
+.btn-reminder:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .drawer-actions {

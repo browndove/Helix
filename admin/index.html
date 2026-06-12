@@ -30,7 +30,7 @@
           </div>
           <button type="submit" class="btn primary full">Sign In</button>
         </form>
-        <p class="login-hint">Demo: any email/password works</p>
+        <p class="login-hint" id="login-hint">Sign in with your Helix admin credentials</p>
       </div>
     </div>
 
@@ -173,9 +173,10 @@
                   <span class="sort-icon">↕</span>
                 </th>
                 <th class="sortable" data-sort="submitted_at">
-                  Submitted
+                  Record submitted
                   <span class="sort-icon">↕</span>
                 </th>
+                <th>Last submit</th>
                 <th class="sortable" data-sort="status">
                   Status
                   <span class="sort-icon">↕</span>
@@ -238,14 +239,22 @@
         </div>
         <div class="drawer-body" id="detail-body"></div>
         <div class="drawer-footer">
-          <button class="btn-export" id="detail-export">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export JSON
-          </button>
+          <div class="drawer-footer-left">
+            <button class="btn-export" id="detail-export">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export JSON
+            </button>
+            <button class="btn-reminder" id="detail-reminder" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/>
+              </svg>
+              Send Reminder
+            </button>
+          </div>
           <div class="drawer-actions">
             <button class="action-btn action-reject" id="status-rejected">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -279,6 +288,7 @@
     }
   })();
   </script>
+  <script src="onboarding-schema.js"></script>
   <script src="api.js"></script>
   <script src="admin.js"></script>
 </body>

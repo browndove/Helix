@@ -973,13 +973,7 @@
           ${tip}
         </label>
         ${control}
-        ${field.guidance ? `<span class="hint">${escapeHtml(shortenGuidance(field.guidance))}</span>` : ""}
       </div>`;
-  }
-
-  function shortenGuidance(g) {
-    if (!g) return "";
-    return g.length > 130 ? g.slice(0, 128) + "…" : g;
   }
 
   // ---- Review ----

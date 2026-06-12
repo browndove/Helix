@@ -244,6 +244,7 @@ function initEventListeners() {
   document.getElementById('export-all-btn')?.addEventListener('click', exportAllData);
   document.getElementById('close-detail')?.addEventListener('click', closeDetailModal);
   document.getElementById('detail-export')?.addEventListener('click', exportCurrentDetail);
+  document.getElementById('detail-reminder')?.addEventListener('click', sendDetailReminder);
   
   // Status actions
   document.getElementById('status-pending')?.addEventListener('click', () => updateStatus('pending'));
@@ -529,7 +530,7 @@ function renderTable() {
   if (pageData.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="9" class="empty-state">
+        <td colspan="10" class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <path d="M3 9h18M9 21V9"/>
@@ -547,7 +548,8 @@ function renderTable() {
         <td>${escapeHtml(f.region || '-')}</td>
         <td>${escapeHtml(f.city || '-')}</td>
         <td>${escapeHtml(f.facility_type || '-')}</td>
-        <td>${formatDate(f.submitted_at)}</td>
+        <td>${f.submitted ? formatDateTime(f.submitted_at) : '<span class="muted-cell">Draft</span>'}</td>
+        <td class="last-submit-cell">${f.last_submitted_at ? formatDateTime(f.last_submitted_at) : (f.submitted && f.submitted_at ? formatDateTime(f.submitted_at) : '<span class="muted-cell">—</span>')}</td>
         <td><span class="status-badge ${f.status}">${f.status}</span></td>
         <td>
           <span class="file-count ${f.fileCount > 0 ? 'has-files' : ''}">
@@ -614,6 +616,190 @@ async function updateStats() {
   document.getElementById('stat-uploads').textContent = mockFacilities.reduce((sum, f) => sum + f.fileCount, 0);
 }
 
+const CARD_ICONS = {
+  teal: '<path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/>',
+  blue: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
+  amber: '<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+  violet: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  emerald: '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+};
+
+function formatAnswerValue(value) {
+  if (value === null || value === undefined || value === '') return null;
+  return String(value);
+}
+
+function buildDrawerCard(title, icon, bodyHtml) {
+  const iconPath = CARD_ICONS[icon] || CARD_ICONS.teal;
+  return `
+    <div class="drawer-card">
+      <div class="card-header">
+        <div class="card-header-icon ${icon}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconPath}</svg>
+        </div>
+        <h3>${title}</h3>
+      </div>
+      <div class="card-body">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+function buildInfoGrid(items) {
+  return `
+    <div class="info-grid">
+      ${items.map((f) => `
+        <div class="info-item ${f.full ? 'full-width' : ''}">
+          <span class="info-label">${f.label}</span>
+          <span class="info-value ${!f.value ? 'empty' : ''}">${f.value || 'Not provided'}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function getOnboardingSchema() {
+  return typeof HelixOnboardingSchema !== 'undefined' ? HelixOnboardingSchema : null;
+}
+
+function mergedAnswers(facility) {
+  const a = { ...(facility.answers || {}) };
+  const denorm = {
+    facility_name: facility.facility_name,
+    facility_type: facility.facility_type,
+    facility_region: facility.region,
+    facility_city: facility.city,
+    facility_address: facility.facility_address,
+    facility_email: facility.facility_email,
+    facility_phone: facility.facility_phone,
+    primary_name: facility.primary_contact_name,
+    primary_email: facility.primary_contact_email,
+    primary_phone: facility.primary_contact_phone,
+    secondary_name: facility.secondary_contact_name,
+    secondary_email: facility.secondary_contact_email,
+    secondary_phone: facility.secondary_contact_phone,
+  };
+  Object.entries(denorm).forEach(([key, value]) => {
+    if (value != null && value !== '' && (a[key] == null || a[key] === '')) {
+      a[key] = value;
+    }
+  });
+  return a;
+}
+
+function formatFieldDisplay(field, raw) {
+  const value = formatAnswerValue(raw);
+  if (value === null) return null;
+  if (field.type === 'email') return mailtoLink(value);
+  return escapeHtml(value);
+}
+
+function buildSchemaSection(section, answers, { showEmpty = true } = {}) {
+  const items = section.fields
+    .map((field) => {
+      const display = formatFieldDisplay(field, answers[field.key]);
+      if (!showEmpty && display === null) return null;
+      return {
+        label: field.label,
+        value: display || 'Not provided',
+        empty: display === null,
+        full: field.type === 'textarea' || field.type === 'email',
+      };
+    })
+    .filter((item) => showEmpty || !item.empty);
+
+  if (items.length === 0) {
+    return buildDrawerCard(
+      section.title,
+      section.icon,
+      '<p class="section-empty">No responses recorded for this section</p>'
+    );
+  }
+
+  return buildDrawerCard(section.title, section.icon, buildInfoGrid(items));
+}
+
+function buildSubmissionMetaCard(facility) {
+  const schema = getOnboardingSchema();
+  const phaseLabel = schema?.portalPhaseLabels?.[facility.portal_phase]
+    || (facility.portal_phase || 'checklist').replace(/_/g, ' ');
+
+  const rows = [
+    { label: 'Record status', value: facility.submitted ? 'Submitted' : 'Draft (not submitted)' },
+    { label: 'Review status', value: facility.status },
+    { label: 'Portal step', value: phaseLabel },
+    { label: 'This record submitted', value: facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Not yet' },
+    {
+      label: 'Last submit by facility',
+      value: facility.last_submitted_at ? formatDateTime(facility.last_submitted_at) : 'Never',
+      full: true,
+    },
+    { label: 'Created', value: facility.created_at ? formatDateTime(facility.created_at) : '—' },
+    { label: 'Last updated', value: facility.updated_at ? formatDateTime(facility.updated_at) : '—' },
+    { label: 'Facility email', value: facility.facility_email ? mailtoLink(facility.facility_email) : 'Not provided', full: true },
+  ];
+
+  return buildDrawerCard(
+    'Submission timeline',
+    'violet',
+    buildInfoGrid(rows.map((r) => ({ ...r, empty: !r.value || r.value === '—' || r.value === 'Never' || r.value === 'Not yet' })))
+  );
+}
+
+function buildUploadsMetaCard(facility) {
+  const schema = getOnboardingSchema();
+  const keys = schema?.uploadKeys || [
+    { key: 'departments', label: 'Departments' },
+    { key: 'units', label: 'Units' },
+    { key: 'staff', label: 'Staff' },
+    { key: 'roles', label: 'Roles' },
+    { key: 'patients', label: 'Patients' },
+  ];
+  const meta = facility.uploads_meta || {};
+  const items = keys.map(({ key, label }) => {
+    const entry = meta[key];
+    let value = 'Not uploaded';
+    if (entry && typeof entry === 'object') {
+      value = entry.file_name || entry.name || 'Uploaded';
+    } else if (entry) {
+      value = String(entry);
+    }
+    const uploaded = value !== 'Not uploaded';
+    return { label, value: escapeHtml(value), empty: !uploaded };
+  });
+
+  return buildDrawerCard('Template uploads (portal)', 'emerald', buildInfoGrid(items));
+}
+
+function buildExtraAnswersCard(answers) {
+  const schema = getOnboardingSchema();
+  if (!schema?.knownKeys) return '';
+
+  const extras = Object.entries(answers).filter(([key, val]) => {
+    if (schema.knownKeys.has(key)) return false;
+    return formatAnswerValue(val) !== null;
+  });
+  if (extras.length === 0) return '';
+
+  const items = extras.map(([key, val]) => ({
+    label: key.replace(/_/g, ' '),
+    value: escapeHtml(String(val)),
+    full: String(val).length > 40,
+  }));
+
+  return buildDrawerCard('Additional fields', 'amber', buildInfoGrid(items));
+}
+
+function shortRefId(id) {
+  if (!id) return '—';
+  const s = String(id);
+  return s.length > 8 ? s.slice(0, 8) : s;
+}
+
+function mailtoLink(email) {
+  if (!email) return '';
+  return `<a class="contact-link" href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`;
+}
+
 // Detail View
 async function openDetail(id) {
   let facility;
@@ -639,14 +825,20 @@ async function openDetail(id) {
     subtitle.textContent = [facility.facility_type, facility.region].filter(Boolean).join(' · ');
   }
   
-  // Meta bar: status badge + completion ring + submission info
+  const answers = mergedAnswers(facility);
+  const schema = getOnboardingSchema();
+
+  // Meta bar: status, completion, last submit, short ref
   const metaBar = document.getElementById('drawer-meta');
   if (metaBar) {
-    const pct = facility.completionPercentage;
+    const pct = facility.completionPercentage ?? 0;
     const circumference = 2 * Math.PI * 15.5;
     const dashLength = (pct / 100) * circumference;
     const completionColor = pct >= 90 ? '#059669' : pct >= 70 ? '#d97706' : '#dc2626';
-    
+    const lastSubmitLabel = facility.last_submitted_at
+      ? formatDateTime(facility.last_submitted_at)
+      : 'Never';
+
     metaBar.innerHTML = `
       <div class="meta-chip">
         <span class="status-badge ${facility.status}">${facility.status}</span>
@@ -662,190 +854,31 @@ async function openDetail(id) {
           </svg>
           <span class="ring-value">${pct}%</span>
         </div>
-        <span class="meta-label">Complete</span>
+        <span class="meta-label">Checklist</span>
       </div>
-      <div class="meta-chip">
+      <div class="meta-chip meta-highlight">
         <div class="meta-col">
-          <span class="meta-value">${facility.id}</span>
-          <span class="meta-label">${formatDate(facility.submitted_at)}</span>
+          <span class="meta-label">Last submit</span>
+          <span class="meta-value">${lastSubmitLabel}</span>
+        </div>
+      </div>
+      <div class="meta-chip meta-id-chip" title="${escapeHtml(facility.id)}">
+        <div class="meta-col">
+          <span class="meta-label">Ref</span>
+          <span class="meta-value mono">${shortRefId(facility.id)}</span>
         </div>
       </div>
     `;
   }
-  
-  // Helper: get initials from name
-  function getInitials(name) {
-    if (!name) return '??';
-    return name.split(' ')
-      .filter(w => !['Dr.', 'Mr.', 'Mrs.', 'Ms.', 'Prof.'].includes(w))
-      .map(w => w[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
-  }
-  
-  // --- Facility Information Card ---
-  const facilityFields = [
-    { label: 'Facility Type', value: facility.facility_type },
-    { label: 'Region', value: facility.region },
-    { label: 'City / Town', value: facility.city },
-    { label: 'Phone', value: facility.facility_phone },
-    { label: 'Email', value: facility.facility_email, full: true },
-    { label: 'Address', value: facility.facility_address, full: true },
-  ];
-  
-  const facilityCard = `
-    <div class="drawer-card">
-      <div class="card-header">
-        <div class="card-header-icon teal">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/>
-          </svg>
-        </div>
-        <h3>Facility Information</h3>
-      </div>
-      <div class="card-body">
-        <div class="info-grid">
-          ${facilityFields.map(f => `
-            <div class="info-item ${f.full ? 'full-width' : ''}">
-              <span class="info-label">${f.label}</span>
-              <span class="info-value ${!f.value ? 'empty' : ''}">${escapeHtml(f.value) || 'Not provided'}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-  `;
-  
-  // --- Contact Persons Card ---
-  const primaryInitials = getInitials(facility.primary_contact_name);
-  const secondaryInitials = getInitials(facility.secondary_contact_name);
-  
-  const contactCard = `
-    <div class="drawer-card">
-      <div class="card-header">
-        <div class="card-header-icon blue">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-          </svg>
-        </div>
-        <h3>Contact Persons</h3>
-      </div>
-      <div class="card-body">
-        <div class="contact-row">
-          <div class="contact-avatar primary">${primaryInitials}</div>
-          <div class="contact-details">
-            <div class="contact-name">${escapeHtml(facility.primary_contact_name) || 'Not provided'}</div>
-            <span class="contact-role-tag primary">Primary Contact</span>
-            ${facility.primary_contact_email ? `
-              <div class="contact-info-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
-                ${escapeHtml(facility.primary_contact_email)}
-              </div>` : ''}
-            ${facility.primary_contact_phone ? `
-              <div class="contact-info-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                ${escapeHtml(facility.primary_contact_phone)}
-              </div>` : ''}
-          </div>
-        </div>
-        ${facility.secondary_contact_name ? `
-          <div class="contact-row">
-            <div class="contact-avatar secondary">${secondaryInitials}</div>
-            <div class="contact-details">
-              <div class="contact-name">${escapeHtml(facility.secondary_contact_name)}</div>
-              <span class="contact-role-tag secondary">Secondary Contact</span>
-              ${facility.secondary_contact_email ? `
-                <div class="contact-info-row">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
-                  ${escapeHtml(facility.secondary_contact_email)}
-                </div>` : ''}
-              ${facility.secondary_contact_phone ? `
-                <div class="contact-info-row">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                  ${escapeHtml(facility.secondary_contact_phone)}
-                </div>` : ''}
-            </div>
-          </div>
-        ` : `
-          <div class="contact-row faded">
-            <div class="contact-avatar secondary faded">--</div>
-            <div class="contact-details">
-              <div class="contact-name" style="color:var(--ink-subtle);font-style:italic">No secondary contact provided</div>
-            </div>
-          </div>
-        `}
-      </div>
-    </div>
-  `;
-  
-  // --- Staffing & Services Card ---
-  const staffingCard = `
-    <div class="drawer-card">
-      <div class="card-header">
-        <div class="card-header-icon amber">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
-          </svg>
-        </div>
-        <h3>Staffing &amp; Services</h3>
-      </div>
-      <div class="card-body">
-        <div class="staffing-grid">
-          <div class="staffing-item">
-            <div class="staffing-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-              </svg>
-            </div>
-            <div class="staffing-text">
-              <span class="staffing-label">Patient Load</span>
-              <span class="staffing-value">${escapeHtml(facility.patient_load) || '—'}</span>
-            </div>
-          </div>
-          <div class="staffing-item">
-            <div class="staffing-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-              </svg>
-            </div>
-            <div class="staffing-text">
-              <span class="staffing-label">HIS System</span>
-              <span class="staffing-value">${escapeHtml(facility.his_system) || '—'}</span>
-            </div>
-          </div>
-          <div class="staffing-item">
-            <div class="staffing-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-              </svg>
-            </div>
-            <div class="staffing-text">
-              <span class="staffing-label">IT Support</span>
-              <span class="staffing-value">${escapeHtml(facility.it_support) || '—'}</span>
-            </div>
-          </div>
-          <div class="staffing-item">
-            <div class="staffing-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/>
-              </svg>
-            </div>
-            <div class="staffing-text">
-              <span class="staffing-label">Internet</span>
-              <span class="staffing-value">${escapeHtml(facility.internet_quality) || '—'}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+
+  const metaCard = buildSubmissionMetaCard(facility);
+  const uploadsMetaCard = buildUploadsMetaCard(facility);
+  const checklistSections = (schema?.sections || []).map((s) => buildSchemaSection(s, answers)).join('');
+  const extraCard = buildExtraAnswersCard(answers);
   
   // --- Attached Files Card ---
   const filesHtml = facility.files && facility.files.length > 0
-    ? facility.files.map(file => `
+    ? facility.files.map((file) => `
         <div class="file-row">
           <div class="file-icon-wrap">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -855,34 +888,49 @@ async function openDetail(id) {
           </div>
           <div class="file-details">
             <div class="file-name">${escapeHtml(file.name)}</div>
-            <div class="file-meta">${formatBytes(file.size)} · ${formatDate(file.uploadedAt)}</div>
+            <div class="file-meta">${formatBytes(file.size)} · ${formatDate(file.uploadedAt)}${file.upload_key ? ` · ${escapeHtml(file.upload_key)}` : ''}</div>
           </div>
           <span class="file-badge ${file.status}">${file.status}</span>
+          ${apiMode && file.upload_key ? `
+            <button type="button" class="file-download-btn" data-upload-key="${escapeHtml(file.upload_key)}" data-filename="${escapeHtml(file.name)}" title="Download">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>` : ''}
         </div>
       `).join('')
     : '<p class="no-files">No files attached to this submission</p>';
   
-  const filesCard = `
-    <div class="drawer-card">
-      <div class="card-header">
-        <div class="card-header-icon emerald">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-        </div>
-        <h3>Attached Files (${facility.fileCount})</h3>
-      </div>
-      <div class="card-body">
-        <div class="files-list">
-          ${filesHtml}
-        </div>
-      </div>
-    </div>
-  `;
+  const filesCard = buildDrawerCard(
+    `Attached Files (${facility.fileCount || 0})`,
+    'emerald',
+    `<div class="files-list">${filesHtml}</div>`
+  );
   
-  detailBody.innerHTML = facilityCard + contactCard + staffingCard + filesCard;
+  detailBody.innerHTML = metaCard + checklistSections + uploadsMetaCard + filesCard + extraCard;
+
+  detailBody.querySelectorAll('.file-download-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!apiMode || !currentDetailId) return;
+      try {
+        await HelixAdminApi.downloadFile(
+          currentDetailId,
+          btn.dataset.uploadKey,
+          btn.dataset.filename
+        );
+        showToast('File downloaded', 'success');
+      } catch (err) {
+        showToast(err.message || 'Download failed', 'error');
+      }
+    });
+  });
+
+  const reminderBtn = document.getElementById('detail-reminder');
+  if (reminderBtn) {
+    const canRemind = apiMode && !!facility.facility_email;
+    reminderBtn.disabled = !canRemind;
+    reminderBtn.title = canRemind
+      ? `Send reminder to ${facility.facility_email}`
+      : 'No facility email on record';
+  }
   
   // Show drawer with animation
   detailModal.classList.remove('hidden');
@@ -977,6 +1025,20 @@ async function exportFacility(id) {
 function exportCurrentDetail() {
   if (currentDetailId) {
     exportFacility(currentDetailId);
+  }
+}
+
+async function sendDetailReminder() {
+  if (!currentDetailId || !apiMode) return;
+  const btn = document.getElementById('detail-reminder');
+  if (btn) btn.disabled = true;
+  try {
+    const res = await HelixAdminApi.sendReminder(currentDetailId);
+    showToast(res.message || 'Reminder sent', 'success');
+  } catch (err) {
+    showToast(err.message || 'Could not send reminder', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
