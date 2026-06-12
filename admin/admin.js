@@ -326,9 +326,22 @@ async function showDashboard() {
 }
 
 async function populateFiltersFromApi() {
-  const res = await HelixAdminApi.listSubmissions({ per_page: 500, page: 1 });
-  const regions = [...new Set(res.items.map(f => f.region).filter(Boolean))].sort();
-  const types = [...new Set(res.items.map(f => f.facility_type).filter(Boolean))].sort();
+  const regionSet = new Set();
+  const typeSet = new Set();
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const res = await HelixAdminApi.listSubmissions({ per_page: 100, page });
+    res.items.forEach((f) => {
+      if (f.region) regionSet.add(f.region);
+      if (f.facility_type) typeSet.add(f.facility_type);
+    });
+    totalPages = res.pages || 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  const regions = [...regionSet].sort();
+  const types = [...typeSet].sort();
   const regionSelect = document.getElementById('region-filter');
   const typeSelect = document.getElementById('type-filter');
   [regionSelect, typeSelect].forEach((sel) => {

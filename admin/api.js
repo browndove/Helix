@@ -16,6 +16,16 @@
     return !!base();
   }
 
+  function formatApiError(detail, fallback) {
+    if (!detail) return fallback || "Request failed";
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+      return detail.map((e) => e.msg || JSON.stringify(e)).join("; ");
+    }
+    if (typeof detail === "object" && detail.message) return detail.message;
+    return JSON.stringify(detail);
+  }
+
   function getToken() {
     return localStorage.getItem(TOKEN_KEY);
   }
@@ -42,8 +52,7 @@
       data = { detail: text };
     }
     if (!res.ok) {
-      const msg = data?.detail || res.statusText;
-      const err = new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+      const err = new Error(formatApiError(data?.detail, res.statusText));
       err.status = res.status;
       throw err;
     }
