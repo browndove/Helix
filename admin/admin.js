@@ -629,17 +629,21 @@ async function updateStats() {
   document.getElementById('stat-uploads').textContent = mockFacilities.reduce((sum, f) => sum + f.fileCount, 0);
 }
 
-const CARD_ICONS = {
-  teal: '<path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/>',
-  blue: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
-  amber: '<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
-  violet: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
-  emerald: '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
-  timeline: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+const CARD_MSYM = {
+  teal: 'domain',
+  blue: 'group',
+  amber: 'badge',
+  violet: 'computer',
+  emerald: 'upload_file',
+  timeline: 'timeline',
+  facility: 'domain_verification',
+  uploads: 'table_chart',
+  files: 'attach_file',
 };
 
 function drawerStatusLabel(status) {
-  return (status || 'incomplete').replace(/_/g, ' ').toUpperCase();
+  const s = (status || 'incomplete').replace(/_/g, ' ');
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function renderDrawerMetaBar(facility) {
@@ -650,27 +654,32 @@ function renderDrawerMetaBar(facility) {
   const status = facility.status || 'incomplete';
 
   return `
-    <div class="drawer-meta-row">
-      <span class="drawer-status-pill ${escapeHtml(status)}">
-        <span class="drawer-status-dot" aria-hidden="true"></span>
-        ${drawerStatusLabel(status)}
-      </span>
-      <div class="drawer-checklist-pill">
-        <div class="checklist-progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
-          <div class="checklist-progress-fill" style="width:${pct}%"></div>
-        </div>
-        <span class="checklist-progress-label">${pct}% CHECKLIST</span>
+    <span class="drawer-status-pill ${escapeHtml(status)}">
+      <span class="drawer-status-dot" aria-hidden="true"></span>
+      ${drawerStatusLabel(status)}
+    </span>
+    <div class="drawer-checklist-pill">
+      <div class="checklist-progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
+        <div class="checklist-progress-fill" style="width:${pct}%"></div>
       </div>
+      <span class="checklist-progress-label">${pct}% Checklist</span>
     </div>
-    <div class="drawer-meta-row drawer-meta-row--secondary">
-      <div class="meta-ref-chip">
-        <span class="meta-label">Last submit</span>
-        <span class="meta-value">${lastSubmitLabel}</span>
-      </div>
-      <div class="meta-ref-chip" title="${escapeHtml(facility.id)}">
-        <span class="meta-label">Ref</span>
-        <span class="meta-value mono">${shortRefId(facility.id)}</span>
-      </div>
+    <div class="meta-ref-chip">
+      <span class="meta-label">Last Submit:</span>
+      <span class="meta-value mono">${lastSubmitLabel}</span>
+    </div>
+    <div class="meta-ref-chip meta-ref-chip--end" title="${escapeHtml(facility.id)}">
+      <span class="meta-label">Ref:</span>
+      <span class="meta-value mono ref-id">${shortRefId(facility.id)}</span>
+    </div>
+  `;
+}
+
+function renderInfoField(label, valueHtml, { full = false, valueClass = '', empty = false } = {}) {
+  return `
+    <div class="info-item ${full ? 'full-width' : ''}">
+      <div class="info-label">${label}</div>
+      <div class="info-value ${valueClass} ${empty ? 'empty' : ''}">${valueHtml || 'Not provided'}</div>
     </div>
   `;
 }
@@ -681,14 +690,12 @@ function formatAnswerValue(value) {
 }
 
 function buildDrawerCard(title, icon, bodyHtml, modifier = '') {
-  const iconPath = CARD_ICONS[icon] || CARD_ICONS.teal;
+  const msym = CARD_MSYM[icon] || CARD_MSYM.teal;
   const modClass = modifier ? ` ${modifier}` : '';
   return `
     <div class="drawer-card${modClass}">
       <div class="card-header">
-        <div class="card-header-icon ${icon}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconPath}</svg>
-        </div>
+        <span class="material-symbols-outlined card-header-icon" aria-hidden="true">${msym}</span>
         <h3>${title}</h3>
       </div>
       <div class="card-body">${bodyHtml}</div>
@@ -699,12 +706,11 @@ function buildDrawerCard(title, icon, bodyHtml, modifier = '') {
 function buildInfoGrid(items) {
   return `
     <div class="info-grid">
-      ${items.map((f) => `
-        <div class="info-item ${f.full ? 'full-width' : ''}">
-          <span class="info-label">${f.label}</span>
-          <span class="info-value ${!f.value ? 'empty' : ''}">${f.value || 'Not provided'}</span>
-        </div>
-      `).join('')}
+      ${items.map((f) => renderInfoField(
+        f.label,
+        f.value || 'Not provided',
+        { full: f.full, valueClass: f.valueClass || '', empty: f.empty || !f.value || f.value === 'Not provided' }
+      )).join('')}
     </div>
   `;
 }
@@ -755,6 +761,7 @@ function buildSchemaSection(section, answers, { showEmpty = true } = {}) {
         value: display || 'Not provided',
         empty: display === null,
         full: field.type === 'textarea' || field.type === 'email',
+        valueClass: display && field.type !== 'email' ? 'semibold' : '',
       };
     })
     .filter((item) => showEmpty || !item.empty);
@@ -779,44 +786,80 @@ function buildSubmissionMetaCard(facility) {
     ? formatDateTime(facility.last_submitted_at)
     : 'Never';
 
-  const topRows = [
-    { label: 'Record status', value: facility.submitted ? 'Submitted' : 'Draft (not submitted)' },
-    {
-      label: 'Review status',
-      value: escapeHtml(status),
-      valueClass: `status-emphasis ${status}`,
-    },
-    { label: 'Portal step', value: escapeHtml(phaseLabel) },
-    { label: 'This record submitted', value: facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Not yet' },
-    { label: 'Last submit by facility', value: lastSubmit, full: true, valueClass: 'mono-emphasis' },
-  ];
+  const recordStatus = facility.submitted
+    ? 'Submitted'
+    : 'Draft <span class="record-status-note">(not submitted)</span>';
 
-  const footerRows = [
-    { label: 'Created', value: facility.created_at ? formatDateTime(facility.created_at) : '—' },
-    { label: 'Last updated', value: facility.updated_at ? formatDateTime(facility.updated_at) : '—' },
-    {
-      label: 'Facility email',
-      value: facility.facility_email
-        ? `<span class="email-with-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>${mailtoLink(facility.facility_email)}</span>`
-        : 'Not provided',
-      full: true,
-    },
-  ];
-
-  const renderRow = (r) => `
-    <div class="info-item ${r.full ? 'full-width' : ''}">
-      <span class="info-label">${r.label}</span>
-      <span class="info-value ${r.valueClass || ''} ${!r.value || r.value === 'Not yet' ? 'empty' : ''}">${r.value || 'Not provided'}</span>
+  const topGrid = `
+    <div class="info-grid">
+      ${renderInfoField('Record Status', recordStatus, { valueClass: 'semibold' })}
+      ${renderInfoField('Review Status', drawerStatusLabel(status), { valueClass: `status-emphasis ${status}` })}
+      ${renderInfoField('Portal Step', escapeHtml(phaseLabel), { valueClass: 'semibold' })}
+      ${renderInfoField(
+        'This Record Submitted',
+        facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Not yet',
+        { empty: !facility.submitted_at, valueClass: 'light' }
+      )}
+      ${renderInfoField('Last Submit by Facility', lastSubmit, { full: true, valueClass: 'mono-value' })}
     </div>
   `;
 
-  const body = `
-    <div class="info-grid">${topRows.map(renderRow).join('')}</div>
-    <div class="timeline-divider"></div>
-    <div class="info-grid timeline-footer-grid">${footerRows.map(renderRow).join('')}</div>
+  const emailValue = facility.facility_email
+    ? `<a class="contact-link email-mono-link" href="mailto:${escapeHtml(facility.facility_email)}">
+        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+        ${escapeHtml(facility.facility_email)}
+      </a>`
+    : 'Not provided';
+
+  const footerGrid = `
+    <div class="info-grid timeline-footer-grid">
+      ${renderInfoField('Created', facility.created_at ? formatDateTime(facility.created_at) : '—', { valueClass: 'mono-muted' })}
+      ${renderInfoField('Last Updated', facility.updated_at ? formatDateTime(facility.updated_at) : '—', { valueClass: 'mono-muted' })}
+      ${renderInfoField('Facility Email', emailValue, { full: true, empty: !facility.facility_email })}
+    </div>
   `;
 
-  return buildDrawerCard('Submission timeline', 'timeline', body, 'drawer-card--timeline');
+  const body = `${topGrid}<div class="timeline-divider"></div>${footerGrid}`;
+  return buildDrawerCard('Submission Timeline', 'timeline', body);
+}
+
+function buildFacilityInfoCard(answers) {
+  const coreFields = [
+    { key: 'facility_name', label: 'Facility Name' },
+    { key: 'facility_type', label: 'Facility Type' },
+    { key: 'facility_region', label: 'Region' },
+    { key: 'facility_city', label: 'City / Town' },
+    { key: 'facility_address', label: 'Facility Address', full: true },
+  ];
+  const extraFields = [
+    { key: 'facility_email', label: 'Facility Email', type: 'email' },
+    { key: 'facility_phone_country', label: 'Facility Phone Country' },
+    { key: 'facility_phone', label: 'Facility Phone' },
+  ];
+
+  const items = coreFields.map((field) => {
+    const display = formatFieldDisplay({ type: 'text' }, answers[field.key]);
+    return {
+      label: field.label,
+      value: display || 'Not provided',
+      empty: display === null,
+      full: field.full,
+      valueClass: display ? 'semibold' : '',
+    };
+  });
+
+  extraFields.forEach((field) => {
+    const display = formatFieldDisplay(field, answers[field.key]);
+    if (display === null) return;
+    items.push({
+      label: field.label,
+      value: display,
+      full: field.type === 'email',
+      valueClass: field.type === 'email' ? '' : 'semibold',
+    });
+  });
+
+  return buildDrawerCard('Facility Information', 'facility', buildInfoGrid(items));
 }
 
 function buildUploadsMetaCard(facility) {
@@ -841,7 +884,7 @@ function buildUploadsMetaCard(facility) {
     return { label, value: escapeHtml(value), empty: !uploaded };
   });
 
-  return buildDrawerCard('Template uploads (portal)', 'emerald', buildInfoGrid(items));
+  return buildDrawerCard('Template Uploads (Portal)', 'uploads', buildInfoGrid(items));
 }
 
 function buildExtraAnswersCard(answers) {
@@ -871,7 +914,7 @@ function shortRefId(id) {
 
 function mailtoLink(email) {
   if (!email) return '';
-  return `<a class="contact-link" href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`;
+  return `<a class="contact-link email-mono-link" href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`;
 }
 
 // Detail View
@@ -904,7 +947,6 @@ async function openDetail(id) {
 
   const metaCard = buildSubmissionMetaCard(facility);
   const uploadsMetaCard = buildUploadsMetaCard(facility);
-  const checklistSections = (schema?.sections || []).map((s) => buildSchemaSection(s, answers)).join('');
   const extraCard = buildExtraAnswersCard(answers);
   
   // --- Attached Files Card ---
@@ -932,11 +974,17 @@ async function openDetail(id) {
   
   const filesCard = buildDrawerCard(
     `Attached Files (${facility.fileCount || 0})`,
-    'emerald',
+    'files',
     `<div class="files-list">${filesHtml}</div>`
   );
-  
-  detailBody.innerHTML = metaCard + checklistSections + uploadsMetaCard + filesCard + extraCard;
+
+  const facilityCard = buildFacilityInfoCard(answers);
+  const otherSections = (schema?.sections || [])
+    .filter((s) => s.id !== 'facility')
+    .map((s) => buildSchemaSection(s, answers))
+    .join('');
+
+  detailBody.innerHTML = metaCard + facilityCard + otherSections + uploadsMetaCard + filesCard + extraCard;
 
   detailBody.querySelectorAll('.file-download-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
