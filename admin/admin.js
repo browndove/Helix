@@ -635,17 +635,56 @@ const CARD_ICONS = {
   amber: '<path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
   violet: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
   emerald: '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  timeline: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
 };
+
+function drawerStatusLabel(status) {
+  return (status || 'incomplete').replace(/_/g, ' ').toUpperCase();
+}
+
+function renderDrawerMetaBar(facility) {
+  const pct = facility.completionPercentage ?? 0;
+  const lastSubmitLabel = facility.last_submitted_at
+    ? formatDateTime(facility.last_submitted_at)
+    : 'Never';
+  const status = facility.status || 'incomplete';
+
+  return `
+    <div class="drawer-meta-row">
+      <span class="drawer-status-pill ${escapeHtml(status)}">
+        <span class="drawer-status-dot" aria-hidden="true"></span>
+        ${drawerStatusLabel(status)}
+      </span>
+      <div class="drawer-checklist-pill">
+        <div class="checklist-progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
+          <div class="checklist-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="checklist-progress-label">${pct}% CHECKLIST</span>
+      </div>
+    </div>
+    <div class="drawer-meta-row drawer-meta-row--secondary">
+      <div class="meta-ref-chip">
+        <span class="meta-label">Last submit</span>
+        <span class="meta-value">${lastSubmitLabel}</span>
+      </div>
+      <div class="meta-ref-chip" title="${escapeHtml(facility.id)}">
+        <span class="meta-label">Ref</span>
+        <span class="meta-value mono">${shortRefId(facility.id)}</span>
+      </div>
+    </div>
+  `;
+}
 
 function formatAnswerValue(value) {
   if (value === null || value === undefined || value === '') return null;
   return String(value);
 }
 
-function buildDrawerCard(title, icon, bodyHtml) {
+function buildDrawerCard(title, icon, bodyHtml, modifier = '') {
   const iconPath = CARD_ICONS[icon] || CARD_ICONS.teal;
+  const modClass = modifier ? ` ${modifier}` : '';
   return `
-    <div class="drawer-card">
+    <div class="drawer-card${modClass}">
       <div class="card-header">
         <div class="card-header-icon ${icon}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconPath}</svg>
@@ -735,27 +774,49 @@ function buildSubmissionMetaCard(facility) {
   const schema = getOnboardingSchema();
   const phaseLabel = schema?.portalPhaseLabels?.[facility.portal_phase]
     || (facility.portal_phase || 'checklist').replace(/_/g, ' ');
+  const status = facility.status || 'incomplete';
+  const lastSubmit = facility.last_submitted_at
+    ? formatDateTime(facility.last_submitted_at)
+    : 'Never';
 
-  const rows = [
+  const topRows = [
     { label: 'Record status', value: facility.submitted ? 'Submitted' : 'Draft (not submitted)' },
-    { label: 'Review status', value: facility.status },
-    { label: 'Portal step', value: phaseLabel },
-    { label: 'This record submitted', value: facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Not yet' },
     {
-      label: 'Last submit by facility',
-      value: facility.last_submitted_at ? formatDateTime(facility.last_submitted_at) : 'Never',
-      full: true,
+      label: 'Review status',
+      value: escapeHtml(status),
+      valueClass: `status-emphasis ${status}`,
     },
-    { label: 'Created', value: facility.created_at ? formatDateTime(facility.created_at) : '—' },
-    { label: 'Last updated', value: facility.updated_at ? formatDateTime(facility.updated_at) : '—' },
-    { label: 'Facility email', value: facility.facility_email ? mailtoLink(facility.facility_email) : 'Not provided', full: true },
+    { label: 'Portal step', value: escapeHtml(phaseLabel) },
+    { label: 'This record submitted', value: facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Not yet' },
+    { label: 'Last submit by facility', value: lastSubmit, full: true, valueClass: 'mono-emphasis' },
   ];
 
-  return buildDrawerCard(
-    'Submission timeline',
-    'violet',
-    buildInfoGrid(rows.map((r) => ({ ...r, empty: !r.value || r.value === '—' || r.value === 'Never' || r.value === 'Not yet' })))
-  );
+  const footerRows = [
+    { label: 'Created', value: facility.created_at ? formatDateTime(facility.created_at) : '—' },
+    { label: 'Last updated', value: facility.updated_at ? formatDateTime(facility.updated_at) : '—' },
+    {
+      label: 'Facility email',
+      value: facility.facility_email
+        ? `<span class="email-with-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>${mailtoLink(facility.facility_email)}</span>`
+        : 'Not provided',
+      full: true,
+    },
+  ];
+
+  const renderRow = (r) => `
+    <div class="info-item ${r.full ? 'full-width' : ''}">
+      <span class="info-label">${r.label}</span>
+      <span class="info-value ${r.valueClass || ''} ${!r.value || r.value === 'Not yet' ? 'empty' : ''}">${r.value || 'Not provided'}</span>
+    </div>
+  `;
+
+  const body = `
+    <div class="info-grid">${topRows.map(renderRow).join('')}</div>
+    <div class="timeline-divider"></div>
+    <div class="info-grid timeline-footer-grid">${footerRows.map(renderRow).join('')}</div>
+  `;
+
+  return buildDrawerCard('Submission timeline', 'timeline', body, 'drawer-card--timeline');
 }
 
 function buildUploadsMetaCard(facility) {
@@ -830,59 +891,16 @@ async function openDetail(id) {
   if (!facility) return;
   
   currentDetailId = id;
-  detailTitle.textContent = facility.facility_name;
-  
-  // Subtitle
+  detailTitle.textContent = facility.facility_name || 'Facility';
+
   const subtitle = document.getElementById('detail-subtitle');
-  if (subtitle) {
-    subtitle.textContent = [facility.facility_type, facility.region].filter(Boolean).join(' · ');
-  }
-  
+  if (subtitle) subtitle.textContent = 'Facility Submission Review';
+
   const answers = mergedAnswers(facility);
   const schema = getOnboardingSchema();
 
-  // Meta bar: status, completion, last submit, short ref
   const metaBar = document.getElementById('drawer-meta');
-  if (metaBar) {
-    const pct = facility.completionPercentage ?? 0;
-    const circumference = 2 * Math.PI * 15.5;
-    const dashLength = (pct / 100) * circumference;
-    const completionColor = pct >= 90 ? '#059669' : pct >= 70 ? '#d97706' : '#dc2626';
-    const lastSubmitLabel = facility.last_submitted_at
-      ? formatDateTime(facility.last_submitted_at)
-      : 'Never';
-
-    metaBar.innerHTML = `
-      <div class="meta-chip">
-        <span class="status-badge ${facility.status}">${facility.status}</span>
-      </div>
-      <div class="meta-chip completion-chip">
-        <div class="completion-ring">
-          <svg viewBox="0 0 36 36">
-            <circle class="ring-bg" cx="18" cy="18" r="15.5"/>
-            <circle class="ring-fill" cx="18" cy="18" r="15.5"
-              stroke="${completionColor}"
-              stroke-dasharray="${dashLength} ${circumference}"
-              transform="rotate(-90 18 18)"/>
-          </svg>
-          <span class="ring-value">${pct}%</span>
-        </div>
-        <span class="meta-label">Checklist</span>
-      </div>
-      <div class="meta-chip meta-highlight">
-        <div class="meta-col">
-          <span class="meta-label">Last submit</span>
-          <span class="meta-value">${lastSubmitLabel}</span>
-        </div>
-      </div>
-      <div class="meta-chip meta-id-chip" title="${escapeHtml(facility.id)}">
-        <div class="meta-col">
-          <span class="meta-label">Ref</span>
-          <span class="meta-value mono">${shortRefId(facility.id)}</span>
-        </div>
-      </div>
-    `;
-  }
+  if (metaBar) metaBar.innerHTML = renderDrawerMetaBar(facility);
 
   const metaCard = buildSubmissionMetaCard(facility);
   const uploadsMetaCard = buildUploadsMetaCard(facility);
