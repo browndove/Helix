@@ -437,7 +437,7 @@
   if (window.HELIX_API_BASE) return;
   var h = location.hostname;
   if (h === "www.helixhealth.app" || h === "helixhealth.app") {
-    window.HELIX_API_BASE = "https://api.helixhealth.app/api/v1";
+    window.HELIX_API_BASE = "https://intbackend-production.up.railway.app/api/v1";
   } else if (h === "localhost" || h === "127.0.0.1" || !h) {
     window.HELIX_API_BASE = "http://localhost:8000/api/v1";
   }
