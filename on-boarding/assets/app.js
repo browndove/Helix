@@ -136,8 +136,42 @@
         state.meta.server_submission_id = created.id;
         scheduleSave();
       }
+      setSaveStatus("cloud");
     } catch (err) {
       console.warn("API sync failed:", err);
+      setSaveStatus("error");
+    }
+  }
+
+  function applyServerSubmission(row) {
+    if (!row) return;
+    state.meta.server_submission_id = row.id;
+    state.meta.portal_phase = isValidPortalPhase(row.portal_phase)
+      ? row.portal_phase
+      : state.meta.portal_phase;
+    if (row.updated_at) state.meta.updated_at = row.updated_at;
+    if (row.submitted != null) state.meta.submitted = row.submitted;
+    if (row.submitted_at) state.meta.submitted_at = row.submitted_at;
+    if (row.answers && typeof row.answers === "object") {
+      state.answers = Object.assign({}, state.answers, row.answers);
+    }
+    if (row.uploads_meta && typeof row.uploads_meta === "object") {
+      state.uploads = Object.assign(defaultUploads(), row.uploads_meta);
+    }
+    scheduleSave();
+  }
+
+  async function resumeDraftFromServer(email) {
+    if (!window.HelixOnboardingApi?.enabled() || !email) return false;
+    try {
+      const row = await HelixOnboardingApi.lookupDraft(email);
+      applyServerSubmission(row);
+      setSaveStatus("cloud");
+      toast("Resumed your saved draft from Helix.", "success");
+      return true;
+    } catch (err) {
+      if (err.status !== 404) console.warn("Resume from server failed:", err);
+      return false;
     }
   }
 
@@ -166,8 +200,9 @@
     el.dataset.status = status;
     const map = {
       saving: "Saving…",
-      saved:  `Saved · ${formatTime(state.meta.updated_at)}`,
-      error:  "Couldn't save locally",
+      saved:  `Saved locally · ${formatTime(state.meta.updated_at)}`,
+      cloud:  `Saved to Helix · ${formatTime(state.meta.updated_at)}`,
+      error:  "Couldn't save — check connection",
       idle:   "Draft ready",
     };
     el.querySelector(".status-label").textContent = map[status] || "";
@@ -2127,17 +2162,23 @@
   // ------------------------------------------------------------------
   // Init
   // ------------------------------------------------------------------
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     initLanding();
     initPortalActions();
     tipManager.init();
     updateResumeButton();
 
+    let openedFromResume = false;
+    const resumeEmail = new URLSearchParams(location.search).get("resume");
+    if (resumeEmail) {
+      openedFromResume = await resumeDraftFromServer(resumeEmail);
+    }
+
     // Kick off IP geo — non-blocking; the portal will render with GH by
     // default and reshuffle the phone defaults once detection resolves.
     detectDefaultCountry();
 
-    if (location.hash === "#portal") setView("portal");
+    if (openedFromResume || location.hash === "#portal") setView("portal");
     else if (location.hash === "#templates") setView("templates");
     else if (location.hash.startsWith("#portal-")) {
       const uploadKey = location.hash.slice("#portal-".length);

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse
+from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.auth import create_access_token, get_current_admin, verify_admin_password
@@ -19,6 +20,7 @@ from app.schemas import (
     StatusUpdate,
     TokenResponse,
 )
+from app.services.email import send_batch_reminders
 from app.services.submissions import (
     answers_to_admin_detail,
     get_stats,
@@ -147,4 +149,91 @@ def download_file(
         path=record.storage_path,
         filename=record.file_name,
         media_type=record.content_type or "application/octet-stream",
+    )
+
+
+@router.post("/reminders/send-incomplete")
+def send_incomplete_reminders(
+    db: Session = Depends(get_db),
+    _: str = Depends(get_current_admin),
+):
+    """
+    Send reminder emails to all facilities with incomplete onboarding submissions.
+    
+    This endpoint finds all submissions that are:
+    - Not submitted (submitted = False)
+    - Have a facility email
+    
+    And sends reminder emails to prompt completion.
+    """
+    # Query all incomplete submissions
+    incomplete = db.execute(
+        select(Submission)
+        .where(Submission.submitted.is_(False))
+        .filter(Submission.facility_email.is_not(None))
+    ).scalars().all()
+    
+    if not incomplete:
+        return {
+            "message": "No incomplete submissions found",
+            "sent": 0,
+            "failed": 0,
+            "total": 0
+        }
+    
+    # Send reminders and get results
+    results = send_batch_reminders(incomplete)
+    
+    return {
+        "message": f"Sent {results['sent']} reminder emails",
+        "sent": results["sent"],
+        "failed": results["failed"],
+        "total": results["total"]
+    }
+
+
+@router.post("/reminders/send-to-facility/{submission_id}")
+def send_facility_reminder(
+    submission_id: UUID,
+    db: Session = Depends(get_db),
+    _: str = Depends(get_current_admin),
+):
+    """
+    Send a reminder email to a specific facility.
+    """
+    submission = db.get(Submission, submission_id)
+    
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    if not submission.facility_email:
+        raise HTTPException(status_code=400, detail="Submission has no facility email")
+    
+    from app.services.email import send_reminder_email
+    
+    last_step = submission.portal_phase or "facility information"
+    success = send_reminder_email(
+        submission.facility_email,
+        submission.facility_name or "Facility",
+        last_step
+    )
+    
+    if success:
+        return {
+            "message": f"Reminder sent to {submission.facility_email}",
+            "success": True,
+        }
+    from app.services.email import resend_configured
+
+    if not resend_configured():
+        raise HTTPException(
+            status_code=503,
+            detail="Email not configured. Set RESEND_API_KEY and RESEND_ENABLED=true in .env.",
+        )
+    raise HTTPException(
+        status_code=502,
+        detail=(
+            "Resend rejected the email. Verify RESEND_FROM_EMAIL uses a domain "
+            "verified in your Resend dashboard."
+        ),
     )

@@ -432,7 +432,17 @@
   syncInert();
 })();
 </script>
-<!-- <script>window.HELIX_API_BASE = "http://localhost:8000/api/v1";</script> -->
+<script>
+(function () {
+  if (window.HELIX_API_BASE) return;
+  var h = location.hostname;
+  if (h === "www.helixhealth.app" || h === "helixhealth.app") {
+    window.HELIX_API_BASE = "https://api.helixhealth.app/api/v1";
+  } else if (h === "localhost" || h === "127.0.0.1" || !h) {
+    window.HELIX_API_BASE = "http://localhost:8000/api/v1";
+  }
+})();
+</script>
 <script src="assets/data.js"></script>
 <script src="assets/api-client.js"></script>
 <script src="assets/app.js"></script>

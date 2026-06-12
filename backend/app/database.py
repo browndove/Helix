@@ -1,4 +1,6 @@
-from sqlalchemy import create_engine
+from pathlib import Path
+
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import get_settings
@@ -23,3 +25,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def run_migrations() -> None:
+    """Apply idempotent SQL migrations (adds columns to existing deployments)."""
+    migration = Path(__file__).resolve().parent.parent / "migrations" / "001_onboarding_schema.sql"
+    if not migration.is_file():
+        return
+    sql = migration.read_text()
+    with engine.begin() as conn:
+        for statement in sql.split(";"):
+            stmt = statement.strip()
+            if stmt:
+                conn.execute(text(stmt))

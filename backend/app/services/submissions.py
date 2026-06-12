@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.config import get_settings
 from app.models import Submission, SubmissionFile, SubmissionStatus, UPLOAD_KEYS
 from app.schemas import (
     AdminFacilityDetail,
@@ -64,13 +65,69 @@ def validate_required_answers(answers: dict[str, Any]) -> list[str]:
     return missing
 
 
+def _str_or_none(value: Any) -> str | None:
+    if value is None:
+        return None
+    s = str(value).strip()
+    return s or None
+
+
+def _int_or_none(value: Any) -> int | None:
+    if value is None:
+        return None
+    s = str(value).strip()
+    if not s:
+        return None
+    try:
+        return int(s)
+    except ValueError:
+        return None
+
+
+def _phone_country(answers: dict[str, Any], prefix: str) -> str | None:
+    return _str_or_none(answers.get(f"{prefix}_country") or answers.get(f"{prefix}_iso"))
+
+
 def sync_denormalized(submission: Submission) -> None:
     answers = submission.answers or {}
-    submission.facility_name = answers.get("facility_name")
+
+    submission.facility_name = _str_or_none(answers.get("facility_name"))
+    submission.facility_type = _str_or_none(answers.get("facility_type"))
+    submission.region = _str_or_none(answers.get("facility_region"))
+    submission.city = _str_or_none(answers.get("facility_city"))
+    submission.facility_address = _str_or_none(answers.get("facility_address"))
     submission.facility_email = (answers.get("facility_email") or "").strip().lower() or None
-    submission.region = answers.get("facility_region")
-    submission.city = answers.get("facility_city")
-    submission.facility_type = answers.get("facility_type")
+    submission.facility_phone = _str_or_none(answers.get("facility_phone"))
+    submission.facility_phone_country = _phone_country(answers, "facility_phone")
+
+    submission.primary_name = _str_or_none(answers.get("primary_name"))
+    submission.primary_phone = _str_or_none(answers.get("primary_phone"))
+    submission.primary_phone_country = _phone_country(answers, "primary_phone")
+    submission.primary_email = _str_or_none(answers.get("primary_email"))
+
+    submission.secondary_name = _str_or_none(answers.get("secondary_name"))
+    submission.secondary_phone = _str_or_none(answers.get("secondary_phone"))
+    submission.secondary_phone_country = _phone_country(answers, "secondary_phone")
+    submission.secondary_email = _str_or_none(answers.get("secondary_email"))
+
+    submission.total_employees = _int_or_none(answers.get("total_employees"))
+    submission.total_clinical_staff = _int_or_none(answers.get("total_clinical_staff"))
+    submission.total_nonclinical_staff = _int_or_none(answers.get("total_nonclinical_staff"))
+    submission.has_it_team = _str_or_none(answers.get("has_it_team"))
+    submission.total_it_staff = _int_or_none(answers.get("total_it_staff"))
+
+    submission.has_emergency = _str_or_none(answers.get("has_emergency"))
+    submission.has_inpatient_wards = _str_or_none(answers.get("has_inpatient_wards"))
+    submission.total_inpatient_beds = _int_or_none(answers.get("total_inpatient_beds"))
+    submission.has_ambulance = _str_or_none(answers.get("has_ambulance"))
+    submission.has_medical_director = _str_or_none(answers.get("has_medical_director"))
+
+    submission.staff_has_id = _str_or_none(answers.get("staff_has_id"))
+    submission.staff_has_work_email = _str_or_none(answers.get("staff_has_work_email"))
+    submission.staff_uses_personal_email = _str_or_none(answers.get("staff_uses_personal_email"))
+    submission.has_employee_directory = _str_or_none(answers.get("has_employee_directory"))
+    submission.staff_list_by_department = _str_or_none(answers.get("staff_list_by_department"))
+    submission.staff_list_by_role = _str_or_none(answers.get("staff_list_by_role"))
 
 
 def completion_percentage(answers: dict[str, Any]) -> int:
@@ -95,12 +152,17 @@ def uploads_meta_to_dict(uploads: dict | None) -> dict:
     return out
 
 
-def apply_payload(submission: Submission, payload: SubmissionPayload) -> None:
+def apply_payload(submission: Submission, payload: SubmissionPayload, *, uploads_meta: dict | None = None) -> None:
+    from sqlalchemy.orm.attributes import flag_modified
+
     submission.kind = payload.kind
     submission.schema_version = payload.schema_version
     submission.portal_phase = payload.portal_phase
     submission.answers = payload.answers
-    submission.uploads_meta = uploads_meta_to_dict(payload.uploads)
+    flag_modified(submission, "answers")
+    meta = uploads_meta if uploads_meta is not None else uploads_meta_to_dict(payload.uploads)
+    submission.uploads_meta = meta
+    flag_modified(submission, "uploads_meta")
     submission.submitted = payload.submitted
     if payload.submitted_at:
         submission.submitted_at = payload.submitted_at
@@ -152,22 +214,22 @@ def answers_to_admin_detail(submission: Submission) -> AdminFacilityDetail:
 
     return AdminFacilityDetail(
         id=str(submission.id),
-        facility_name=a.get("facility_name"),
-        facility_email=a.get("facility_email"),
-        facility_phone=a.get("facility_phone"),
-        region=a.get("facility_region"),
-        city=a.get("facility_city"),
-        facility_address=a.get("facility_address"),
-        facility_type=a.get("facility_type"),
-        primary_contact_name=a.get("primary_name"),
-        primary_contact_email=a.get("primary_email"),
-        primary_contact_phone=a.get("primary_phone"),
-        secondary_contact_name=a.get("secondary_name"),
-        secondary_contact_email=a.get("secondary_email"),
-        secondary_contact_phone=a.get("secondary_phone"),
+        facility_name=submission.facility_name or a.get("facility_name"),
+        facility_email=submission.facility_email or a.get("facility_email"),
+        facility_phone=submission.facility_phone or a.get("facility_phone"),
+        region=submission.region or a.get("facility_region"),
+        city=submission.city or a.get("facility_city"),
+        facility_address=submission.facility_address or a.get("facility_address"),
+        facility_type=submission.facility_type or a.get("facility_type"),
+        primary_contact_name=submission.primary_name or a.get("primary_name"),
+        primary_contact_email=submission.primary_email or a.get("primary_email"),
+        primary_contact_phone=submission.primary_phone or a.get("primary_phone"),
+        secondary_contact_name=submission.secondary_name or a.get("secondary_name"),
+        secondary_contact_email=submission.secondary_email or a.get("secondary_email"),
+        secondary_contact_phone=submission.secondary_phone or a.get("secondary_phone"),
         patient_load=patient_load,
-        his_system=a.get("has_emergency"),
-        it_support=a.get("has_it_team"),
+        his_system=submission.has_emergency or a.get("has_emergency"),
+        it_support=submission.has_it_team or a.get("has_it_team"),
         internet_quality=None,
         submitted_at=submission.submitted_at,
         status=submission.status,
@@ -302,3 +364,9 @@ def submit_submission(db: Session, submission: Submission) -> None:
     submission.submitted_at = now
     submission.status = SubmissionStatus.pending.value
     sync_denormalized(submission)
+
+    settings = get_settings()
+    if settings.send_submit_confirmation and settings.resend_enabled:
+        from app.services.email import send_submission_confirmation
+
+        send_submission_confirmation(submission)

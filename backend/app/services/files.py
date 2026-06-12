@@ -9,59 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.models import Submission, SubmissionFile, UPLOAD_KEYS
-
-# Template headers (must match on-boarding/assets/data.js)
-TEMPLATE_HEADERS: dict[str, list[str]] = {
-    "departments": [
-        "building_block",
-        "department",
-        "department_description",
-        "subspecialty",
-        "subspecialty_description",
-        "floor",
-        "ward_list",
-    ],
-    "units": ["building_block", "unit", "floor"],
-    "staff": [
-        "email",
-        "first_name",
-        "last_name",
-        "job_title",
-        "rank",
-        "middle_name",
-        "phone",
-        "gender",
-        "department",
-        "subspecialty",
-        "patient_access",
-        "employee_id",
-        "highest_qualifications",
-    ],
-    "roles": [
-        "role_name",
-        "role_description",
-        "department",
-        "subspecialty",
-        "priority",
-        "restricted_signin",
-        "permitted_signin_emails",
-        "external_communication",
-        "escalation",
-    ],
-    "patients": [
-        "first_name",
-        "last_name",
-        "middle_name",
-        "dob",
-        "medical_record_number",
-        "gender",
-        "department",
-        "subspecialty",
-        "floor",
-        "ward",
-        "bed",
-    ],
-}
+from app.services.ingest import clear_ingested_rows, ingest_csv_rows
+from app.template_schema import TEMPLATE_HEADERS
 
 
 def validate_csv_headers(content: bytes, upload_key: str) -> dict:
@@ -137,6 +86,7 @@ async def save_submission_file(
             Path(existing.storage_path).unlink(missing_ok=True)
         except OSError:
             pass
+        clear_ingested_rows(db, submission.id, upload_key)
         db.delete(existing)
 
     record = SubmissionFile(
@@ -149,6 +99,10 @@ async def save_submission_file(
         validation=validation,
     )
     db.add(record)
+    db.flush()
+
+    if name_lower.endswith(".csv") and validation.get("ok") is True:
+        ingest_csv_rows(db, submission, upload_key, content, record.id)
 
     meta = submission.uploads_meta or {}
     meta[upload_key] = {
@@ -176,6 +130,7 @@ def delete_submission_file(db: Session, submission: Submission, upload_key: str)
         except OSError:
             pass
         db.delete(record)
+    clear_ingested_rows(db, submission.id, upload_key)
     meta = submission.uploads_meta or {}
     meta[upload_key] = None
     submission.uploads_meta = meta

@@ -80,6 +80,10 @@
         method: "DELETE",
       });
     },
+    async lookupDraft(email) {
+      const q = encodeURIComponent(email.trim());
+      return request(`/onboarding/submissions/by-email?email=${q}`);
+    },
   };
 
   global.HelixOnboardingApi = api;

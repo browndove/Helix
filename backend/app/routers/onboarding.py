@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.database import get_db
 from app.models import Submission, SubmissionStatus
@@ -12,6 +13,7 @@ from app.services.submissions import (
     apply_payload,
     submission_to_out,
     submit_submission,
+    sync_denormalized,
     uploads_meta_to_dict,
 )
 
@@ -35,6 +37,33 @@ def create_submission(body: SubmissionCreate, db: Session = Depends(get_db)):
     return submission_to_out(submission)
 
 
+@router.get("/submissions/by-email", response_model=SubmissionOut)
+def lookup_draft_by_query(email: str = Query(..., min_length=3), db: Session = Depends(get_db)):
+    """Preferred for addresses with @ — avoids URL encoding issues in some clients."""
+    return _lookup_draft_by_email(db, email)
+
+
+@router.get("/submissions/by-email/{email:path}", response_model=SubmissionOut)
+def lookup_draft_by_path(email: str, db: Session = Depends(get_db)):
+    return _lookup_draft_by_email(db, email)
+
+
+def _lookup_draft_by_email(db: Session, email: str) -> SubmissionOut:
+    normalized = email.strip().lower()
+    submission = db.execute(
+        select(Submission)
+        .where(
+            Submission.facility_email == normalized,
+            Submission.submitted.is_(False),
+        )
+        .order_by(Submission.updated_at.desc())
+        .limit(1)
+    ).scalars().first()
+    if not submission:
+        raise HTTPException(status_code=404, detail="No draft found for this email")
+    return submission_to_out(submission)
+
+
 @router.get("/submissions/{submission_id}", response_model=SubmissionOut)
 def get_submission(submission_id: UUID, db: Session = Depends(get_db)):
     return submission_to_out(_get_submission_or_404(db, submission_id))
@@ -50,13 +79,14 @@ def update_submission(
     if body.portal_phase is not None:
         submission.portal_phase = body.portal_phase
     if body.answers is not None:
-        submission.answers = body.answers
+        submission.answers = {**(submission.answers or {}), **body.answers}
+        flag_modified(submission, "answers")
     if body.uploads is not None:
-        submission.uploads_meta = uploads_meta_to_dict(body.uploads)
+        merged_uploads = {**(submission.uploads_meta or {}), **uploads_meta_to_dict(body.uploads)}
+        submission.uploads_meta = merged_uploads
+        flag_modified(submission, "uploads_meta")
     if body.submitted is not None:
         submission.submitted = body.submitted
-    from app.services.submissions import sync_denormalized
-
     sync_denormalized(submission)
     db.commit()
     db.refresh(submission)
@@ -64,13 +94,18 @@ def update_submission(
 
 
 @router.put("/submissions/{submission_id}", response_model=SubmissionOut)
-def replace_submission(
+async def replace_submission(
     submission_id: UUID,
-    body: SubmissionCreate,
+    request: Request,
     db: Session = Depends(get_db),
 ):
     submission = _get_submission_or_404(db, submission_id)
-    apply_payload(submission, body)
+    data = await request.json()
+    if not data.get("uploads") and data.get("uploads_meta"):
+        data["uploads"] = data["uploads_meta"]
+    payload = SubmissionCreate.model_validate(data)
+    apply_payload(submission, payload)
+    sync_denormalized(submission)
     db.commit()
     db.refresh(submission)
     return submission_to_out(submission)
@@ -82,23 +117,6 @@ def submit(submission_id: UUID, db: Session = Depends(get_db)):
     submit_submission(db, submission)
     db.commit()
     db.refresh(submission)
-    return submission_to_out(submission)
-
-
-@router.get("/submissions/by-email/{email}", response_model=SubmissionOut)
-def lookup_draft(email: str, db: Session = Depends(get_db)):
-    normalized = email.strip().lower()
-    submission = db.execute(
-        select(Submission)
-        .where(
-            Submission.facility_email == normalized,
-            Submission.submitted.is_(False),
-        )
-        .order_by(Submission.updated_at.desc())
-        .limit(1)
-    ).scalars().first()
-    if not submission:
-        raise HTTPException(status_code=404, detail="No draft found for this email")
     return submission_to_out(submission)
 
 

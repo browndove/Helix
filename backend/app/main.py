@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.database import Base, engine
+from app.database import Base, engine, run_migrations
 from app.routers import admin, onboarding
 
 
@@ -14,6 +14,7 @@ async def lifespan(_app: FastAPI):
     settings = get_settings()
     Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
+    run_migrations()
     yield
 
 
