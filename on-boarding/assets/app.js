@@ -352,6 +352,23 @@
     return String(h || "").trim().replace(/^\uFEFF/, "");
   }
 
+  function isExcelFile(file) {
+    const name = (file.name || "").toLowerCase();
+    return name.endsWith(".xlsx") || name.endsWith(".xls")
+      || (file.type || "").includes("spreadsheet")
+      || file.type === "application/vnd.ms-excel";
+  }
+
+  function isExcelLegacy(file) {
+    const name = (file.name || "").toLowerCase();
+    return name.endsWith(".xls") && !name.endsWith(".xlsx");
+  }
+
+  function isCsvFile(file) {
+    const name = (file.name || "").toLowerCase();
+    return name.endsWith(".csv") || file.type === "text/csv" || file.type === "text/plain";
+  }
+
   function validateCsvHeadersAgainstTemplate(got, template) {
     const exp = template.columns.map(c => normalizeHeader(c.name));
     const g = got.map(normalizeHeader);
@@ -375,22 +392,19 @@
 
   function validateUploadHeaders(file, template) {
     return new Promise((resolve) => {
-      const name = (file.name || "").toLowerCase();
-      const isCsv = name.endsWith(".csv") || file.type === "text/csv" || file.type === "text/plain";
-      const isExcel = name.endsWith(".xlsx") || name.endsWith(".xls")
-        || (file.type || "").includes("spreadsheet")
-        || file.type === "application/vnd.ms-excel";
-      if (isExcel) {
+      if (isExcelFile(file)) {
         resolve({
           ok: null,
-          message: "Excel file noted — CSV exports get instant header checks here; Helix validates spreadsheets on intake.",
+          message: isExcelLegacy(file)
+            ? "Legacy .xls format — please save as .xlsx or .csv for validation."
+            : "Excel saved locally — connect to Helix to validate headers on upload.",
         });
         return;
       }
-      if (!isCsv) {
+      if (!isCsvFile(file)) {
         resolve({
           ok: null,
-          message: "Save as CSV to validate headers automatically in this browser.",
+          message: "Save as .csv or .xlsx to validate headers automatically.",
         });
         return;
       }
@@ -667,15 +681,19 @@
 
   async function ingestUploadFile(uploadKey, template, file) {
     sessionFiles[uploadKey] = file;
-    const validation = await validateUploadHeaders(file, template);
+    const apiEnabled = window.HelixOnboardingApi?.enabled();
+
     state.uploads[uploadKey] = {
       fileName: file.name,
       size: file.size,
       lastModified: file.lastModified,
       savedAt: new Date().toISOString(),
-      validation: { ok: validation.ok, message: validation.message },
+      validation: { ok: null, message: apiEnabled ? "Validating headers…" : null },
     };
-    if (window.HelixOnboardingApi?.enabled()) {
+
+    let validation = state.uploads[uploadKey].validation;
+
+    if (apiEnabled) {
       try {
         if (!state.meta.server_submission_id) {
           const created = await HelixOnboardingApi.createSubmission(buildSubmissionPayload());
@@ -686,19 +704,38 @@
           uploadKey,
           file
         );
-        state.uploads[uploadKey] = updated.uploads_meta?.[uploadKey] || state.uploads[uploadKey];
+        const serverMeta = updated.uploads_meta?.[uploadKey];
+        if (serverMeta) {
+          state.uploads[uploadKey] = serverMeta;
+          validation = serverMeta.validation || validation;
+        }
       } catch (err) {
         toast(err.message || "Upload to server failed — saved locally only.", "warn");
+        if (!isExcelFile(file)) {
+          validation = await validateUploadHeaders(file, template);
+          state.uploads[uploadKey].validation = { ok: validation.ok, message: validation.message };
+        } else {
+          validation = {
+            ok: null,
+            message: err.message || "Could not validate Excel headers — upload to Helix failed.",
+          };
+          state.uploads[uploadKey].validation = validation;
+        }
       }
+    } else {
+      validation = await validateUploadHeaders(file, template);
+      state.uploads[uploadKey].validation = { ok: validation.ok, message: validation.message };
     }
+
     scheduleSave();
     renderPortalSteps();
     renderSidebar();
     renderWorkspace();
+    validation = state.uploads[uploadKey]?.validation || validation;
     const toastKind = validation.ok === false ? "warn" : "success";
     let toastMsg = "File recorded locally.";
     if (validation.ok === true) toastMsg = "Headers match the Helix template.";
-    else if (validation.ok === false) toastMsg = "Headers don't match the template yet — fix the CSV and upload again.";
+    else if (validation.ok === false) toastMsg = "Headers don't match the template yet — fix the file and upload again.";
     toast(toastMsg, toastKind);
   }
 
@@ -736,7 +773,7 @@
       <div class="upload-dropzone" tabindex="0" role="button" aria-label="Upload ${escapeAttr(step.shortLabel)} file" data-upload-dropzone>
         <input type="file" accept=".csv,.xlsx,.xls,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden data-file-input />
         <strong>${meta ? "Replace file" : "Drop CSV or Excel here"}</strong>
-        <span>${meta ? "Choose a new file to replace the current attachment" : "or click to browse · CSV files get instant header checks"}</span>
+        <span>${meta ? "Choose a new file to replace the current attachment" : "or click to browse · CSV and Excel validated on upload"}</span>
       </div>
 
       <div class="upload-panel ${meta ? "" : "empty"}" data-upload-panel>
@@ -787,6 +824,10 @@
       const f = sessionFiles[uploadKey];
       if (!f) {
         toast("Upload the file again to re-check.", "warn");
+        return;
+      }
+      if (window.HelixOnboardingApi?.enabled()) {
+        await ingestUploadFile(uploadKey, tpl, f);
         return;
       }
       const validation = await validateUploadHeaders(f, tpl);

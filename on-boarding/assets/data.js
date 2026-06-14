@@ -710,7 +710,7 @@ const DATA_UPLOAD_STEPS = [
 
 const UPLOAD_SIDEBAR_RULES = [
   "These uploads never block submitting Step 1 — attach each file when that dataset is ready.",
-  "CSV exports validate instantly against template headers. Excel files are accepted but only checked on the Helix side.",
+  "CSV and Excel files are validated against template headers when uploaded to Helix.",
   "Upload again any time to replace a file — we keep only the latest attachment metadata in this browser.",
 ];
 
