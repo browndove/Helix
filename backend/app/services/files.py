@@ -20,14 +20,17 @@ def _check_columns(got_headers: list[str], upload_key: str) -> dict:
     expected = TEMPLATE_HEADERS.get(upload_key)
     if not expected:
         return {"ok": False, "message": "Unknown template type"}
-    got_lower = [h.lower() for h in got_headers]
+    got = [h.strip().replace("\ufeff", "") for h in got_headers if h and str(h).strip()]
+    got_lower = [h.lower() for h in got]
     missing = [h for h in expected if h.lower() not in got_lower]
+    base = {"expected": expected, "found": got, "missing": missing}
     if missing:
         return {
             "ok": False,
             "message": f"Missing required column{'s' if len(missing) > 1 else ''}: {', '.join(missing)}.",
+            **base,
         }
-    return {"ok": True, "message": "All required columns found."}
+    return {"ok": True, "message": "All required columns found.", **base}
 
 
 def validate_csv_headers(content: bytes, upload_key: str) -> dict:

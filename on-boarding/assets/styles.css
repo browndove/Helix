@@ -1006,13 +1006,69 @@ section { padding: clamp(56px, 8vw, 112px) 0; }
 .upload-panel-meta { font-size: 13px; color: var(--ink-muted); margin: 4px 0 0; }
 .upload-validation {
   font-size: 13px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 8px;
   margin-top: 12px;
+  line-height: 1.45;
+}
+.upload-validation-lead {
+  margin: 0;
+  font-weight: 600;
+}
+.upload-validation-detail {
+  margin-top: 12px;
+}
+.upload-validation-detail + .upload-validation-detail {
+  margin-top: 10px;
+}
+.upload-validation-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: inherit;
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+.upload-validation-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.upload-val-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.upload-val-chip.missing {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #991b1b;
+  font-weight: 600;
+}
+.upload-val-chip.expected {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 .upload-validation.ok { background: var(--success-soft); color: var(--ink); }
 .upload-validation.warn { background: var(--warning-soft); color: var(--ink); }
 .upload-validation.bad { background: #fdecea; color: #8b2016; }
+.upload-validation.bad .upload-val-chip:not(.missing) {
+  background: rgba(139, 32, 22, 0.08);
+  border-color: rgba(139, 32, 22, 0.15);
+}
+.review-upload-val .upload-validation-lead {
+  font-weight: 500;
+  font-size: 13px;
+}
+.review-upload-val .upload-validation-detail {
+  margin-top: 8px;
+}
 .upload-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 
 .upload-sidebar-card {

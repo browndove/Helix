@@ -156,7 +156,13 @@
       state.answers = Object.assign({}, state.answers, row.answers);
     }
     if (row.uploads_meta && typeof row.uploads_meta === "object") {
-      state.uploads = Object.assign(defaultUploads(), row.uploads_meta);
+      const uploads = Object.assign(defaultUploads(), row.uploads_meta);
+      Object.keys(uploads).forEach((key) => {
+        if (uploads[key]?.validation) {
+          uploads[key].validation = normalizeValidation(uploads[key].validation);
+        }
+      });
+      state.uploads = uploads;
     }
     scheduleSave();
   }
@@ -369,25 +375,75 @@
     return name.endsWith(".csv") || file.type === "text/csv" || file.type === "text/plain";
   }
 
-  function validateCsvHeadersAgainstTemplate(got, template) {
-    const exp = template.columns.map(c => normalizeHeader(c.name));
-    const g = got.map(normalizeHeader);
-    while (g.length && g[g.length - 1] === "") g.pop();
-    if (g.length !== exp.length) {
+  function checkHeadersAgainstTemplate(got, template) {
+    const expected = template.columns.map(c => normalizeHeader(c.name));
+    const found = got.map(normalizeHeader).filter(h => h !== "");
+    const foundLower = found.map(h => h.toLowerCase());
+    const missing = expected.filter(h => !foundLower.includes(h.toLowerCase()));
+    const base = { expected, found, missing };
+    if (missing.length) {
       return {
         ok: false,
-        message: `Expected ${exp.length} columns; found ${g.length}. Headers must be: ${exp.join(", ")}.`,
+        message: `Missing required column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}.`,
+        ...base,
       };
     }
-    for (let i = 0; i < exp.length; i++) {
-      if (g[i] !== exp[i]) {
-        return {
-          ok: false,
-          message: `Column ${i + 1}: expected "${exp[i]}" but found "${g[i] || "(blank)"}".`,
-        };
-      }
+    return { ok: true, message: "All required columns found.", ...base };
+  }
+
+  function normalizeValidation(v) {
+    if (!v || typeof v !== "object") return v;
+    return {
+      ok: v.ok ?? null,
+      message: v.message ?? null,
+      missing: Array.isArray(v.missing) ? v.missing : [],
+      found: Array.isArray(v.found) ? v.found : [],
+      expected: Array.isArray(v.expected) ? v.expected : [],
+    };
+  }
+
+  function renderUploadValidationHtml(v, template) {
+    if (!v?.message) return "";
+    const val = normalizeValidation(v);
+    let html = `<p class="upload-validation-lead">${escapeHtml(val.message)}</p>`;
+
+    if (val.ok === false && val.missing.length) {
+      html += `
+        <div class="upload-validation-detail">
+          <span class="upload-validation-label">Missing columns — add these to row 1:</span>
+          <div class="upload-validation-chips">
+            ${val.missing.map(col => `<span class="upload-val-chip missing">${escapeHtml(col)}</span>`).join("")}
+          </div>
+        </div>`;
     }
-    return { ok: true, message: "First row matches the Helix template headers." };
+
+    if (val.ok === false && val.found.length) {
+      html += `
+        <div class="upload-validation-detail">
+          <span class="upload-validation-label">Found in your file:</span>
+          <div class="upload-validation-chips">
+            ${val.found.map(col => `<span class="upload-val-chip">${escapeHtml(col)}</span>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    if (val.ok === false && !val.missing.length && val.expected.length) {
+      html += `
+        <div class="upload-validation-detail">
+          <span class="upload-validation-label">Required columns for this template:</span>
+          <div class="upload-validation-chips">
+            ${val.expected.map(col => `<span class="upload-val-chip expected">${escapeHtml(col)}</span>`).join("")}
+          </div>
+        </div>`;
+    }
+
+    return html;
+  }
+
+  function validateCsvHeadersAgainstTemplate(got, template) {
+    const g = got.map(normalizeHeader);
+    while (g.length && g[g.length - 1] === "") g.pop();
+    return checkHeadersAgainstTemplate(g, template);
   }
 
   function validateUploadHeaders(file, template) {
@@ -706,36 +762,39 @@
         );
         const serverMeta = updated.uploads_meta?.[uploadKey];
         if (serverMeta) {
+          if (serverMeta.validation) {
+            serverMeta.validation = normalizeValidation(serverMeta.validation);
+          }
           state.uploads[uploadKey] = serverMeta;
           validation = serverMeta.validation || validation;
         }
       } catch (err) {
         toast(err.message || "Upload to server failed — saved locally only.", "warn");
         if (!isExcelFile(file)) {
-          validation = await validateUploadHeaders(file, template);
-          state.uploads[uploadKey].validation = { ok: validation.ok, message: validation.message };
+          validation = normalizeValidation(await validateUploadHeaders(file, template));
+          state.uploads[uploadKey].validation = validation;
         } else {
-          validation = {
+          validation = normalizeValidation({
             ok: null,
             message: err.message || "Could not validate Excel headers — upload to Helix failed.",
-          };
+          });
           state.uploads[uploadKey].validation = validation;
         }
       }
     } else {
-      validation = await validateUploadHeaders(file, template);
-      state.uploads[uploadKey].validation = { ok: validation.ok, message: validation.message };
+      validation = normalizeValidation(await validateUploadHeaders(file, template));
+      state.uploads[uploadKey].validation = validation;
     }
 
     scheduleSave();
     renderPortalSteps();
     renderSidebar();
     renderWorkspace();
-    validation = state.uploads[uploadKey]?.validation || validation;
+    validation = normalizeValidation(state.uploads[uploadKey]?.validation || validation);
     const toastKind = validation.ok === false ? "warn" : "success";
     let toastMsg = "File recorded locally.";
-    if (validation.ok === true) toastMsg = "Headers match the Helix template.";
-    else if (validation.ok === false) toastMsg = "Headers don't match the template yet — fix the file and upload again.";
+    if (validation.ok === true) toastMsg = validation.message || "All required columns found.";
+    else if (validation.ok === false) toastMsg = validation.message || "Fix the column headers and upload again.";
     toast(toastMsg, toastKind);
   }
 
@@ -787,7 +846,7 @@
           </div>
           ${v && v.message ? `
             <div class="upload-validation ${valClass}">
-              ${escapeHtml(v.message)}
+              ${renderUploadValidationHtml(v, tpl)}
             </div>` : ""}
           <div class="upload-actions">
             <button type="button" class="btn sm secondary" data-jump-templates="${escapeAttr(step.templateId)}">View ${escapeHtml(tpl.name)} template</button>
@@ -830,11 +889,17 @@
         await ingestUploadFile(uploadKey, tpl, f);
         return;
       }
-      const validation = await validateUploadHeaders(f, tpl);
+      const validation = normalizeValidation(await validateUploadHeaders(f, tpl));
       if (state.uploads[uploadKey]) {
-        state.uploads[uploadKey].validation = { ok: validation.ok, message: validation.message };
+        state.uploads[uploadKey].validation = validation;
         scheduleSave();
         renderWorkspace();
+        toast(
+          validation.ok === false
+            ? (validation.message || "Fix the column headers and upload again.")
+            : (validation.message || "All required columns found."),
+          validation.ok === false ? "warn" : "success"
+        );
       }
     });
 
@@ -1067,7 +1132,7 @@
             <div class="review-upload-card ${up ? "has-file" : ""}${badVal ? " warn" : ""}">
               <strong>${escapeHtml(s.shortLabel)}</strong>
               <span class="review-upload-meta">${up ? escapeHtml(shortenName(up.fileName)) : "Not attached"}</span>
-              ${badVal && up.validation.message ? `<span class="review-upload-val">${escapeHtml(up.validation.message)}</span>` : ""}
+              ${badVal && up.validation.message ? `<div class="review-upload-val">${renderUploadValidationHtml(up.validation, TEMPLATES.find(t => t.id === s.templateId))}</div>` : ""}
               <button type="button" class="btn ghost sm" data-jump-upload="${escapeAttr(s.uploadKey)}">${up ? "Replace file" : "Attach file"}</button>
             </div>`;
         }).join("")}
