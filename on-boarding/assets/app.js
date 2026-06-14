@@ -391,10 +391,24 @@
     return { ok: true, message: "All required columns found.", ...base };
   }
 
+  function coerceValidationOk(ok) {
+    if (ok === true || ok === "true" || ok === 1) return true;
+    if (ok === false || ok === "false" || ok === 0) return false;
+    return null;
+  }
+
+  function isValidationFailed(v) {
+    return coerceValidationOk(v?.ok) === false;
+  }
+
+  function isValidationPassed(v) {
+    return coerceValidationOk(v?.ok) === true;
+  }
+
   function normalizeValidation(v) {
     if (!v || typeof v !== "object") return v;
     return {
-      ok: v.ok ?? null,
+      ok: coerceValidationOk(v.ok),
       message: v.message ?? null,
       missing: Array.isArray(v.missing) ? v.missing : [],
       found: Array.isArray(v.found) ? v.found : [],
@@ -407,7 +421,7 @@
     const val = normalizeValidation(v);
     let html = `<p class="upload-validation-lead">${escapeHtml(val.message)}</p>`;
 
-    if (val.ok === false && val.missing.length) {
+    if (isValidationFailed(val) && val.missing.length) {
       html += `
         <div class="upload-validation-detail">
           <span class="upload-validation-label">Missing columns — add these to row 1:</span>
@@ -417,7 +431,7 @@
         </div>`;
     }
 
-    if (val.ok === false && val.found.length) {
+    if (isValidationFailed(val) && val.found.length) {
       html += `
         <div class="upload-validation-detail">
           <span class="upload-validation-label">Found in your file:</span>
@@ -427,7 +441,7 @@
         </div>`;
     }
 
-    if (val.ok === false && !val.missing.length && val.expected.length) {
+    if (isValidationFailed(val) && !val.missing.length && val.expected.length) {
       html += `
         <div class="upload-validation-detail">
           <span class="upload-validation-label">Required columns for this template:</span>
@@ -765,8 +779,17 @@
           if (serverMeta.validation) {
             serverMeta.validation = normalizeValidation(serverMeta.validation);
           }
-          state.uploads[uploadKey] = serverMeta;
-          validation = serverMeta.validation || validation;
+          state.uploads[uploadKey] = {
+            ...state.uploads[uploadKey],
+            ...serverMeta,
+          };
+          validation = state.uploads[uploadKey].validation || validation;
+        } else if (!isExcelFile(file)) {
+          validation = normalizeValidation(await validateUploadHeaders(file, template));
+          state.uploads[uploadKey] = {
+            ...state.uploads[uploadKey],
+            validation,
+          };
         }
       } catch (err) {
         toast(err.message || "Upload to server failed — saved locally only.", "warn");
@@ -791,10 +814,15 @@
     renderSidebar();
     renderWorkspace();
     validation = normalizeValidation(state.uploads[uploadKey]?.validation || validation);
-    const toastKind = validation.ok === false ? "warn" : "success";
+    const toastKind = isValidationFailed(validation) ? "error" : (isValidationPassed(validation) ? "success" : "warn");
     let toastMsg = "File recorded locally.";
-    if (validation.ok === true) toastMsg = validation.message || "All required columns found.";
-    else if (validation.ok === false) toastMsg = validation.message || "Fix the column headers and upload again.";
+    if (isValidationPassed(validation)) {
+      toastMsg = validation.message || "All required columns found.";
+    } else if (isValidationFailed(validation)) {
+      toastMsg = validation.message || "Fix the column headers and upload again.";
+    } else if (validation.message) {
+      toastMsg = validation.message;
+    }
     toast(toastMsg, toastKind);
   }
 
@@ -804,7 +832,7 @@
     const meta = state.uploads[uploadKey];
     const idx = DATA_UPLOAD_STEPS.indexOf(step);
     const v = meta?.validation;
-    const valClass = !v ? "" : v.ok === true ? "ok" : v.ok === false ? "bad" : "warn";
+    const valClass = !v ? "" : isValidationPassed(v) ? "ok" : isValidationFailed(v) ? "bad" : "warn";
     const hasSessionFile = !!sessionFiles[uploadKey];
     return `
       <header class="workspace-header">
@@ -895,10 +923,10 @@
         scheduleSave();
         renderWorkspace();
         toast(
-          validation.ok === false
+          isValidationFailed(validation)
             ? (validation.message || "Fix the column headers and upload again.")
             : (validation.message || "All required columns found."),
-          validation.ok === false ? "warn" : "success"
+          isValidationFailed(validation) ? "error" : "success"
         );
       }
     });
@@ -1127,7 +1155,7 @@
       <div class="review-upload-summary">
         ${DATA_UPLOAD_STEPS.map(s => {
           const up = state.uploads[s.uploadKey];
-          const badVal = up?.validation && up.validation.ok === false;
+          const badVal = up?.validation && isValidationFailed(up.validation);
           return `
             <div class="review-upload-card ${up ? "has-file" : ""}${badVal ? " warn" : ""}">
               <strong>${escapeHtml(s.shortLabel)}</strong>

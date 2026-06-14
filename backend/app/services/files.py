@@ -7,6 +7,7 @@ from fastapi import HTTPException, UploadFile
 from openpyxl import load_workbook
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.config import get_settings
 from app.models import Submission, SubmissionFile, UPLOAD_KEYS
@@ -127,7 +128,7 @@ async def save_submission_file(
     if name_lower.endswith(".csv") and validation.get("ok") is True:
         ingest_csv_rows(db, submission, upload_key, content, record.id)
 
-    meta = submission.uploads_meta or {}
+    meta = dict(submission.uploads_meta or {})
     meta[upload_key] = {
         "fileName": safe_name,
         "size": len(content),
@@ -135,7 +136,9 @@ async def save_submission_file(
         "validation": validation,
     }
     submission.uploads_meta = meta
+    flag_modified(submission, "uploads_meta")
     db.commit()
+    db.refresh(submission)
     db.refresh(record)
     return record
 
@@ -154,7 +157,9 @@ def delete_submission_file(db: Session, submission: Submission, upload_key: str)
             pass
         db.delete(record)
     clear_ingested_rows(db, submission.id, upload_key)
-    meta = submission.uploads_meta or {}
+    meta = dict(submission.uploads_meta or {})
     meta[upload_key] = None
     submission.uploads_meta = meta
+    flag_modified(submission, "uploads_meta")
     db.commit()
+    db.refresh(submission)
