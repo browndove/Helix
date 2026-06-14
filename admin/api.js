@@ -119,8 +119,10 @@
       a.download = filename || `${uploadKey}-export`;
       document.body.appendChild(a);
       a.click();
-      a.remove();
-      URL.revokeObjectURL(objectUrl);
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      }, 150);
     },
   };
 
