@@ -202,6 +202,7 @@
       });
       state.uploads = uploads;
     }
+    syncResumeUrl(row.facility_email || state.answers.facility_email);
     scheduleSave();
   }
 
@@ -217,6 +218,22 @@
       if (err.status !== 404) console.warn("Resume from server failed:", err);
       return false;
     }
+  }
+
+  function syncResumeUrl(email) {
+    const trimmed = (email || "").trim();
+    const params = new URLSearchParams(location.search);
+    if (!trimmed || !trimmed.includes("@")) {
+      if (!params.has("resume")) return;
+      params.delete("resume");
+    } else if (params.get("resume") === trimmed) {
+      return;
+    } else {
+      params.set("resume", trimmed);
+    }
+    const qs = params.toString();
+    const next = `${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`;
+    history.replaceState(null, "", next);
   }
 
   function scheduleSave() {
@@ -1365,6 +1382,9 @@
       }
     }
     state.answers[key] = value;
+    if (key === "facility_email" && ev.type === "change") {
+      syncResumeUrl(value);
+    }
     scheduleSave();
     updateHeaderSummary();
     updateSidebarLight();
@@ -2330,6 +2350,7 @@
     if (resumeEmail) {
       openedFromResume = await resumeDraftFromServer(resumeEmail);
     }
+    syncResumeUrl(state.answers.facility_email);
 
     // Kick off IP geo — non-blocking; the portal will render with GH by
     // default and reshuffle the phone defaults once detection resolves.
