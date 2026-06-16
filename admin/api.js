@@ -97,6 +97,9 @@
     async sendReminder(id) {
       return request(`/admin/reminders/send-to-facility/${id}`, { method: "POST" });
     },
+    async deleteSubmission(id) {
+      return request(`/admin/submissions/${id}`, { method: "DELETE" });
+    },
     async downloadFile(submissionId, uploadKey, filename) {
       const url = `${base()}/admin/submissions/${submissionId}/files/${uploadKey}/download`;
       const res = await fetch(url, {

@@ -255,6 +255,74 @@ function initEventListeners() {
   detailModal?.addEventListener('click', (e) => {
     if (e.target === detailModal) closeDetailModal();
   });
+
+  initConfirmDeleteDialog();
+}
+
+let pendingDeleteId = null;
+
+function initConfirmDeleteDialog() {
+  const overlay = document.getElementById('confirm-delete-modal');
+  const cancelBtn = document.getElementById('confirm-delete-cancel');
+  const confirmBtn = document.getElementById('confirm-delete-confirm');
+  if (!overlay) return;
+
+  const close = () => {
+    overlay.classList.add('hidden');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingDeleteId = null;
+  };
+
+  cancelBtn?.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+  confirmBtn?.addEventListener('click', async () => {
+    const id = pendingDeleteId;
+    close();
+    if (id) await performDeleteFacility(id);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.classList.contains('hidden')) close();
+  });
+}
+
+function openConfirmDeleteDialog(id, name) {
+  const overlay = document.getElementById('confirm-delete-modal');
+  const message = document.getElementById('confirm-delete-message');
+  if (!overlay || !message) return;
+
+  pendingDeleteId = id;
+  const label = name || 'this facility';
+  message.innerHTML = `Are you sure you want to delete <strong>${escapeHtml(label)}</strong>?`;
+
+  overlay.classList.remove('hidden');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('confirm-delete-confirm')?.focus();
+}
+
+async function performDeleteFacility(id) {
+  if (apiMode) {
+    try {
+      await HelixAdminApi.deleteSubmission(id);
+      if (currentDetailId === id) closeDetailModal();
+      await applyFilters();
+      await updateStats();
+      showToast('Facility submission deleted', 'success');
+    } catch (err) {
+      showToast(err.message || 'Delete failed', 'error');
+    }
+    return;
+  }
+
+  const idx = mockFacilities.findIndex((f) => f.id === id);
+  if (idx >= 0) mockFacilities.splice(idx, 1);
+  filteredData = filteredData.filter((f) => f.id !== id);
+  if (currentDetailId === id) closeDetailModal();
+  renderTable();
+  updateStats();
+  showToast('Facility submission deleted', 'success');
 }
 
 // Auth Functions
@@ -572,9 +640,16 @@ function renderTable() {
         <td class="actions-cell">
           <button class="btn sm" onclick="openDetail('${f.id}')">View</button>
           <button class="btn ghost sm" onclick="exportFacility('${f.id}')">Export</button>
+          <button class="btn danger-ghost sm btn-delete" type="button" data-delete-id="${f.id}" data-delete-name="${escapeHtml(f.facility_name || 'this facility')}">Delete</button>
         </td>
       </tr>
     `).join('');
+
+    tableBody.querySelectorAll('.btn-delete').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openConfirmDeleteDialog(btn.dataset.deleteId, btn.dataset.deleteName);
+      });
+    });
   }
   
   // Update pagination info
