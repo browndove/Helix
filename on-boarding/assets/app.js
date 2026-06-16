@@ -121,21 +121,59 @@
   let saveTimer = null;
   let apiSaveTimer = null;
 
+  function isSubmissionNotFound(err) {
+    if (err?.status !== 404) return false;
+    const detail = err.data?.detail;
+    return detail === "Submission not found" || err.message === "Submission not found";
+  }
+
+  async function createServerSubmission() {
+    const created = await HelixOnboardingApi.createSubmission(buildSubmissionPayload());
+    state.meta.server_submission_id = created.id;
+    scheduleSave();
+    return created.id;
+  }
+
+  /** Rebind or recreate server id when localStorage points at a deleted submission. */
+  async function recoverServerSubmissionId() {
+    const email = (state.answers.facility_email || "").trim();
+    if (email) {
+      try {
+        const row = await HelixOnboardingApi.lookupDraft(email);
+        state.meta.server_submission_id = row.id;
+        scheduleSave();
+        return row.id;
+      } catch (err) {
+        if (err.status !== 404) throw err;
+      }
+    }
+    state.meta.server_submission_id = null;
+    return createServerSubmission();
+  }
+
+  async function withSubmissionRecovery(fn) {
+    let id = state.meta.server_submission_id;
+    if (!id) id = await createServerSubmission();
+    try {
+      return await fn(id);
+    } catch (err) {
+      if (!isSubmissionNotFound(err)) throw err;
+      const reboundId = await recoverServerSubmissionId();
+      return fn(reboundId);
+    }
+  }
+
   async function syncToApi() {
     if (!window.HelixOnboardingApi?.enabled()) return;
     const payload = buildSubmissionPayload();
     try {
-      if (state.meta.server_submission_id) {
-        await HelixOnboardingApi.updateSubmission(state.meta.server_submission_id, {
+      await withSubmissionRecovery((id) =>
+        HelixOnboardingApi.updateSubmission(id, {
           portal_phase: payload.portal_phase,
           answers: payload.answers,
           uploads: payload.uploads,
-        });
-      } else {
-        const created = await HelixOnboardingApi.createSubmission(payload);
-        state.meta.server_submission_id = created.id;
-        scheduleSave();
-      }
+        })
+      );
       setSaveStatus("cloud");
     } catch (err) {
       console.warn("API sync failed:", err);
@@ -765,14 +803,8 @@
 
     if (apiEnabled) {
       try {
-        if (!state.meta.server_submission_id) {
-          const created = await HelixOnboardingApi.createSubmission(buildSubmissionPayload());
-          state.meta.server_submission_id = created.id;
-        }
-        const updated = await HelixOnboardingApi.uploadFile(
-          state.meta.server_submission_id,
-          uploadKey,
-          file
+        const updated = await withSubmissionRecovery((id) =>
+          HelixOnboardingApi.uploadFile(id, uploadKey, file)
         );
         const serverMeta = updated.uploads_meta?.[uploadKey];
         if (serverMeta) {
@@ -1736,14 +1768,11 @@
         downloadSubmission();
         if (window.HelixOnboardingApi?.enabled()) {
           try {
-            let id = state.meta.server_submission_id;
-            if (!id) {
-              const created = await HelixOnboardingApi.createSubmission(payload);
-              id = created.id;
-              state.meta.server_submission_id = id;
-            } else {
-              await HelixOnboardingApi.replaceSubmission(id, payload);
-            }
+            const id = await withSubmissionRecovery(async (submissionId) => {
+              await HelixOnboardingApi.replaceSubmission(submissionId, payload);
+              return submissionId;
+            });
+            state.meta.server_submission_id = id;
             await HelixOnboardingApi.submit(id);
             toast("Submitted to Helix. JSON copy downloaded for your records.", "success");
           } catch (err) {
