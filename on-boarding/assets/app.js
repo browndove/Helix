@@ -36,7 +36,6 @@
 
   const STORAGE_KEY      = "helix.preonboarding.v1";
   const LEGACY_KEY       = "helix.onboarding.v1"; // Clean up old drafts
-  const VIDEO_URL        = ""; // Drop a YouTube/Vimeo embed URL here when ready.
   const DEFAULT_ISO      = "GH";
   const EMAIL_REGEX      = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const GEO_CACHE_KEY    = "helix.default_iso";
@@ -2226,7 +2225,7 @@
   })();
 
   // ------------------------------------------------------------------
-  // Landing wiring, scroll, video
+  // Landing wiring, scroll
   // ------------------------------------------------------------------
   function initLanding() {
     document.querySelectorAll("[data-go]").forEach(a => {
@@ -2270,18 +2269,6 @@
 
     el("#nav-resume")?.addEventListener("click", () => setView("portal"));
 
-    const placeholder = el("#video-placeholder");
-    placeholder?.addEventListener("click", () => playVideo());
-    placeholder?.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") playVideo(); });
-    el("#hero-watch")?.addEventListener("click", () => {
-      document.getElementById("video")?.scrollIntoView({ behavior: "smooth" });
-      setTimeout(playVideo, 550);
-    });
-    el("#cta-watch")?.addEventListener("click", () => {
-      document.getElementById("video")?.scrollIntoView({ behavior: "smooth" });
-      setTimeout(playVideo, 550);
-    });
-
     const nav = el("#top-nav");
     const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 12);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -2293,16 +2280,6 @@
     document.querySelectorAll(".reveal").forEach(el => io.observe(el));
 
     el("#y").textContent = new Date().getFullYear();
-  }
-
-  function playVideo() {
-    const wrap = el("#video-wrap");
-    if (!wrap) return;
-    if (!VIDEO_URL) {
-      toast("The walkthrough video will be available here soon.", "warn");
-      return;
-    }
-    wrap.innerHTML = `<iframe src="${VIDEO_URL}" title="Helix walkthrough" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
   }
 
   // ------------------------------------------------------------------
