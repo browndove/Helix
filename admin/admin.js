@@ -601,6 +601,17 @@ async function changePage(page) {
   else renderTable();
 }
 
+function lastSavedLabel(f) {
+  if (f.last_submitted_at) return formatDateTime(f.last_submitted_at);
+  if (f.submitted && f.submitted_at) return formatDateTime(f.submitted_at);
+  if (f.updated_at) return formatDateTime(f.updated_at);
+  return null;
+}
+
+function formatLastSaved(f) {
+  return lastSavedLabel(f) || '<span class="muted-cell">—</span>';
+}
+
 // Render Functions
 function renderTable() {
   const start = apiMode ? (currentPage - 1) * perPage : (currentPage - 1) * perPage;
@@ -630,7 +641,7 @@ function renderTable() {
         <td>${escapeHtml(f.city || '-')}</td>
         <td>${escapeHtml(f.facility_type || '-')}</td>
         <td>${f.submitted ? formatDateTime(f.submitted_at) : '<span class="muted-cell">Draft</span>'}</td>
-        <td class="last-submit-cell">${f.last_submitted_at ? formatDateTime(f.last_submitted_at) : (f.submitted && f.submitted_at ? formatDateTime(f.submitted_at) : '<span class="muted-cell">—</span>')}</td>
+        <td class="last-submit-cell">${formatLastSaved(f)}</td>
         <td><span class="status-badge ${f.status}">${f.status}</span></td>
         <td>
           <span class="file-count ${f.fileCount > 0 ? 'has-files' : ''}">
@@ -723,9 +734,7 @@ function drawerStatusLabel(status) {
 
 function renderDrawerMetaBar(facility) {
   const pct = facility.completionPercentage ?? 0;
-  const lastSubmitLabel = facility.last_submitted_at
-    ? formatDateTime(facility.last_submitted_at)
-    : 'Never';
+  const lastSaved = lastSavedLabel(facility) || 'Never';
   const status = facility.status || 'incomplete';
 
   return `
@@ -740,8 +749,8 @@ function renderDrawerMetaBar(facility) {
       <span class="checklist-progress-label">${pct}% Checklist</span>
     </div>
     <div class="meta-ref-chip">
-      <span class="meta-label">Last Submit:</span>
-      <span class="meta-value mono">${lastSubmitLabel}</span>
+      <span class="meta-label">Last saved:</span>
+      <span class="meta-value mono">${lastSaved}</span>
     </div>
     <div class="meta-ref-chip meta-ref-chip--end" title="${escapeHtml(facility.id)}">
       <span class="meta-label">Ref:</span>
@@ -857,9 +866,7 @@ function buildSubmissionMetaCard(facility) {
   const phaseLabel = schema?.portalPhaseLabels?.[facility.portal_phase]
     || (facility.portal_phase || 'checklist').replace(/_/g, ' ');
   const status = facility.status || 'incomplete';
-  const lastSubmit = facility.last_submitted_at
-    ? formatDateTime(facility.last_submitted_at)
-    : 'Never';
+  const lastSaved = lastSavedLabel(facility) || 'Never';
 
   const recordStatus = facility.submitted
     ? 'Submitted'
@@ -875,7 +882,7 @@ function buildSubmissionMetaCard(facility) {
         facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Not yet',
         { empty: !facility.submitted_at, valueClass: 'light' }
       )}
-      ${renderInfoField('Last Submit by Facility', lastSubmit, { full: true, valueClass: 'mono-value' })}
+      ${renderInfoField('Last saved', lastSaved, { full: true, valueClass: 'mono-value' })}
     </div>
   `;
 

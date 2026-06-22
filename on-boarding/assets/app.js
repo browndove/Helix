@@ -127,32 +127,71 @@
   }
 
   async function createServerSubmission() {
+    const existingId = await lookupDraftIdByEmail(state.answers.facility_email);
+    if (existingId) {
+      state.meta.server_submission_id = existingId;
+      scheduleSave();
+      return existingId;
+    }
     const created = await HelixOnboardingApi.createSubmission(buildSubmissionPayload());
     state.meta.server_submission_id = created.id;
     scheduleSave();
     return created.id;
   }
 
+  async function lookupDraftIdByEmail(email) {
+    const trimmed = (email || "").trim();
+    if (!trimmed || !trimmed.includes("@")) return null;
+    if (!window.HelixOnboardingApi?.enabled()) return null;
+    try {
+      const row = await HelixOnboardingApi.lookupDraft(trimmed);
+      return row.id;
+    } catch (err) {
+      if (err.status === 404) return null;
+      throw err;
+    }
+  }
+
+  async function resolveServerSubmissionId() {
+    const email = (state.answers.facility_email || "").trim();
+    if (email) {
+      const existingId = await lookupDraftIdByEmail(email);
+      if (existingId) {
+        if (state.meta.server_submission_id !== existingId) {
+          state.meta.server_submission_id = existingId;
+          scheduleSave();
+        }
+        return existingId;
+      }
+    }
+    if (state.meta.server_submission_id) return state.meta.server_submission_id;
+    return createServerSubmission();
+  }
+
+  async function rebindDraftByEmail(email) {
+    if (!window.HelixOnboardingApi?.enabled()) return;
+    const existingId = await lookupDraftIdByEmail(email);
+    if (!existingId || existingId === state.meta.server_submission_id) return;
+    state.meta.server_submission_id = existingId;
+    scheduleSave();
+    await syncToApi();
+  }
+
   /** Rebind or recreate server id when localStorage points at a deleted submission. */
   async function recoverServerSubmissionId() {
     const email = (state.answers.facility_email || "").trim();
-    if (email) {
-      try {
-        const row = await HelixOnboardingApi.lookupDraft(email);
-        state.meta.server_submission_id = row.id;
-        scheduleSave();
-        return row.id;
-      } catch (err) {
-        if (err.status !== 404) throw err;
-      }
+    const existingId = email ? await lookupDraftIdByEmail(email) : null;
+    if (existingId) {
+      state.meta.server_submission_id = existingId;
+      scheduleSave();
+      return existingId;
     }
     state.meta.server_submission_id = null;
     return createServerSubmission();
   }
 
   async function withSubmissionRecovery(fn) {
-    let id = state.meta.server_submission_id;
-    if (!id) id = await createServerSubmission();
+    let id = await resolveServerSubmissionId();
     try {
       return await fn(id);
     } catch (err) {
@@ -166,13 +205,21 @@
     if (!window.HelixOnboardingApi?.enabled()) return;
     const payload = buildSubmissionPayload();
     try {
-      await withSubmissionRecovery((id) =>
+      const row = await withSubmissionRecovery((id) =>
         HelixOnboardingApi.updateSubmission(id, {
           portal_phase: payload.portal_phase,
           answers: payload.answers,
           uploads: payload.uploads,
         })
       );
+      if (row?.updated_at) {
+        state.meta.updated_at = row.updated_at;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch {
+          /* ignore quota errors */
+        }
+      }
       setSaveStatus("cloud");
     } catch (err) {
       console.warn("API sync failed:", err);
@@ -1430,6 +1477,7 @@
     state.answers[key] = value;
     if (key === "facility_email" && ev.type === "change") {
       syncResumeUrl(value);
+      rebindDraftByEmail(value);
     }
     scheduleSave();
     updateHeaderSummary();

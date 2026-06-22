@@ -411,10 +411,14 @@
 (function () {
   if (window.HELIX_API_BASE) return;
   var h = location.hostname;
-  if (h === "www.helixhealth.app" || h === "helixhealth.app") {
+  if (
+    h === "www.helixhealth.app" ||
+    h === "helixhealth.app" ||
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    !h
+  ) {
     window.HELIX_API_BASE = "https://intbackend-production.up.railway.app/api/v1";
-  } else if (h === "localhost" || h === "127.0.0.1" || !h) {
-    window.HELIX_API_BASE = "http://localhost:8000/api/v1";
   }
 })();
 </script>
