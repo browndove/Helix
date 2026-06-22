@@ -757,8 +757,15 @@
     const ringText = el("#ring-text");
     if (ringText) ringText.textContent = `${pct}%`;
     if (ringSub) {
-      const n = uploadedFileCount();
-      ringSub.textContent = `Data files · ${n} / ${DATA_UPLOAD_STEPS.length} attached`;
+      if (page === "checklist") {
+        const { done, total } = overallProgress();
+        ringSub.textContent = total > 0
+          ? `${done} of ${total} required fields complete`
+          : "Facility checklist";
+      } else {
+        const n = uploadedFileCount();
+        ringSub.textContent = `Data files · ${n} / ${DATA_UPLOAD_STEPS.length} attached`;
+      }
     }
 
     if (page === "uploads" && phase !== PHASE_CHECKLIST) {
@@ -1254,20 +1261,9 @@
         }).join("")}
       </div>
 
-      <h3 class="review-heading">Data files</h3>
-      <p class="review-upload-lead">Attach Departments, Units, Staff, Roles and Patients when ready — uploads never block submitting Step&nbsp;1.</p>
-      <div class="review-upload-summary">
-        ${DATA_UPLOAD_STEPS.map(s => {
-          const up = state.uploads[s.uploadKey];
-          const badVal = up?.validation && isValidationFailed(up.validation);
-          return `
-            <div class="review-upload-card ${up ? "has-file" : ""}${badVal ? " warn" : ""}">
-              <strong>${escapeHtml(s.shortLabel)}</strong>
-              <span class="review-upload-meta">${up ? escapeHtml(shortenName(up.fileName)) : "Not attached"}</span>
-              ${badVal && up.validation.message ? `<div class="review-upload-val">${renderUploadValidationHtml(up.validation, TEMPLATES.find(t => t.id === s.templateId))}</div>` : ""}
-              <button type="button" class="btn ghost sm" data-jump-upload="${escapeAttr(s.uploadKey)}">${up ? "Replace file" : "Attach file"}</button>
-            </div>`;
-        }).join("")}
+      <div class="review-upload-note">
+        <p><strong>Data file uploads are not required to submit Step 1.</strong> After you submit, attach Departments, Units, Staff, Roles and Patients whenever those datasets are ready.</p>
+        <button type="button" class="btn sm secondary" data-go-uploads>Go to data uploads →</button>
       </div>
 
       ${problems.length > 0 ? `
@@ -1349,9 +1345,6 @@
 
   function wireReview() {
     els("[data-jump]").forEach(b => b.addEventListener("click", () => switchSection(b.dataset.jump)));
-    els("[data-jump-upload]").forEach(b => {
-      b.addEventListener("click", () => switchPortalPhase(b.dataset.jumpUpload));
-    });
     el("#save-draft-btn")?.addEventListener("click", () => {
       scheduleSave();
       setTimeout(() => toast("Draft saved. You can close this tab any time — it'll be waiting.", "success"), 80);
