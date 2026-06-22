@@ -740,6 +740,10 @@ section { padding: clamp(56px, 8vw, 112px) 0; }
   vertical-align: middle;
 }
 .portal-step.has-file .ps-dot { background: var(--success); }
+.portal-step.portal-step--nav:not(.active) {
+  border-style: dashed;
+  background: var(--bg-soft);
+}
 
 .progress-ring .ring-sub {
   text-align: center;
@@ -1731,6 +1735,8 @@ input.invalid, textarea.invalid, select.invalid {
 /* 3-view toggle: landing / portal / templates — only one shows at a time. */
 .landing, .portal, .templates-main { display: none; }
 body[data-view="landing"]   .landing        { display: block; }
+body[data-view="checklist"] .portal,
+body[data-view="uploads"]   .portal,
 body[data-view="portal"]    .portal         { display: grid; }
 body[data-view="templates"] .templates-main { display: block; }
 

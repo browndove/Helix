@@ -50,12 +50,13 @@
       <nav class="nav-links" aria-label="Primary">
         <a class="nav-link" data-go="landing" data-section="features">Features</a>
         <a class="nav-link" data-go="landing" data-section="how">How it works</a>
-        <a class="nav-link" data-go="portal">Pre-onboarding</a>
+        <a class="nav-link" data-go="checklist">Facility checklist</a>
+        <a class="nav-link" data-go="uploads">Data uploads</a>
         <a class="nav-link" data-go="templates" href="#templates">Templates</a>
       </nav>
       <div class="row nav-actions">
         <button class="btn sm secondary" id="nav-resume" hidden>Resume draft</button>
-        <button class="btn sm" data-go="portal">Start checklist</button>
+        <button class="btn sm" data-go="checklist">Start checklist</button>
       </div>
     </div>
   </div>
@@ -73,7 +74,7 @@
       <h1 class="display display-xl">Tell us about your facility — we'll take it from there.</h1>
       <p class="lead">A polished replacement for the Google Form: Step 1 captures required facility details (must be complete to submit). Steps 2–6 walk through Departments, Units, Staff, Roles and Patients files using the exact Helix templates — attach each whenever your data is ready.</p>
       <div class="hero-cta">
-        <button class="btn lg" data-go="portal">
+        <button class="btn lg" data-go="checklist">
           Start the checklist
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -197,11 +198,11 @@
         <button type="button" class="btn sm secondary" data-go="templates" data-tpl="patients">Patients</button>
       </div>
       <div class="dataset-nav-grid dataset-nav-grid--uploads">
-        <button type="button" class="btn sm" data-go="portal" data-phase="departments">Upload · Departments</button>
-        <button type="button" class="btn sm" data-go="portal" data-phase="units">Upload · Units</button>
-        <button type="button" class="btn sm" data-go="portal" data-phase="staff">Upload · Staff</button>
-        <button type="button" class="btn sm" data-go="portal" data-phase="roles">Upload · Roles</button>
-        <button type="button" class="btn sm" data-go="portal" data-phase="patients">Upload · Patients</button>
+        <button type="button" class="btn sm" data-go="uploads" data-phase="departments">Upload · Departments</button>
+        <button type="button" class="btn sm" data-go="uploads" data-phase="units">Upload · Units</button>
+        <button type="button" class="btn sm" data-go="uploads" data-phase="staff">Upload · Staff</button>
+        <button type="button" class="btn sm" data-go="uploads" data-phase="roles">Upload · Roles</button>
+        <button type="button" class="btn sm" data-go="uploads" data-phase="patients">Upload · Patients</button>
       </div>
       <button type="button" class="btn sm ghost dataset-nav-all" data-go="templates">View all Templates</button>
     </div>
@@ -252,7 +253,7 @@
         <p class="lead" style="color:rgba(255,255,255,0.72);">Run the checklist now; add template files later. Everything saves locally until your team connects the API.</p>
       </div>
       <div class="reveal cta-band-actions">
-        <button class="btn lg" data-go="portal">Open the checklist</button>
+        <button class="btn lg" data-go="checklist">Open the checklist</button>
       </div>
     </div>
   </div>
@@ -293,18 +294,22 @@
     <h4 class="sidebar-dynamic-heading">Sections</h4>
     <div class="tab-list" id="tab-list"></div>
 
-    <h4 class="sidebar-files-heading">Data file uploads</h4>
-    <p class="sidebar-files-note">Steps 2–6 · optional before submit</p>
-    <div class="tab-list" id="data-files-nav"></div>
-
-    <div class="rules">
-      <strong id="rules-heading" style="color:var(--ink); font-weight:600;">How this works</strong>
-      <ul id="rules-list"></ul>
+    <div id="sidebar-uploads-block" hidden>
+      <h4 class="sidebar-files-heading">Data file uploads</h4>
+      <p class="sidebar-files-note">Steps 2–6 · optional before submit</p>
+      <div class="tab-list" id="data-files-nav"></div>
     </div>
 
-    <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
-      <button class="btn sm secondary" id="export-btn">Export as JSON</button>
-      <button class="btn sm ghost" id="reset-btn">Discard draft</button>
+    <div id="sidebar-footer-block">
+      <div class="rules">
+        <strong id="rules-heading" style="color:var(--ink); font-weight:600;">How this works</strong>
+        <ul id="rules-list"></ul>
+      </div>
+
+      <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
+        <button class="btn sm secondary" id="export-btn">Export as JSON</button>
+        <button class="btn sm ghost" id="reset-btn">Discard draft</button>
+      </div>
     </div>
   </aside>
 

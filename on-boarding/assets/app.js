@@ -555,15 +555,42 @@
     return DATA_UPLOAD_STEPS.filter(s => state.uploads[s.uploadKey]).length;
   }
 
+  function getPortalPage() {
+    const view = document.body.dataset.view || "landing";
+    if (view === "uploads") return "uploads";
+    if (view === "checklist" || view === "portal") return "checklist";
+    return null;
+  }
+
+  function isPortalView() {
+    return getPortalPage() !== null;
+  }
+
+  function getResumeView() {
+    const phase = getPortalPhase();
+    if (phase !== PHASE_CHECKLIST) return "uploads";
+    const hasUpload = DATA_UPLOAD_STEPS.some(s => state.uploads[s.uploadKey]);
+    if (hasUpload) return "uploads";
+    return "checklist";
+  }
+
+  function updateSidebarPageBlocks() {
+    const page = getPortalPage();
+    const uploadsBlock = el("#sidebar-uploads-block");
+    const footerBlock = el("#sidebar-footer-block");
+    if (uploadsBlock) uploadsBlock.hidden = page !== "uploads";
+    if (footerBlock) footerBlock.hidden = page === "checklist";
+  }
+
   function renderPortalSteps() {
     const nav = el("#portal-steps");
     if (!nav) return;
-    const phase = getPortalPhase();
+    const page = getPortalPage();
     const clPct = overallProgress().pct;
 
     const checklistBtn = `
-      <button type="button" role="tab" aria-selected="${phase === PHASE_CHECKLIST}" aria-controls="workspace"
-              class="portal-step ${phase === PHASE_CHECKLIST ? "active" : ""}" data-phase="${PHASE_CHECKLIST}">
+      <button type="button" role="tab" aria-selected="${page === "checklist"}" aria-controls="workspace"
+              class="portal-step ${page === "checklist" ? "active" : "portal-step--nav"}" data-go-checklist>
         <span class="ps-num">Step 1</span>
         <span class="ps-label">Facility checklist</span>
         <span class="ps-meta">${clPct}% · required to submit</span>
@@ -571,7 +598,7 @@
 
     const uploadBtns = DATA_UPLOAD_STEPS.map((step, i) => {
       const stepNum = i + 2;
-      const active = phase === step.uploadKey;
+      const active = page === "uploads" && getPortalPhase() === step.uploadKey;
       const hasFile = !!state.uploads[step.uploadKey];
       const meta = hasFile
         ? escapeHtml(shortenName(state.uploads[step.uploadKey].fileName, 22))
@@ -585,7 +612,12 @@
         </button>`;
     }).join("");
 
-    nav.innerHTML = checklistBtn + uploadBtns;
+    nav.innerHTML = page === "uploads"
+      ? checklistBtn + uploadBtns
+      : checklistBtn;
+
+    nav.querySelector("[data-go-checklist]")?.addEventListener("click", () => setView("checklist"));
+    nav.querySelector("[data-go-uploads]")?.addEventListener("click", () => setView("uploads"));
     nav.querySelectorAll("[data-phase]").forEach(btn => {
       btn.addEventListener("click", () => switchPortalPhase(btn.dataset.phase));
     });
@@ -596,6 +628,11 @@
     state.meta.portal_phase = phase;
     onReview = false;
     scheduleSave();
+    const targetView = phase === PHASE_CHECKLIST ? "checklist" : "uploads";
+    if (getPortalPage() !== targetView) {
+      setView(targetView);
+      return;
+    }
     renderPortalSteps();
     renderSidebar();
     renderWorkspace();
@@ -609,23 +646,36 @@
     const skip = el("#skip-content");
     if (!skip) return;
     const view = document.body.dataset.view || "landing";
-    if (view === "portal") skip.setAttribute("href", "#workspace");
+    if (isPortalView()) skip.setAttribute("href", "#workspace");
     else if (view === "templates") skip.setAttribute("href", "#templates-view");
     else skip.setAttribute("href", "#landing-root");
   }
 
   function setView(name) {
+    if (name === "portal") name = "checklist";
     document.body.dataset.view = name;
     document.body.scrollTop = 0;
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
     document.querySelectorAll(".nav-link").forEach(n => n.classList.toggle("active", n.dataset.go === name));
-    if (name === "portal") {
+
+    if (name === "checklist") {
+      state.meta.portal_phase = PHASE_CHECKLIST;
+      scheduleSave();
+      renderPortalSteps();
+      renderSidebar();
+      renderWorkspace();
+    } else if (name === "uploads") {
+      if (getPortalPhase() === PHASE_CHECKLIST) {
+        state.meta.portal_phase = DATA_UPLOAD_STEPS[0].uploadKey;
+        scheduleSave();
+      }
       renderPortalSteps();
       renderSidebar();
       renderWorkspace();
     } else if (name === "templates") {
       renderTemplatesView();
     }
+
     updateResumeButton();
     updateSkipLink();
   }
@@ -634,7 +684,7 @@
     const hasUpload = DATA_UPLOAD_STEPS.some(s => state.uploads[s.uploadKey]);
     const hasDraft = Object.keys(state.answers || {}).length > 0 || hasUpload;
     const btn = el("#nav-resume");
-    if (btn) btn.hidden = !hasDraft || document.body.dataset.view === "portal";
+    if (btn) btn.hidden = !hasDraft || isPortalView();
   }
 
   // ------------------------------------------------------------------
@@ -693,6 +743,9 @@
     const ringSub = el("#ring-sub");
     const rulesHeading = el("#rules-heading");
     const phase = getPortalPhase();
+    const page = getPortalPage();
+
+    updateSidebarPageBlocks();
 
     const { pct } = overallProgress();
     const circ = 2 * Math.PI * 52;
@@ -708,7 +761,7 @@
       ringSub.textContent = `Data files · ${n} / ${DATA_UPLOAD_STEPS.length} attached`;
     }
 
-    if (phase !== PHASE_CHECKLIST) {
+    if (page === "uploads" && phase !== PHASE_CHECKLIST) {
       if (!list) return;
       const step = DATA_UPLOAD_STEPS.find(s => s.uploadKey === phase);
       const tpl = TEMPLATES.find(t => t.id === step.templateId);
@@ -734,7 +787,9 @@
     if (!list) return;
     if (heading) heading.textContent = "Sections";
     if (rulesHeading) rulesHeading.textContent = "How this works";
-    if (rules) rules.innerHTML = GLOBAL_RULES.map(r => `<li>${escapeHtml(r)}</li>`).join("");
+    if (rules && page !== "checklist") {
+      rules.innerHTML = GLOBAL_RULES.map(r => `<li>${escapeHtml(r)}</li>`).join("");
+    }
 
     const items = [
       ...SECTIONS.map(s => ({ ...s, kind: "section" })),
@@ -773,8 +828,6 @@
     list.querySelectorAll("[data-review]").forEach(b => {
       b.addEventListener("click", () => openReview());
     });
-
-    renderDataFilesNav();
   }
 
   function switchSection(id) {
@@ -885,7 +938,7 @@
     return `
       <header class="workspace-header">
         <div>
-          <span class="eyebrow">Stage ${idx + 2} of ${DATA_UPLOAD_STEPS.length + 1}</span>
+          <span class="eyebrow">Upload ${idx + 1} of ${DATA_UPLOAD_STEPS.length}</span>
           <h1>${escapeHtml(step.stepLabel)}</h1>
           <p class="upload-intro">${escapeHtml(step.intro)}</p>
         </div>
@@ -933,10 +986,10 @@
       </div>
 
       <div class="action-bar" style="margin-top:28px;">
-        <span class="summary">Stage ${idx + 2} of ${DATA_UPLOAD_STEPS.length + 1}</span>
+        <span class="summary">Upload ${idx + 1} of ${DATA_UPLOAD_STEPS.length}</span>
         <span class="spacer"></span>
-        <button type="button" class="btn ghost sm" data-upload-prev>${idx <= 0 ? "← Back to Step 1" : `← Previous Stage`}</button>
-        <button type="button" class="btn sm" data-upload-next>${idx >= DATA_UPLOAD_STEPS.length - 1 ? "Finish · Back to Step 1" : `Next Stage →`}</button>
+        <button type="button" class="btn ghost sm" data-upload-prev>${idx <= 0 ? "← Back to checklist" : `← Previous upload`}</button>
+        <button type="button" class="btn sm" data-upload-next>${idx >= DATA_UPLOAD_STEPS.length - 1 ? "Finish · Back to checklist" : `Next upload →`}</button>
       </div>
     `;
   }
@@ -1008,12 +1061,12 @@
 
     el("[data-upload-prev]")?.addEventListener("click", () => {
       const idx = DATA_UPLOAD_STEPS.findIndex(s => s.uploadKey === uploadKey);
-      if (idx <= 0) switchPortalPhase(PHASE_CHECKLIST);
+      if (idx <= 0) setView("checklist");
       else switchPortalPhase(DATA_UPLOAD_STEPS[idx - 1].uploadKey);
     });
     el("[data-upload-next]")?.addEventListener("click", () => {
       const idx = DATA_UPLOAD_STEPS.findIndex(s => s.uploadKey === uploadKey);
-      if (idx >= DATA_UPLOAD_STEPS.length - 1) switchPortalPhase(PHASE_CHECKLIST);
+      if (idx >= DATA_UPLOAD_STEPS.length - 1) setView("checklist");
       else switchPortalPhase(DATA_UPLOAD_STEPS[idx + 1].uploadKey);
     });
 
@@ -1025,10 +1078,13 @@
     const ws = el("#workspace");
     if (!ws) return;
 
+    const page = getPortalPage();
     const phase = getPortalPhase();
-    if (phase !== PHASE_CHECKLIST) {
-      ws.innerHTML = renderUploadWorkspace(phase);
-      wireUploadWorkspace(phase);
+
+    if (page === "uploads") {
+      const uploadKey = phase === PHASE_CHECKLIST ? DATA_UPLOAD_STEPS[0].uploadKey : phase;
+      ws.innerHTML = renderUploadWorkspace(uploadKey);
+      wireUploadWorkspace(uploadKey);
       setSaveStatus("saved");
       return;
     }
@@ -1069,7 +1125,7 @@
     const summary = total > 0
       ? `${done} / ${total} required answered in this section`
       : `Optional section`;
-    const nextLabel = isLast ? "Next: Stage 2" : `Next: ${SECTIONS[idx + 1].title}`;
+    const nextLabel = isLast ? "Continue to data uploads" : `Next: ${SECTIONS[idx + 1].title}`;
     return `
       <div class="action-bar">
         <span class="summary">${escapeHtml(summary)}</span>
@@ -1358,9 +1414,7 @@
       if (idx < SECTIONS.length - 1) {
         switchSection(SECTIONS[idx + 1].id);
       } else {
-        const firstUploadKey = DATA_UPLOAD_STEPS[0]?.uploadKey;
-        if (firstUploadKey) switchPortalPhase(firstUploadKey);
-        else openReview();
+        setView("uploads");
       }
     });
   }
@@ -2003,7 +2057,7 @@
       btn.addEventListener("click", () => {
         const uploadKey = btn.dataset.goPortalUpload;
         if (!DATA_UPLOAD_STEPS.some(s => s.uploadKey === uploadKey)) return;
-        setView("portal");
+        setView("uploads");
         switchPortalPhase(uploadKey);
       });
     });
@@ -2244,14 +2298,20 @@
         const portalPhase = a.dataset.phase;
         const tplId = a.dataset.tpl;
 
-        if (dest === "portal" || dest === "landing" || dest === "templates") {
+        if (dest === "portal" || dest === "checklist" || dest === "uploads" || dest === "landing" || dest === "templates") {
           ev.preventDefault();
           if (tplId && TEMPLATES.some(t => t.id === tplId)) {
             currentTemplateId = tplId;
           }
-          setView(dest);
-          if (dest === "portal" && portalPhase && isValidPortalPhase(portalPhase)) {
+          if (dest === "landing" || dest === "templates") {
+            setView(dest);
+          } else if (portalPhase && isValidPortalPhase(portalPhase) && portalPhase !== PHASE_CHECKLIST) {
+            setView("uploads");
             switchPortalPhase(portalPhase);
+          } else if (dest === "uploads") {
+            setView("uploads");
+          } else {
+            setView("checklist");
           }
           // Close mobile menu if open
           const drawer = document.getElementById("nav-drawer");
@@ -2267,7 +2327,7 @@
       });
     });
 
-    el("#nav-resume")?.addEventListener("click", () => setView("portal"));
+    el("#nav-resume")?.addEventListener("click", () => setView(getResumeView()));
 
     const nav = el("#top-nav");
     const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 12);
@@ -2286,6 +2346,14 @@
   // Portal actions (export / reset)
   // ------------------------------------------------------------------
   function initPortalActions() {
+    document.addEventListener("click", (e) => {
+      const uploadsBtn = e.target.closest("[data-go-uploads]");
+      if (uploadsBtn) {
+        e.preventDefault();
+        setView("uploads");
+      }
+    });
+
     el("#export-btn")?.addEventListener("click", () => {
       downloadSubmission();
       toast("Exported current answers as JSON.", "success");
@@ -2333,13 +2401,15 @@
     // default and reshuffle the phone defaults once detection resolves.
     detectDefaultCountry();
 
-    if (openedFromResume || location.hash === "#portal") setView("portal");
-    else if (location.hash === "#templates") setView("templates");
-    else if (location.hash.startsWith("#portal-")) {
-      const uploadKey = location.hash.slice("#portal-".length);
-      setView("portal");
+    if (openedFromResume) setView(getResumeView());
+    else if (location.hash === "#portal" || location.hash === "#checklist") setView("checklist");
+    else if (location.hash === "#uploads") setView("uploads");
+    else if (location.hash.startsWith("#portal-") || location.hash.startsWith("#uploads-")) {
+      const uploadKey = location.hash.replace(/^#(?:portal|uploads)-/, "");
+      setView("uploads");
       if (isValidPortalPhase(uploadKey)) switchPortalPhase(uploadKey);
     }
+    else if (location.hash === "#templates") setView("templates");
     else if (location.hash.startsWith("#templates-")) {
       const tplId = location.hash.slice("#templates-".length);
       if (TEMPLATES.some(t => t.id === tplId)) currentTemplateId = tplId;
