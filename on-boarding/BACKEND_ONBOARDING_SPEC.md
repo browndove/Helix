@@ -189,10 +189,9 @@ Only shown (and required when visible) when the condition matches:
 | `job_title` | no | May differ from app role |
 | `rank` | no | e.g. Consultant |
 | `middle_name` | no | |
-| `phone` | yes | International format, e.g. `233209182633` |
+| `phone` | no | International format, e.g. `233209182633` |
 | `gender` | yes | e.g. Male, Female, Other — be consistent |
 | `department` | yes | Must match Departments.`department` |
-| `subspecialty` | no | |
 | `patient_access` | yes | **`Yes` or `No`** |
 | `employee_id` | yes | Unique per staff member |
 | `highest_qualifications` | yes | e.g. MBChB; use `Other` if none apply |
@@ -200,7 +199,7 @@ Only shown (and required when visible) when the condition matches:
 **Example row (from schema):**
 
 ```text
-dr.kwame.mensah@gmail.com,Kwame,Mensah,Physician,Consultant,,233209182633,Male,Medicine,Cardiology,Yes,EMP-1001,MBChB
+dr.kwame.mensah@gmail.com,Kwame,Mensah,Physician,Consultant,,233209182633,Male,Medicine,Yes,EMP-1001,MBChB
 ```
 
 ### Step 5 — Roles (`uploadKey: roles`)
@@ -212,7 +211,6 @@ Operational roles (workflow/communication), not just HR job titles.
 | `role_name` | yes | |
 | `role_description` | no | |
 | `department` | yes | Must match Departments |
-| `subspecialty` | no | |
 | `priority` | yes | `Critical` or `Standard` |
 | `restricted_signin` | yes | `Yes` or `No` |
 | `permitted_signin_emails` | no* | *Required when `restricted_signin` is Yes; semicolon-separated emails |
@@ -221,7 +219,7 @@ Operational roles (workflow/communication), not just HR job titles.
 
 ### Step 6 — Patients (`uploadKey: patients`) ⭐
 
-**One row per patient.** Location fields must align with Departments structure.
+**One row per patient.** Location fields must align with Department and Units structure.
 
 | Column | Required | Notes |
 |--------|----------|--------|
@@ -232,15 +230,15 @@ Operational roles (workflow/communication), not just HR job titles.
 | `medical_record_number` | yes | Unique MRN / hospital number |
 | `gender` | yes | Consistent values |
 | `department` | yes | Must match Departments |
-| `subspecialty` | no | |
 | `floor` | yes | Same convention as Departments |
-| `ward` | yes | Should match ward names from Departments where possible |
-| `bed` | no | If facility tracks beds |
+| `Unit` | yes | Should match unit names from Units tab where possible |
+| `bed_number` | yes | Bed number or label |
+| `room_number` | yes | Room where the patient is located |
 
 **Example row (from schema):**
 
 ```text
-Ama,Mensah,,1985-03-12,MRN-BULK-FULL-001,Female,Surgery,Neurosurgery,Level 3,Surgical Ward A,
+Ama,Mensah,,1985-03-12,MRN-BULK-FULL-001,Female,Surgery,Level 3,ICU,2,201
 ```
 
 ---
@@ -337,7 +335,7 @@ Always the strings **`"Yes"`** or **`"No"`** (not booleans).
 | **Conditional required** | `total_it_staff`, `total_inpatient_beds` required only when parent yesno is Yes. |
 | **Staff vs Roles** | Staff sheet = people roster; Roles sheet = operational roles, escalation, sign-in restrictions. |
 | **patient_access** | On Staff rows only — whether that staff member gets patient access in Helix. |
-| **Cross-sheet integrity** | Validate `department`, `floor`, `ward` against Departments upload before ingesting Staff/Patients. |
+| **Cross-sheet integrity** | Validate `department`, `floor`, and `Unit` against Department and Units uploads before ingesting Staff/Patients. |
 | **MRN uniqueness** | Enforce unique `medical_record_number` per facility on Patients ingest. |
 | **employee_id uniqueness** | Enforce unique `employee_id` per facility on Staff ingest. |
 | **PHI** | Patient file contains demographics and location — treat as PHI in transit and at rest. |

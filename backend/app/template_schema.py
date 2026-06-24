@@ -5,10 +5,6 @@ TEMPLATE_HEADERS: dict[str, list[str]] = {
         "building_block",
         "department",
         "department_description",
-        "subspecialty",
-        "subspecialty_description",
-        "floor",
-        "ward_list",
     ],
     "units": ["building_block", "unit", "floor"],
     "staff": [

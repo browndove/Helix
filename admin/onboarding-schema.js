@@ -87,7 +87,6 @@
 
   const uploadKeys = [
     { key: "departments", label: "Departments" },
-    { key: "units", label: "Units" },
     { key: "staff", label: "Staff" },
     { key: "roles", label: "Roles" },
     { key: "patients", label: "Patients" },
@@ -96,7 +95,6 @@
   const portalPhaseLabels = {
     checklist: "Facility checklist",
     departments: "Departments upload",
-    units: "Units upload",
     staff: "Staff upload",
     roles: "Roles upload",
     patients: "Patients upload",
