@@ -1034,7 +1034,7 @@
           <div class="upload-actions">
             <button type="button" class="btn sm secondary" data-jump-templates="${escapeAttr(step.templateId)}">View ${escapeHtml(tpl.name)} template</button>
             ${hasSessionFile ? `<button type="button" class="btn sm secondary" data-recheck-csv>Re-check headers</button>` : ""}
-            <button type="button" class="btn sm secondary" data-dl-template-csv>Download CSV template</button>
+            <button type="button" class="btn sm secondary" data-dl-template>Download Excel template</button>
           </div>
         ` : ""}
       </div>
@@ -1086,7 +1086,7 @@
       }
     });
 
-    el("[data-dl-template-csv]")?.addEventListener("click", () => downloadTemplateCsv(tpl));
+    el("[data-dl-template]")?.addEventListener("click", () => downloadTemplateFile(tpl));
 
     el("[data-jump-templates]")?.addEventListener("click", (ev) => {
       currentTemplateId = ev.currentTarget.dataset.jumpTemplates || step.templateId;
@@ -2021,7 +2021,7 @@
             </div>
             <div class="tpl-btn-row">
               <button class="btn sm secondary" data-copy-cols="${escapeAttr(tpl.id)}" title="Copy header row as tab-separated values">Copy headers</button>
-              <button class="btn sm" data-download-csv="${escapeAttr(tpl.id)}" title="Download the ${escapeHtml(tpl.name)} template as a CSV">Download CSV</button>
+              <button class="btn sm" data-download-template="${escapeAttr(tpl.id)}" title="Download the ${escapeHtml(tpl.name)} sheet from the Helix workbook">Download Excel</button>
               <button class="btn sm secondary" data-go-portal-upload="${escapeAttr(tpl.id)}" title="Open the upload step for ${escapeHtml(tpl.name)}">Attach file in portal</button>
             </div>
           </div>
@@ -2087,11 +2087,11 @@
         );
       });
     });
-    els("[data-download-csv]").forEach(btn => {
+    els("[data-download-template]").forEach(btn => {
       btn.addEventListener("click", () => {
-        const tpl = TEMPLATES.find(t => t.id === btn.dataset.downloadCsv);
+        const tpl = TEMPLATES.find(t => t.id === btn.dataset.downloadTemplate);
         if (!tpl) return;
-        downloadTemplateCsv(tpl);
+        downloadTemplateFile(tpl);
       });
     });
     els("[data-go-portal-upload]").forEach(btn => {
@@ -2180,21 +2180,29 @@
     pop.style.left = `${Math.round(left)}px`;
   }
 
-  function downloadTemplateCsv(tpl) {
-    const esc = (v) => {
-      const s = v == null ? "" : String(v);
-      return /["\n,]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const lines = [tpl.columns.map(c => esc(c.name)).join(",")];
-    tpl.examples.forEach(row => lines.push(tpl.columns.map((_, i) => esc(row[i])).join(",")));
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href = url;
-    a.download = `helix-${tpl.id}-template.csv`;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-    toast(`Downloaded ${tpl.name} template CSV.`, "success");
+  function templateDownloadUrl(tpl) {
+    return `assets/templates/helix-${tpl.id}-template.xlsx`;
+  }
+
+  async function downloadTemplateFile(tpl) {
+    const url = templateDownloadUrl(tpl);
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `helix-${tpl.id}-template.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
+      toast(`Downloaded ${tpl.name} template (${tpl.sheet} sheet).`, "success");
+    } catch (err) {
+      console.error("Template download failed", err);
+      toast(`Could not download the ${tpl.name} template. Try again in a moment.`, "error");
+    }
   }
 
   // ------------------------------------------------------------------

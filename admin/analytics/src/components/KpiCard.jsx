@@ -1,11 +1,8 @@
 import Sparkline from "./Sparkline";
-import Text from "./ui/Text";
-import { TrendArrow, StoreBadge } from "./shared";
+import { StatDelta, StoreBadge } from "./shared";
 import { formatNumber } from "../data/mockData";
-import { kpiAccentColors } from "../lib/theme";
 
 export default function KpiCard({ metric, index = 0 }) {
-  const color = kpiAccentColors[metric.accent] || kpiAccentColors.primary;
   const display =
     metric.prefix || metric.suffix
       ? formatNumber(metric.value, {
@@ -17,34 +14,29 @@ export default function KpiCard({ metric, index = 0 }) {
 
   return (
     <article
-      className="dashboard-card hover-lift p-5"
+      className="stat-card"
       style={{ animationDelay: `${index * 0.05}s` }}
     >
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <Text as="p" variant="body-sm" color="text-secondary">
-          {metric.label}
-        </Text>
-        <div className="flex gap-1">
-          {metric.stores?.map((s) => (
-            <StoreBadge key={s} store={s} />
-          ))}
-        </div>
+      <div className="flex items-start justify-between gap-2">
+        <p className="stat-label">{metric.label}</p>
+        {metric.stores?.length > 0 && (
+          <div className="flex gap-1">
+            {metric.stores.map((s) => (
+              <StoreBadge key={s} store={s} />
+            ))}
+          </div>
+        )}
       </div>
-      <Text as="p" variant="metric-lg" color="text-primary" className="animate-value-reveal">
-        {display}
-      </Text>
-      <div className="mt-3 flex items-end justify-between gap-2">
-        <TrendArrow change={metric.change} />
-        <Sparkline data={metric.sparkline} color={color} />
+
+      <p className="stat-value animate-value-reveal">{display}</p>
+
+      <div className="flex items-center justify-between gap-2">
+        <StatDelta change={metric.change} />
+        <Sparkline data={metric.sparkline} />
       </div>
-      {metric.meta && (
-        <Text as="p" variant="body-xs" color="text-tertiary" className="mt-2">
-          {metric.meta}
-        </Text>
-      )}
-      <Text as="p" variant="body-xs" color="text-tertiary" className="mt-1">
-        {metric.source}
-      </Text>
+
+      {metric.meta && <p className="stat-sublabel">{metric.meta}</p>}
+      <p className="stat-sublabel">{metric.source}</p>
     </article>
   );
 }

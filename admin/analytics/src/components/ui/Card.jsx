@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-export default function Card({ children, className, hover = true, padding = "p-5" }) {
+export default function Card({ children, className, hover = true, padding = "p-8" }) {
   return (
     <section className={clsx("dashboard-card", hover && "hover-lift", padding, className)}>
       {children}

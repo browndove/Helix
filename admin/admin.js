@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ---------------------------------------------------------------------------
 function initCustomSelects() {
   document
-    .querySelectorAll('#dashboard-screen select.field')
+    .querySelectorAll('#dashboard-screen select.custom-select-native-host, #dashboard-screen select.field')
     .forEach(enhanceSelect);
 }
 
@@ -63,11 +63,17 @@ function enhanceSelect(nativeSelect) {
 
   const trigger = document.createElement('button');
   trigger.type = 'button';
-  trigger.className = 'custom-select__trigger field' + (isSm ? ' sm' : '');
+  trigger.className = 'custom-select__trigger' + (isSm ? ' custom-select__trigger--sm' : '');
   trigger.setAttribute('aria-haspopup', 'listbox');
   trigger.setAttribute('aria-expanded', 'false');
   const listId = `${nativeSelect.id || 'select'}-listbox`;
   trigger.setAttribute('aria-controls', listId);
+  if (nativeSelect.getAttribute('aria-label')) {
+    trigger.setAttribute('aria-label', nativeSelect.getAttribute('aria-label'));
+  } else if (nativeSelect.id) {
+    const labelledBy = document.querySelector(`label[for="${nativeSelect.id}"]`);
+    if (labelledBy) trigger.setAttribute('aria-labelledby', labelledBy.id || nativeSelect.id);
+  }
 
   const labelSpan = document.createElement('span');
   labelSpan.className = 'custom-select__label';
@@ -76,7 +82,7 @@ function enhanceSelect(nativeSelect) {
   chevron.className = 'custom-select__chevron';
   chevron.setAttribute('aria-hidden', 'true');
   chevron.innerHTML =
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
 
   trigger.append(labelSpan, chevron);
 
@@ -111,7 +117,7 @@ function enhanceSelect(nativeSelect) {
       check.className = 'custom-select__check';
       check.setAttribute('aria-hidden', 'true');
       check.innerHTML =
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
       btn.append(text, check);
       btn.addEventListener('click', () => setValue(opt.value, true));
@@ -147,12 +153,31 @@ function enhanceSelect(nativeSelect) {
   });
 
   trigger.addEventListener('keydown', (e) => {
+    const options = [...menu.querySelectorAll('.custom-select__option')];
+    const currentIndex = options.findIndex((el) => el.classList.contains('is-selected'));
+
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      open();
+      if (!wrapper.classList.contains('is-open')) {
+        open();
+        return;
+      }
+    }
+    if (e.key === 'ArrowDown' && wrapper.classList.contains('is-open')) {
+      e.preventDefault();
+      const next = options[Math.min(currentIndex + 1, options.length - 1)];
+      if (next) setValue(next.dataset.value, true);
+    }
+    if (e.key === 'ArrowUp' && wrapper.classList.contains('is-open')) {
+      e.preventDefault();
+      const prev = options[Math.max(currentIndex - 1, 0)];
+      if (prev) setValue(prev.dataset.value, true);
     }
     if (e.key === 'Escape') close();
   });
+
+  nativeSelect.tabIndex = -1;
+  nativeSelect.setAttribute('aria-hidden', 'true');
 
   menu.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -376,6 +401,7 @@ async function showDashboard() {
   loginScreen.classList.add('hidden');
   dashboardScreen.classList.remove('hidden');
   document.getElementById('admin-user').textContent = currentUser?.name || 'Admin';
+  initCustomSelects();
 
   if (apiMode) {
     try {
@@ -727,6 +753,25 @@ const CARD_MSYM = {
   files: 'attach_file',
 };
 
+const ADMIN_ICONS = {
+  domain: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>',
+  group: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  badge: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>',
+  computer: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>',
+  upload_file: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+  timeline: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  domain_verification: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>',
+  table_chart: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
+  attach_file: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
+  mail: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+};
+
+function adminIcon(name, className = 'icon') {
+  const key = CARD_MSYM[name] || name;
+  const svg = ADMIN_ICONS[key] || ADMIN_ICONS.domain;
+  return `<span class="${className}" aria-hidden="true">${svg}</span>`;
+}
+
 function drawerStatusLabel(status) {
   const s = (status || 'incomplete').replace(/_/g, ' ');
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -774,12 +819,11 @@ function formatAnswerValue(value) {
 }
 
 function buildDrawerCard(title, icon, bodyHtml, modifier = '') {
-  const msym = CARD_MSYM[icon] || CARD_MSYM.teal;
   const modClass = modifier ? ` ${modifier}` : '';
   return `
     <div class="drawer-card${modClass}">
       <div class="card-header">
-        <span class="material-symbols-outlined card-header-icon" aria-hidden="true">${msym}</span>
+        <span class="card-header-icon">${adminIcon(icon)}</span>
         <h3>${title}</h3>
       </div>
       <div class="card-body">${bodyHtml}</div>
@@ -888,7 +932,7 @@ function buildSubmissionMetaCard(facility) {
 
   const emailValue = facility.facility_email
     ? `<a class="contact-link email-mono-link" href="mailto:${escapeHtml(facility.facility_email)}">
-        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+        ${adminIcon('mail')}
         ${escapeHtml(facility.facility_email)}
       </a>`
     : 'Not provided';

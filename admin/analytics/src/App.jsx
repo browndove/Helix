@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import TitleBar from "./components/TitleBar";
-import FreshnessBanner from "./components/FreshnessBanner";
 import FilterBar from "./components/FilterBar";
 import SlideIn from "./components/ui/SlideIn";
 import OverviewPage from "./pages/OverviewPage";
@@ -65,17 +64,14 @@ export default function App() {
       <div className="flex min-w-0 flex-1 flex-col">
         <TitleBar title={PAGE_TITLES[activePage] || "Analytics"} />
 
-        <main className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="mx-auto max-w-page space-y-5">
-            <SlideIn>
-              <FreshnessBanner />
-            </SlideIn>
+        <main className="flex-1 overflow-y-auto px-6 py-8">
+          <div className="mx-auto max-w-page space-y-6">
             {showFilters && (
-              <SlideIn delay={0.05}>
+              <SlideIn>
                 <FilterBar filters={filters} onChange={setFilters} />
               </SlideIn>
             )}
-            <SlideIn delay={0.1}>{page}</SlideIn>
+            <SlideIn delay={showFilters ? 0.05 : 0}>{page}</SlideIn>
           </div>
         </main>
       </div>

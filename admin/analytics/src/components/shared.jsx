@@ -34,21 +34,22 @@ export const NAV_SECTIONS = [
 export function StoreBadge({ store }) {
   const Icon = store === "apple" ? TabletSmartphone : Play;
   return (
-    <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-black/5 text-text-secondary">
-      <Icon size={10} strokeWidth={2.5} />
+    <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-[var(--fill-tertiary)] text-text-secondary">
+      <Icon size={10} strokeWidth={1.5} />
     </span>
   );
 }
 
-export function TrendArrow({ change }) {
+export function StatDelta({ change }) {
   const up = change >= 0;
   return (
-    <span
-      className={`inline-flex items-center gap-0.5 text-xs font-semibold tabular-nums ${
-        up ? "text-accent-green" : "text-accent-red"
-      }`}
-    >
+    <span className={`stat-delta ${up ? "up" : "down"}`}>
       {up ? "↑" : "↓"} {Math.abs(change).toFixed(1)}%
     </span>
   );
+}
+
+/** @deprecated Use StatDelta */
+export function TrendArrow({ change }) {
+  return <StatDelta change={change} />;
 }

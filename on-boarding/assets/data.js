@@ -469,7 +469,7 @@ const GLOBAL_RULES = [
   "Phone numbers auto-detect your country and cap digits to the correct length.",
   "Some follow-up questions only appear based on earlier answers.",
   "Your progress is saved locally as you type — you can close the tab and return later.",
-  "Steps 2–5 (Departments, Staff, Roles, Patients files): attach each when that dataset is ready; they never block submitting Step 1.",
+  "Steps 2–6 (Departments, Units, Staff, Roles, Patients files): attach each when that dataset is ready; they never block submitting Step 1.",
   "Post-submit confirmation (email or in-app) depends on how Helix connects this portal — not simulated in this prototype.",
 ];
 
@@ -488,7 +488,7 @@ const GLOBAL_RULES = [
 const TEMPLATES_INTRO = {
   headline: "Data templates",
   description:
-    "Once your facility is onboarded, you'll submit departments, staff, roles and patients using these datasets. Column names must match exactly — Helix reads headers verbatim. Hover a column to see what it means.",
+    "Once your facility is onboarded, you'll submit departments, units, staff, roles and patients using these datasets. Column names must match exactly — Helix reads headers verbatim. Hover a column to see what it means.",
   legend: [
     { tone: "required", label: "Required", note: "Must be submitted for every row." },
     { tone: "optional", label: "Optional", note: "Leave blank if not applicable." },
@@ -524,6 +524,30 @@ const TEMPLATES = [
       ["Main", "Surgery", "Surgical care & consultancy services"],
       ["Main", "Medicine", ""],
       ["Maternity", "Obstetrics & Gynaecology", "Women's care & health"],
+    ],
+  },
+
+  {
+    id: "units",
+    name: "Units",
+    sheet: "Units",
+    tagline: "Discrete clinical or operational units within a building block.",
+    description:
+      "Use this tab to list individual units — ICUs, theatres, wards-as-units, labs, and other operational units Helix should treat separately from the broader department row.",
+    rules: [
+      'Use the same building_block labels as on the Department tab (e.g. "Main").',
+      "The unit name should match how staff refer to it on the floor (e.g. ICU, Theatre 2).",
+      "Keep floor labels consistent with the Department tab where applicable.",
+    ],
+    columns: [
+      { name: "building_block", required: true,  meaning: "Building or block where this unit is located.", guidance: 'Enter "Main" if the facility has only one block/building.' },
+      { name: "unit",             required: true,  meaning: "Name of the unit as it should appear in Helix.", guidance: "Examples: ICU, HDU, Main Operating Theatre, NICU." },
+      { name: "floor",            required: false, meaning: "Floor or level where the unit is primarily situated.", guidance: "Optional if your facility does not label floors." },
+    ],
+    examples: [
+      ["Main", "ICU", "Level 2"],
+      ["Main", "HDU", "Level 2"],
+      ["Main", "Main Operating Theatre", "Level 1"],
     ],
   },
 
@@ -639,6 +663,14 @@ const DATA_UPLOAD_STEPS = [
     shortLabel: "Departments",
     intro:
       "Attach the Departments dataset — one row per department record from your Helix template. Complete this whenever your facility roster is ready; it does not block submitting Step 1.",
+  },
+  {
+    uploadKey: "units",
+    templateId: "units",
+    stepLabel: "Units file",
+    shortLabel: "Units",
+    intro:
+      "Attach the Units sheet listing ICU, theatres, wards-as-units, labs, and other discrete operational units with building_block and floor aligned to Departments.",
   },
   {
     uploadKey: "staff",

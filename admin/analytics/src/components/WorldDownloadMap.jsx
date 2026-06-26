@@ -32,27 +32,21 @@ export default function WorldDownloadMap({ countries }) {
   }, [countries]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#4a5568] to-[#2d3748]">
+    <div className="relative overflow-hidden rounded-xl border border-[var(--separator)] bg-[var(--bg-tertiary)]">
       <svg
         viewBox={world.viewBox}
         className="block h-auto w-full"
         role="img"
         aria-label="World map showing download locations"
       >
-        <defs>
-          <linearGradient id="mapOcean" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4a5568" />
-            <stop offset="100%" stopColor="#2d3748" />
-          </linearGradient>
-        </defs>
-        <rect x={vbX} y={vbY} width={vbW} height={vbH} fill="url(#mapOcean)" />
+        <rect x={vbX} y={vbY} width={vbW} height={vbH} fill="var(--bg-secondary)" />
         {world.locations.map((location) => (
           <path
             key={location.id}
             d={location.path}
-            fill="#ffffff"
-            stroke="#e8eaed"
-            strokeWidth={0.35}
+            fill="var(--fill-primary)"
+            stroke="var(--separator)"
+            strokeWidth={0.5}
           />
         ))}
         {pins.map((pin) => {
@@ -61,25 +55,27 @@ export default function WorldDownloadMap({ countries }) {
           return (
             <g
               key={pin.country}
+              transform={`translate(${pin.x}, ${pin.y})`}
+              className="cursor-pointer"
               onMouseEnter={() => setActive(pin)}
               onMouseLeave={() => setActive(null)}
-              className="cursor-pointer"
+              onFocus={() => setActive(pin)}
+              onBlur={() => setActive(null)}
+              tabIndex={0}
+              role="button"
+              aria-label={`${pin.country}: ${formatNumber(pin.total)} downloads`}
             >
               <circle
-                cx={pin.x}
-                cy={pin.y}
                 r={r + 4}
-                fill="var(--accent-green)"
-                opacity={isActive ? 0.35 : 0.18}
+                fill="var(--accent-blue)"
+                opacity={isActive ? 0.25 : 0.12}
               />
               <circle
-                cx={pin.x}
-                cy={pin.y}
                 r={r}
-                fill="var(--accent-green)"
-                opacity={isActive ? 0.95 : 0.72}
-                stroke="#ffffff"
-                strokeWidth={1.25}
+                fill="var(--accent-blue)"
+                opacity={isActive ? 1 : 0.85}
+                stroke="var(--bg-base)"
+                strokeWidth={1.5}
               />
             </g>
           );
@@ -87,10 +83,13 @@ export default function WorldDownloadMap({ countries }) {
       </svg>
 
       {active && (
-        <div className="pointer-events-none absolute left-4 top-4 rounded-lg bg-primary/95 px-3 py-2 shadow-soft backdrop-blur-sm">
-          <p className="text-xs font-semibold text-text-primary">{active.country}</p>
-          <p className="tabular-nums mt-0.5 text-[11px] text-text-secondary">
-            {formatNumber(active.total)} downloads
+        <div className="chart-tooltip pointer-events-none absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-48">
+          <p className="text-[15px] font-semibold text-text-primary">{active.country}</p>
+          <p className="mt-1 text-[13px] text-text-secondary">
+            {formatNumber(active.total)} total downloads
+          </p>
+          <p className="text-[13px] tabular-nums text-text-tertiary">
+            iOS {formatNumber(active.ios)} · Android {formatNumber(active.android)}
           </p>
         </div>
       )}

@@ -10,13 +10,20 @@ import {
 } from "recharts";
 import KpiCard from "../components/KpiCard";
 import Card from "../components/ui/Card";
-import Text from "../components/ui/Text";
-import { ChartTooltip, CHART_AXIS, CHART_GRID } from "../components/ChartTooltip";
+import {
+  ChartTooltip,
+  CHART_AXIS,
+  CHART_GRID,
+  CHART_CURSOR,
+  CHART_LEGEND,
+} from "../components/ChartTooltip";
 import { chartColors } from "../lib/theme";
 import { KPI_METRICS, filterByDateRange, DOWNLOADS_SERIES } from "../data/mockData";
 
 export default function OverviewPage({ filters }) {
   const data = filterByDateRange(DOWNLOADS_SERIES, filters.dateRange, filters.store);
+  const showBoth = filters.store === "all";
+  const showLegend = showBoth;
 
   return (
     <div className="space-y-6">
@@ -27,30 +34,26 @@ export default function OverviewPage({ filters }) {
       </div>
 
       <Card>
-        <Text as="h2" variant="body-md-semibold" className="mb-1">
-          Downloads overview
-        </Text>
-        <Text as="p" variant="body-xs" color="text-tertiary" className="mb-4">
-          Combined App Store and Play Store activity
-        </Text>
-        <div className="h-[280px] w-full">
+        <h2 className="chart-title">Downloads overview</h2>
+        <p className="chart-subtitle">Combined App Store and Play Store activity</p>
+        <div className="chart-container h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="iosFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(41, 128, 211, 0.15)" />
-                  <stop offset="100%" stopColor="rgba(41, 128, 211, 0)" />
+                  <stop offset="0%" stopColor="var(--chart-accent)" stopOpacity={0.12} />
+                  <stop offset="100%" stopColor="var(--chart-accent)" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="playFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(0, 200, 179, 0.12)" />
-                  <stop offset="100%" stopColor="rgba(0, 200, 179, 0)" />
+                  <stop offset="0%" stopColor="var(--chart-accent-2)" stopOpacity={0.12} />
+                  <stop offset="100%" stopColor="var(--chart-accent-2)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid {...CHART_GRID} />
               <XAxis dataKey="date" {...CHART_AXIS} tickFormatter={(v) => v.slice(5)} />
               <YAxis {...CHART_AXIS} width={40} />
-              <Tooltip content={<ChartTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 12, fontFamily: "Montserrat" }} />
+              <Tooltip content={<ChartTooltip />} cursor={CHART_CURSOR} />
+              {showLegend && <Legend {...CHART_LEGEND} />}
               {(filters.store === "all" || filters.store === "apple") && (
                 <Area
                   type="monotone"
@@ -59,6 +62,7 @@ export default function OverviewPage({ filters }) {
                   stroke={chartColors.appStore}
                   fill="url(#iosFill)"
                   strokeWidth={2}
+                  dot={false}
                 />
               )}
               {(filters.store === "all" || filters.store === "play") && (
@@ -69,6 +73,7 @@ export default function OverviewPage({ filters }) {
                   stroke={chartColors.playStore}
                   fill="url(#playFill)"
                   strokeWidth={2}
+                  dot={false}
                 />
               )}
             </AreaChart>

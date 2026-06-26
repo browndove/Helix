@@ -1,69 +1,97 @@
 import { Download, RefreshCw } from "lucide-react";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { DATE_PRESETS } from "../data/mockData";
 
-export default function FilterBar({ filters, onChange }) {
-  const selectClass =
-    "rounded-full border-0 bg-tertiary px-3 py-1.5 text-xs font-semibold text-text-primary focus:ring-2 focus:ring-accent-primary/30";
+const STORE_OPTIONS = [
+  { value: "all", label: "All stores" },
+  { value: "apple", label: "App Store only" },
+  { value: "play", label: "Play Store only" },
+];
 
+const VERSION_OPTIONS = [
+  { value: "all", label: "All versions" },
+  { value: "v2.3.1", label: "v2.3.1" },
+  { value: "v2.3.0", label: "v2.3.0" },
+  { value: "v2.2.4", label: "v2.2.4" },
+];
+
+const REGION_OPTIONS = [
+  { value: "all", label: "All regions" },
+  { value: "africa", label: "Africa" },
+  { value: "americas", label: "Americas" },
+  { value: "europe", label: "Europe" },
+];
+
+function FilterSelect({ value, onValueChange, options, ariaLabel }) {
   return (
-    <Card hover={false} padding="p-3">
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger aria-label={ariaLabel}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+export default function FilterBar({ filters, onChange }) {
+  return (
+    <Card hover={false} padding="p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex rounded-full bg-tertiary p-1">
+        <div className="time-selector">
           {DATE_PRESETS.map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => onChange({ ...filters, dateRange: p })}
-              className={
-                filters.dateRange === p ? "filter-pill filter-pill-active" : "filter-pill"
-              }
+              className={`time-option${filters.dateRange === p ? " active" : ""}`}
             >
               {p}
             </button>
           ))}
         </div>
 
-        <select
+        <FilterSelect
           value={filters.store}
-          onChange={(e) => onChange({ ...filters, store: e.target.value })}
-          className={selectClass}
-        >
-          <option value="all">All stores</option>
-          <option value="apple">App Store only</option>
-          <option value="play">Play Store only</option>
-        </select>
+          onValueChange={(store) => onChange({ ...filters, store })}
+          options={STORE_OPTIONS}
+          ariaLabel="Store filter"
+        />
 
-        <select
+        <FilterSelect
           value={filters.version}
-          onChange={(e) => onChange({ ...filters, version: e.target.value })}
-          className={selectClass}
-        >
-          <option value="all">All versions</option>
-          <option value="v2.3.1">v2.3.1</option>
-          <option value="v2.3.0">v2.3.0</option>
-          <option value="v2.2.4">v2.2.4</option>
-        </select>
+          onValueChange={(version) => onChange({ ...filters, version })}
+          options={VERSION_OPTIONS}
+          ariaLabel="Version filter"
+        />
 
-        <select
+        <FilterSelect
           value={filters.region}
-          onChange={(e) => onChange({ ...filters, region: e.target.value })}
-          className={selectClass}
-        >
-          <option value="all">All regions</option>
-          <option value="africa">Africa</option>
-          <option value="americas">Americas</option>
-          <option value="europe">Europe</option>
-        </select>
+          onValueChange={(region) => onChange({ ...filters, region })}
+          options={REGION_OPTIONS}
+          ariaLabel="Region filter"
+        />
 
         <div className="ml-auto flex gap-2">
           <Button variant="ghost" size="sm">
-            <RefreshCw size={13} />
+            <RefreshCw size={14} strokeWidth={1.5} />
             Refresh
           </Button>
           <Button variant="primary" size="sm">
-            <Download size={13} />
+            <Download size={14} strokeWidth={1.5} />
             Export
           </Button>
         </div>
