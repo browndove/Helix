@@ -266,10 +266,26 @@ function initEventListeners() {
     applyFilters();
     showToast('Data refreshed', 'success');
   });
-  document.getElementById('export-all-btn')?.addEventListener('click', exportAllData);
+  document.getElementById('export-all-btn')?.addEventListener('click', () => {
+    exportAllData();
+  });
   document.getElementById('close-detail')?.addEventListener('click', closeDetailModal);
   document.getElementById('detail-export')?.addEventListener('click', exportCurrentDetail);
   document.getElementById('detail-reminder')?.addEventListener('click', sendDetailReminder);
+
+  // Table row actions (event delegation — inline onclick is unreliable)
+  tableBody?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (!id) return;
+    const action = btn.dataset.action;
+    if (action === 'view') openDetail(id);
+    else if (action === 'export') exportFacility(id);
+    else if (action === 'delete') {
+      openConfirmDeleteDialog(id, btn.dataset.name || 'this facility');
+    }
+  });
   
   // Status actions
   document.getElementById('status-pending')?.addEventListener('click', () => updateStatus('pending'));
@@ -648,7 +664,7 @@ function renderTable() {
   if (pageData.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="10" class="empty-state">
+        <td colspan="9" class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <path d="M3 9h18M9 21V9"/>
@@ -659,34 +675,46 @@ function renderTable() {
       </tr>
     `;
   } else {
-    tableBody.innerHTML = pageData.map(f => `
-      <tr data-id="${f.id}">
-        <td class="facility-cell" title="${escapeHtml(f.facility_name)}">${escapeHtml(f.facility_name)}</td>
-        <td class="email-cell" title="${escapeHtml(f.facility_email)}">${escapeHtml(f.facility_email)}</td>
-        <td>${escapeHtml(f.region || '-')}</td>
-        <td>${escapeHtml(f.city || '-')}</td>
-        <td>${escapeHtml(f.facility_type || '-')}</td>
-        <td>${f.submitted ? formatDateTime(f.submitted_at) : '<span class="muted-cell">Draft</span>'}</td>
-        <td class="last-submit-cell">${formatLastSaved(f)}</td>
-        <td><span class="status-badge ${f.status}">${f.status}</span></td>
+    tableBody.innerHTML = pageData.map(f => {
+      const id = escapeHtml(f.id);
+      const name = escapeHtml(f.facility_name || 'this facility');
+      return `
+      <tr data-id="${id}">
+        <td>
+          <div class="facility-cell-inner">
+            <span class="facility-name" title="${escapeHtml(f.facility_name)}">${escapeHtml(f.facility_name)}</span>
+            <span class="facility-email" title="${escapeHtml(f.facility_email)}">${escapeHtml(f.facility_email || '—')}</span>
+          </div>
+        </td>
+        <td>${escapeHtml(f.region || '—')}</td>
+        <td>${escapeHtml(f.city || '—')}</td>
+        <td>${escapeHtml(f.facility_type || '—')}</td>
+        <td class="mono-cell">${f.submitted ? formatDateTime(f.submitted_at) : '<span class="muted-cell">Draft</span>'}</td>
+        <td class="last-submit-cell mono-cell">${formatLastSaved(f)}</td>
+        <td><span class="status-badge ${escapeHtml(f.status)}">${escapeHtml(f.status)}</span></td>
         <td>
           <span class="file-count ${f.fileCount > 0 ? 'has-files' : ''}">
-            ${f.fileCount}/5 files
+            ${f.fileCount || 0}<span class="file-count-total">/5</span>
           </span>
         </td>
         <td class="actions-cell">
-          <button class="btn sm" onclick="openDetail('${f.id}')">View</button>
-          <button class="btn ghost sm" onclick="exportFacility('${f.id}')">Export</button>
-          <button class="btn danger-ghost sm btn-delete" type="button" data-delete-id="${f.id}" data-delete-name="${escapeHtml(f.facility_name || 'this facility')}">Delete</button>
+          <div class="action-group" role="group" aria-label="Row actions">
+            <button type="button" class="action-icon-btn" data-action="view" data-id="${id}" title="View details">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>View</span>
+            </button>
+            <button type="button" class="action-icon-btn" data-action="export" data-id="${id}" title="Export JSON">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export</span>
+            </button>
+            <button type="button" class="action-icon-btn action-icon-btn--danger" data-action="delete" data-id="${id}" data-name="${name}" title="Delete">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              <span>Delete</span>
+            </button>
+          </div>
         </td>
-      </tr>
-    `).join('');
-
-    tableBody.querySelectorAll('.btn-delete').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        openConfirmDeleteDialog(btn.dataset.deleteId, btn.dataset.deleteName);
-      });
-    });
+      </tr>`;
+    }).join('');
   }
   
   // Update pagination info
@@ -1191,7 +1219,13 @@ async function updateStatus(newStatus) {
 
 // Export Functions
 function exportAllData() {
-  const data = filteredData.map(f => ({
+  const source = filteredData || [];
+  if (!source.length) {
+    showToast('No facilities to export', 'warning');
+    return;
+  }
+
+  const data = source.map(f => ({
     id: f.id,
     facility_name: f.facility_name,
     facility_email: f.facility_email,
@@ -1200,15 +1234,22 @@ function exportAllData() {
     facility_type: f.facility_type,
     status: f.status,
     submitted_at: f.submitted_at,
+    last_saved_at: f.last_saved_at || f.updated_at || null,
     file_count: f.fileCount,
     completion_percentage: f.completionPercentage
   }));
-  
-  downloadJSON(data, `helix-facilities-export-${formatDateFile(new Date())}.json`);
-  showToast(`Exported ${data.length} facilities`, 'success');
+
+  try {
+    downloadJSON(data, `helix-facilities-export-${formatDateFile(new Date())}.json`);
+    showToast(`Exported ${data.length} facilities`, 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Export failed', 'error');
+  }
 }
 
 async function exportFacility(id) {
+  if (!id) return;
   let facility;
   if (apiMode) {
     try {
@@ -1220,10 +1261,20 @@ async function exportFacility(id) {
   } else {
     facility = mockFacilities.find(f => f.id === id);
   }
-  if (facility) {
-    const name = (facility.facility_name || 'facility').toLowerCase().replace(/\s+/g, '-');
-    downloadJSON(facility, `${name}-data.json`);
+  if (!facility) {
+    showToast('Facility not found', 'error');
+    return;
+  }
+  try {
+    const name = (facility.facility_name || 'facility')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    downloadJSON(facility, `${name || 'facility'}-data.json`);
     showToast('Facility data exported', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Export failed', 'error');
   }
 }
 
@@ -1232,6 +1283,11 @@ function exportCurrentDetail() {
     exportFacility(currentDetailId);
   }
 }
+
+// Keep handlers reachable if anything still calls them by name
+window.openDetail = openDetail;
+window.exportFacility = exportFacility;
+window.exportAllData = exportAllData;
 
 async function sendDetailReminder() {
   if (!currentDetailId || !apiMode) return;

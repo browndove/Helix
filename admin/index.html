@@ -12,23 +12,31 @@
   <div id="app">
     <!-- Login Screen -->
     <div id="login-screen" class="screen">
-      <div class="login-card">
-        <div class="login-logo">
-          <img src="../assets/helix-logo.svg" width="38" height="32" alt="Helix Health" />
-          <h1>Helix Admin</h1>
+      <div class="login-shell">
+        <div class="login-brand">
+          <img src="../assets/helix-logo.svg" width="36" height="30" alt="Helix Health" />
+          <span>Helix Health</span>
         </div>
-        <form id="login-form">
-          <div class="field-group">
-            <label for="admin-email">Email</label>
-            <input type="email" id="admin-email" class="field" placeholder="admin@helix.health" required />
+        <div class="login-card">
+          <div class="login-header">
+            <p class="login-eyebrow">Admin console</p>
+            <h1>Sign in</h1>
+            <p class="login-sub">Access facility submissions and onboarding reviews.</p>
           </div>
-          <div class="field-group">
-            <label for="admin-password">Password</label>
-            <input type="password" id="admin-password" class="field" placeholder="••••••••" required />
-          </div>
-          <button type="submit" class="btn primary full">Sign In</button>
-        </form>
-        <p class="login-hint" id="login-hint">Sign in with your Helix admin credentials</p>
+          <form id="login-form">
+            <div class="field-group">
+              <label for="admin-email">Email</label>
+              <input type="email" id="admin-email" class="field" placeholder="you@helixhealth.app" autocomplete="username" required />
+            </div>
+            <div class="field-group">
+              <label for="admin-password">Password</label>
+              <input type="password" id="admin-password" class="field" placeholder="Enter your password" autocomplete="current-password" required />
+            </div>
+            <button type="submit" class="btn primary full login-submit">Sign in</button>
+          </form>
+          <p class="login-hint" id="login-hint">Use your Helix admin credentials</p>
+        </div>
+        <p class="login-footer">Authorized personnel only</p>
       </div>
     </div>
 
@@ -38,177 +46,158 @@
       <header class="admin-header">
         <div class="header-left">
           <div class="logo">
-            <img src="../assets/helix-logo.svg" width="32" height="27" alt="Helix Health" />
-            <span>Helix Admin</span>
+            <img src="../assets/helix-logo.svg" width="28" height="24" alt="Helix Health" />
+            <div class="logo-text">
+              <span class="logo-title">Helix Admin</span>
+              <span class="logo-sub">Facility submissions</span>
+            </div>
           </div>
         </div>
         <div class="header-right">
-          <a class="btn ghost" href="analytics/">App Analytics</a>
-          <button class="btn ghost" id="refresh-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn ghost sm" id="refresh-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
             </svg>
             Refresh
           </button>
-          <button class="btn secondary" id="export-all-btn">Export All</button>
+          <button class="btn secondary sm" id="export-all-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export All
+          </button>
           <div class="user-menu">
             <span id="admin-user">Admin</span>
-            <button class="btn ghost sm" id="logout-btn">Logout</button>
+            <button class="btn ghost sm" id="logout-btn" type="button">Logout</button>
           </div>
         </div>
       </header>
 
       <!-- Main Content -->
       <main class="admin-main">
+        <div class="page-intro">
+          <div>
+            <h1 class="page-title">Facility submissions</h1>
+            <p class="page-desc">Review onboarding applications, download data files, and update approval status.</p>
+          </div>
+        </div>
+
         <!-- Stats Cards -->
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon total">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="stat-total">0</span>
-              <span class="stat-label">Total Facilities</span>
-            </div>
+            <span class="stat-label">Total facilities</span>
+            <span class="stat-value" id="stat-total">0</span>
           </div>
           <div class="stat-card">
-            <div class="stat-icon pending">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="stat-pending">0</span>
-              <span class="stat-label">Pending Review</span>
-            </div>
+            <span class="stat-label">Pending review</span>
+            <span class="stat-value" id="stat-pending">0</span>
           </div>
           <div class="stat-card">
-            <div class="stat-icon approved">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="stat-approved">0</span>
-              <span class="stat-label">Approved</span>
-            </div>
+            <span class="stat-label">Approved</span>
+            <span class="stat-value" id="stat-approved">0</span>
           </div>
           <div class="stat-card">
-            <div class="stat-icon uploads">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="stat-uploads">0</span>
-              <span class="stat-label">Files Attached</span>
-            </div>
+            <span class="stat-label">Files attached</span>
+            <span class="stat-value" id="stat-uploads">0</span>
           </div>
         </div>
 
-        <!-- Filters Toolbar -->
-        <div class="filters-toolbar">
-          <div class="filter-group">
-            <input type="text" id="search-input" class="field" placeholder="Search facilities..." />
+        <section class="panel">
+          <div class="panel-toolbar">
+            <div class="filters-toolbar">
+              <div class="filter-group filter-search">
+                <input type="text" id="search-input" class="field" placeholder="Search facilities, email, city…" />
+              </div>
+              <div class="filter-group">
+                <select id="status-filter" class="field custom-select-native-host" aria-label="Filter by status">
+                  <option value="">All statuses</option>
+                  <option value="pending">Pending review</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="incomplete">Incomplete</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <select id="region-filter" class="field custom-select-native-host" aria-label="Filter by region">
+                  <option value="">All regions</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <select id="type-filter" class="field custom-select-native-host" aria-label="Filter by facility type">
+                  <option value="">All types</option>
+                </select>
+              </div>
+              <div class="filter-group date-range">
+                <input type="date" id="date-from" class="field" aria-label="From date" />
+                <span>to</span>
+                <input type="date" id="date-to" class="field" aria-label="To date" />
+              </div>
+              <button class="btn ghost sm" id="clear-filters" type="button">Clear</button>
+            </div>
           </div>
-          <div class="filter-group">
-            <select id="status-filter" class="field custom-select-native-host" aria-label="Filter by status">
-              <option value="">All Statuses</option>
-              <option value="pending">Pending Review</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="incomplete">Incomplete</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <select id="region-filter" class="field custom-select-native-host" aria-label="Filter by region">
-              <option value="">All Regions</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <select id="type-filter" class="field custom-select-native-host" aria-label="Filter by facility type">
-              <option value="">All Types</option>
-            </select>
-          </div>
-          <div class="filter-group date-range">
-            <input type="date" id="date-from" class="field" placeholder="From" />
-            <span>to</span>
-            <input type="date" id="date-to" class="field" placeholder="To" />
-          </div>
-          <button class="btn ghost" id="clear-filters">Clear</button>
-        </div>
 
-        <!-- Data Table -->
-        <div class="table-container">
-          <table class="data-table" id="facilities-table">
-            <thead>
-              <tr>
-                <th class="sortable" data-sort="facility_name">
-                  Facility Name
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th class="sortable" data-sort="facility_email">
-                  Email
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th class="sortable" data-sort="region">
-                  Region
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th class="sortable" data-sort="city">
-                  City
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th class="sortable" data-sort="facility_type">
-                  Type
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th class="sortable" data-sort="submitted_at">
-                  Record submitted
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th>Last saved</th>
-                <th class="sortable" data-sort="status">
-                  Status
-                  <span class="sort-icon">↕</span>
-                </th>
-                <th>Files</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="table-body">
-              <!-- Rows populated by JS -->
-            </tbody>
-          </table>
-        </div>
+          <!-- Data Table -->
+          <div class="table-container">
+            <table class="data-table" id="facilities-table">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="facility_name">
+                    Facility
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="sortable" data-sort="region">
+                    Region
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="sortable" data-sort="city">
+                    City
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="sortable" data-sort="facility_type">
+                    Type
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="sortable" data-sort="submitted_at">
+                    Submitted
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th>Last saved</th>
+                  <th class="sortable" data-sort="status">
+                    Status
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th>Files</th>
+                  <th class="th-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Rows populated by JS -->
+              </tbody>
+            </table>
+          </div>
 
-        <!-- Pagination -->
-        <div class="pagination">
-          <div class="page-info">
-            Showing <span id="page-start">0</span> - <span id="page-end">0</span> of <span id="page-total">0</span>
+          <!-- Pagination -->
+          <div class="pagination">
+            <div class="page-info">
+              Showing <span id="page-start">0</span>–<span id="page-end">0</span> of <span id="page-total">0</span>
+            </div>
+            <div class="page-controls">
+              <button class="btn ghost sm" id="prev-page" type="button" disabled>Previous</button>
+              <div class="page-numbers" id="page-numbers"></div>
+              <button class="btn ghost sm" id="next-page" type="button" disabled>Next</button>
+            </div>
+            <div class="per-page">
+              <select id="per-page" class="field sm custom-select-native-host" aria-label="Rows per page">
+                <option value="10">10 / page</option>
+                <option value="25" selected>25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+              </select>
+            </div>
           </div>
-          <div class="page-controls">
-            <button class="btn ghost" id="prev-page" disabled>← Previous</button>
-            <div class="page-numbers" id="page-numbers"></div>
-            <button class="btn ghost" id="next-page" disabled>Next →</button>
-          </div>
-          <div class="per-page">
-            <select id="per-page" class="field sm custom-select-native-host" aria-label="Rows per page">
-              <option value="10">10 per page</option>
-              <option value="25" selected>25 per page</option>
-              <option value="50">50 per page</option>
-              <option value="100">100 per page</option>
-            </select>
-          </div>
-        </div>
+        </section>
       </main>
     </div>
 
