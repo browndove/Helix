@@ -90,6 +90,10 @@ body {
 .screen { min-height: 100vh; }
 .screen.hidden { display: none !important; }
 
+body:not(.is-authenticated) #dashboard-screen {
+  display: none !important;
+}
+
 /* Login Screen */
 #login-screen {
   position: relative;
@@ -239,6 +243,54 @@ body {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field .field {
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  background: var(--fill-tertiary);
+  color: var(--ink);
+}
+
+.password-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  color: var(--ink);
+}
+
+.password-toggle .icon-eye-off {
+  display: none;
+}
+
+.password-toggle.is-visible .icon-eye {
+  display: none;
+}
+
+.password-toggle.is-visible .icon-eye-off {
+  display: block;
+}
+
 /* Form Elements */
 .field-group {
   margin-bottom: 20px;
@@ -372,24 +424,24 @@ body {
 }
 
 .custom-select__menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 300;
+  position: fixed;
+  z-index: 400;
   margin: 0;
   padding: 4px;
   list-style: none;
-  background: var(--glass-surface-strong);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 0.5px solid rgba(255, 255, 255, 0.55);
+  background: #ffffff;
+  border: 1px solid var(--line);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
-  max-height: 280px;
+  max-height: min(320px, 50vh);
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transform: translateY(-6px) scale(0.98);
   transform-origin: top center;
   transition:
@@ -398,10 +450,21 @@ body {
     visibility 160ms var(--ease);
 }
 
-.custom-select.is-open .custom-select__menu {
+.custom-select.is-open .custom-select__menu,
+.custom-select__menu.is-open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
   transform: translateY(0) scale(1);
+}
+
+.custom-select__menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-select__menu::-webkit-scrollbar-thumb {
+  background: rgba(60, 60, 67, 0.28);
+  border-radius: 8px;
 }
 
 .custom-select__option {
@@ -472,18 +535,41 @@ input[type="date"].field {
   appearance: none;
   position: relative;
   cursor: pointer;
+  color: var(--ink);
+  color-scheme: light;
+}
+
+input[type="date"].field:not(:focus):invalid,
+input[type="date"].field:not(:focus):placeholder-shown {
+  color: var(--ink-subtle);
+}
+
+input[type="date"].field::-webkit-datetime-edit {
+  color: inherit;
+  padding: 0;
+}
+
+input[type="date"].field::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
 }
 
 input[type="date"].field::-webkit-calendar-picker-indicator {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: pointer;
   padding: 2px;
   border-radius: 4px;
+  margin-left: 4px;
   transition: opacity 180ms var(--ease);
 }
 
 input[type="date"].field::-webkit-calendar-picker-indicator:hover {
-  opacity: 0.8;
+  opacity: 0.9;
+}
+
+input[type="date"].field:valid,
+input[type="date"].field.has-value {
+  color: var(--ink);
+  font-weight: 500;
 }
 
 /* Buttons */
@@ -701,7 +787,7 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .panel-toolbar {
@@ -751,19 +837,49 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
 
 .date-range {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.date-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  line-height: 1;
+}
+
+.date-range-sep {
+  color: var(--ink-muted);
+  font-size: 12px;
+  padding-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .date-range input {
-  width: 132px;
+  width: 148px;
   height: 36px;
   font-size: 13px;
   border-radius: 8px;
   border: 1px solid var(--line);
   background: #fff;
+  padding: 0 10px;
 }
-.date-range span { color: var(--ink-muted); font-size: 12px; }
+
+.date-range input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  background: #fff;
+}
 
 #clear-filters { margin-left: auto; }
 
@@ -2030,6 +2146,83 @@ input[type="date"].field::-webkit-calendar-picker-indicator:hover {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.export-modal {
+  max-width: 440px;
+}
+
+.export-modal-icon {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.export-modal-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+.export-format-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 20px;
+}
+
+.export-format-option {
+  display: block;
+  cursor: pointer;
+}
+
+.export-format-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.export-format-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 140ms var(--ease), background 140ms var(--ease), box-shadow 140ms var(--ease);
+}
+
+.export-format-card strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.export-format-card span {
+  font-size: 12px;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.export-format-option:hover .export-format-card {
+  border-color: var(--line-strong);
+  background: #fafafa;
+}
+
+.export-format-option input:checked + .export-format-card {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.export-format-option input:focus-visible + .export-format-card {
+  box-shadow: var(--shadow-focus);
+}
+
+.export-modal .confirm-modal-actions .btn.primary {
+  height: 40px;
+  min-width: 110px;
 }
 
 .confirm-modal-header h2 {

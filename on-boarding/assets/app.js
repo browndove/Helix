@@ -824,10 +824,14 @@
       list.innerHTML = `
         <div class="upload-sidebar-card">
           <p class="upload-sidebar-lead">${escapeHtml(step.intro)}</p>
-          <button type="button" class="btn sm secondary" style="width:100%;margin-top:14px;" data-jump-templates="${escapeAttr(step.templateId)}">
-            Open Templates · ${escapeHtml(tpl.name)}
+          <button type="button" class="btn sm secondary upload-sidebar-dl" data-dl-template="${escapeAttr(step.templateId)}">
+            Download ${escapeHtml(tpl.name)} template
+          </button>
+          <button type="button" class="btn sm ghost upload-sidebar-ref" data-jump-templates="${escapeAttr(step.templateId)}">
+            View full reference
           </button>
         </div>`;
+      list.querySelector("[data-dl-template]")?.addEventListener("click", () => downloadTemplateFile(tpl));
       list.querySelector("[data-jump-templates]")?.addEventListener("click", (ev) => {
         currentTemplateId = ev.currentTarget.dataset.jumpTemplates || step.templateId;
         setView("templates");
@@ -1001,15 +1005,23 @@
         </div>
       </header>
 
-      <p class="small text-muted upload-col-guide-lead">Expected column headers (exact spelling). <span class="upload-col-guide-hint">Hover or focus a name for meaning and guidance.</span></p>
-      <div class="upload-col-strip">
-        ${tpl.columns.map(c => `
-          <span class="upload-col-chip ${c.required ? "req" : "opt"}" tabindex="0" role="button"
-                aria-label="Guide for column ${escapeAttr(c.name)}"
-                data-col-tip="${escapeAttr(c.name)}"
-                data-col-meaning="${escapeAttr(c.meaning || "")}"
-                data-col-guidance="${escapeAttr(c.guidance || "")}"
-                data-col-required="${c.required ? "1" : "0"}">${escapeHtml(c.name)}</span>`).join("")}
+      <div class="upload-col-guide">
+        <div class="upload-col-guide-head">
+          <p class="small text-muted upload-col-guide-lead">Expected column headers (exact spelling). <span class="upload-col-guide-hint">Hover or focus a name for meaning and guidance.</span></p>
+          <button type="button" class="btn sm secondary upload-dl-template-btn" data-dl-template aria-label="Download ${escapeAttr(tpl.name)} Excel template">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download ${escapeHtml(tpl.name)} template
+          </button>
+        </div>
+        <div class="upload-col-strip">
+          ${tpl.columns.map(c => `
+            <span class="upload-col-chip ${c.required ? "req" : "opt"}" tabindex="0" role="button"
+                  aria-label="Guide for column ${escapeAttr(c.name)}"
+                  data-col-tip="${escapeAttr(c.name)}"
+                  data-col-meaning="${escapeAttr(c.meaning || "")}"
+                  data-col-guidance="${escapeAttr(c.guidance || "")}"
+                  data-col-required="${c.required ? "1" : "0"}">${escapeHtml(c.name)}</span>`).join("")}
+        </div>
       </div>
 
       <div class="upload-dropzone" tabindex="0" role="button" aria-label="Upload ${escapeAttr(step.shortLabel)} file" data-upload-dropzone>
@@ -1032,9 +1044,8 @@
               ${renderUploadValidationHtml(v, tpl)}
             </div>` : ""}
           <div class="upload-actions">
-            <button type="button" class="btn sm secondary" data-jump-templates="${escapeAttr(step.templateId)}">View ${escapeHtml(tpl.name)} template</button>
+            <button type="button" class="btn sm secondary" data-jump-templates="${escapeAttr(step.templateId)}">View ${escapeHtml(tpl.name)} reference</button>
             ${hasSessionFile ? `<button type="button" class="btn sm secondary" data-recheck-csv>Re-check headers</button>` : ""}
-            <button type="button" class="btn sm secondary" data-dl-template>Download Excel template</button>
           </div>
         ` : ""}
       </div>
@@ -1086,7 +1097,9 @@
       }
     });
 
-    el("[data-dl-template]")?.addEventListener("click", () => downloadTemplateFile(tpl));
+    els("[data-dl-template]").forEach((btn) => {
+      btn.addEventListener("click", () => downloadTemplateFile(tpl));
+    });
 
     el("[data-jump-templates]")?.addEventListener("click", (ev) => {
       currentTemplateId = ev.currentTarget.dataset.jumpTemplates || step.templateId;

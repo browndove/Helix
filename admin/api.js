@@ -51,6 +51,14 @@
     } catch {
       data = { detail: text };
     }
+    if (res.status === 401 && !String(path).includes("/admin/auth/login")) {
+      setToken(null);
+      try {
+        window.dispatchEvent(new CustomEvent("helix-admin-unauthorized"));
+      } catch {
+        /* ignore */
+      }
+    }
     if (!res.ok) {
       const err = new Error(formatApiError(data?.detail, res.statusText));
       err.status = res.status;

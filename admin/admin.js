@@ -33,8 +33,10 @@ const detailTitle = document.getElementById('detail-title');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  initCustomSelects();
   initEventListeners();
+  window.addEventListener('helix-admin-unauthorized', () => {
+    forceLogin('Session expired. Please sign in again.');
+  });
   checkAuth();
 });
 
@@ -91,7 +93,8 @@ function enhanceSelect(nativeSelect) {
   menu.id = listId;
   menu.setAttribute('role', 'listbox');
 
-  wrapper.append(trigger, menu);
+  wrapper.appendChild(trigger);
+  document.body.appendChild(menu);
 
   function syncTriggerLabel() {
     const opt = nativeSelect.selectedOptions[0];
@@ -136,14 +139,42 @@ function enhanceSelect(nativeSelect) {
     }
   }
 
+  function positionMenu() {
+    const rect = trigger.getBoundingClientRect();
+    const minWidth = Math.max(rect.width, 168);
+    const maxH = Math.min(320, Math.floor(window.innerHeight * 0.5));
+    const spaceBelow = window.innerHeight - rect.bottom - 12;
+    const spaceAbove = rect.top - 12;
+    const openUp = spaceBelow < 160 && spaceAbove > spaceBelow;
+    const available = Math.max(120, openUp ? spaceAbove : spaceBelow);
+
+    menu.style.minWidth = `${minWidth}px`;
+    menu.style.width = `${Math.max(minWidth, rect.width)}px`;
+    menu.style.maxHeight = `${Math.min(maxH, available)}px`;
+    menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - minWidth - 8))}px`;
+
+    if (openUp) {
+      menu.style.top = 'auto';
+      menu.style.bottom = `${window.innerHeight - rect.top + 6}px`;
+      menu.style.transformOrigin = 'bottom center';
+    } else {
+      menu.style.bottom = 'auto';
+      menu.style.top = `${rect.bottom + 6}px`;
+      menu.style.transformOrigin = 'top center';
+    }
+  }
+
   function open() {
     closeAllCustomSelects(wrapper);
+    positionMenu();
     wrapper.classList.add('is-open');
+    menu.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
   }
 
   function close() {
     wrapper.classList.remove('is-open');
+    menu.classList.remove('is-open');
     trigger.setAttribute('aria-expanded', 'false');
   }
 
@@ -188,21 +219,42 @@ function enhanceSelect(nativeSelect) {
 
   nativeSelect.addEventListener('change', syncTriggerLabel);
 
+  menu.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+  menu.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+
   if (!customSelectOutsideListener) {
     customSelectOutsideListener = true;
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.custom-select')) {
-        closeAllCustomSelects();
+      if (e.target.closest('.custom-select') || e.target.closest('.custom-select__menu')) {
+        return;
       }
+      closeAllCustomSelects();
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeAllCustomSelects();
     });
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.custom-select.is-open').forEach((el) => {
+        const native = el.querySelector('select');
+        customSelectRegistry.get(native)?.reposition?.();
+      });
+    });
+    window.addEventListener(
+      'scroll',
+      (e) => {
+        if (e.target?.closest?.('.custom-select__menu')) return;
+        document.querySelectorAll('.custom-select.is-open').forEach((el) => {
+          const native = el.querySelector('select');
+          customSelectRegistry.get(native)?.reposition?.();
+        });
+      },
+      true
+    );
   }
 
   buildOptions();
 
-  const api = { refresh: buildOptions, setValue, close, wrapper };
+  const api = { refresh: buildOptions, setValue, close, reposition: positionMenu, wrapper };
   customSelectRegistry.set(nativeSelect, api);
   return api;
 }
@@ -225,6 +277,13 @@ function closeAllCustomSelects(exceptWrapper = null) {
     const trigger = el.querySelector('.custom-select__trigger');
     trigger?.setAttribute('aria-expanded', 'false');
   });
+  document.querySelectorAll('.custom-select__menu.is-open').forEach((menuEl) => {
+    if (exceptWrapper) {
+      const trigger = exceptWrapper.querySelector('.custom-select__trigger');
+      if (trigger && trigger.getAttribute('aria-controls') === menuEl.id) return;
+    }
+    menuEl.classList.remove('is-open');
+  });
 }
 
 // Event Listeners
@@ -232,6 +291,7 @@ function initEventListeners() {
   // Login
   loginForm?.addEventListener('submit', handleLogin);
   document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+  document.getElementById('toggle-password')?.addEventListener('click', togglePasswordVisibility);
   
   // Filters
   const filterChanged = () => {
@@ -242,8 +302,20 @@ function initEventListeners() {
   document.getElementById('status-filter')?.addEventListener('change', filterChanged);
   document.getElementById('region-filter')?.addEventListener('change', filterChanged);
   document.getElementById('type-filter')?.addEventListener('change', filterChanged);
-  document.getElementById('date-from')?.addEventListener('change', filterChanged);
-  document.getElementById('date-to')?.addEventListener('change', filterChanged);
+  document.getElementById('date-from')?.addEventListener('change', (e) => {
+    e.target.classList.toggle('has-value', !!e.target.value);
+    filterChanged();
+  });
+  document.getElementById('date-to')?.addEventListener('change', (e) => {
+    e.target.classList.toggle('has-value', !!e.target.value);
+    filterChanged();
+  });
+  document.getElementById('date-from')?.addEventListener('input', (e) => {
+    e.target.classList.toggle('has-value', !!e.target.value);
+  });
+  document.getElementById('date-to')?.addEventListener('input', (e) => {
+    e.target.classList.toggle('has-value', !!e.target.value);
+  });
   document.getElementById('clear-filters')?.addEventListener('click', clearFilters);
   
   // Sorting
@@ -267,10 +339,12 @@ function initEventListeners() {
     showToast('Data refreshed', 'success');
   });
   document.getElementById('export-all-btn')?.addEventListener('click', () => {
-    exportAllData();
+    openExportFormatModal({ mode: 'all' });
   });
   document.getElementById('close-detail')?.addEventListener('click', closeDetailModal);
-  document.getElementById('detail-export')?.addEventListener('click', exportCurrentDetail);
+  document.getElementById('detail-export')?.addEventListener('click', () => {
+    if (currentDetailId) openExportFormatModal({ mode: 'one', id: currentDetailId });
+  });
   document.getElementById('detail-reminder')?.addEventListener('click', sendDetailReminder);
 
   // Table row actions (event delegation — inline onclick is unreliable)
@@ -281,7 +355,7 @@ function initEventListeners() {
     if (!id) return;
     const action = btn.dataset.action;
     if (action === 'view') openDetail(id);
-    else if (action === 'export') exportFacility(id);
+    else if (action === 'export') openExportFormatModal({ mode: 'one', id });
     else if (action === 'delete') {
       openConfirmDeleteDialog(id, btn.dataset.name || 'this facility');
     }
@@ -298,6 +372,7 @@ function initEventListeners() {
   });
 
   initConfirmDeleteDialog();
+  initExportFormatDialog();
 }
 
 let pendingDeleteId = null;
@@ -367,18 +442,46 @@ async function performDeleteFacility(id) {
 }
 
 // Auth Functions
-function checkAuth() {
-  if (apiMode && HelixAdminApi.getToken()) {
-    const saved = localStorage.getItem('helix_admin_user');
-    currentUser = saved ? JSON.parse(saved) : { email: 'admin', name: 'Admin' };
-    showDashboard();
+function isLoggedIn() {
+  if (apiMode) return !!HelixAdminApi.getToken();
+  return !!currentUser || !!localStorage.getItem('helix_admin_user');
+}
+
+function forceLogin(message) {
+  const wasAuthed = document.body.classList.contains('is-authenticated');
+  currentUser = null;
+  localStorage.removeItem('helix_admin_user');
+  if (apiMode) HelixAdminApi.logout();
+  showLogin();
+  if (message && wasAuthed) showToast(message, 'warning');
+}
+
+async function checkAuth() {
+  showLogin();
+
+  if (apiMode) {
+    if (!HelixAdminApi.getToken()) {
+      showLogin();
+      return;
+    }
+    try {
+      await HelixAdminApi.getStats();
+      const saved = localStorage.getItem('helix_admin_user');
+      currentUser = saved ? JSON.parse(saved) : { email: 'admin', name: 'Admin' };
+      showDashboard();
+    } catch (err) {
+      forceLogin(err.status === 401 ? 'Please sign in to continue.' : (err.message || 'Please sign in to continue.'));
+    }
     return;
   }
+
   const saved = localStorage.getItem('helix_admin_user');
   if (saved) {
     currentUser = JSON.parse(saved);
     showDashboard();
+    return;
   }
+  showLogin();
 }
 
 async function handleLogin(e) {
@@ -402,20 +505,35 @@ async function handleLogin(e) {
 }
 
 function handleLogout() {
-  currentUser = null;
-  localStorage.removeItem('helix_admin_user');
-  if (apiMode) HelixAdminApi.logout();
-  showLogin();
+  forceLogin();
+}
+
+function togglePasswordVisibility() {
+  const input = document.getElementById('admin-password');
+  const btn = document.getElementById('toggle-password');
+  if (!input || !btn) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.classList.toggle('is-visible', show);
+  btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
 }
 
 function showLogin() {
+  currentUser = currentUser || null;
   loginScreen.classList.remove('hidden');
   dashboardScreen.classList.add('hidden');
+  document.body.classList.remove('is-authenticated');
 }
 
 async function showDashboard() {
+  if (apiMode && !HelixAdminApi.getToken()) {
+    showLogin();
+    return;
+  }
   loginScreen.classList.add('hidden');
   dashboardScreen.classList.remove('hidden');
+  document.body.classList.add('is-authenticated');
   document.getElementById('admin-user').textContent = currentUser?.name || 'Admin';
   initCustomSelects();
 
@@ -425,6 +543,7 @@ async function showDashboard() {
       await updateStats();
       await populateFiltersFromApi();
     } catch (err) {
+      if (err.status === 401) return;
       showToast(err.message || 'Could not load submissions', 'error');
     }
     return;
@@ -534,6 +653,7 @@ async function applyFilters() {
       renderTable();
       if (currentPage === 1) updateStats();
     } catch (err) {
+      if (err.status === 401) return;
       showToast(err.message || 'Failed to load data', 'error');
     }
     return;
@@ -556,9 +676,11 @@ async function applyFilters() {
     // Type
     if (type && f.facility_type !== type) return false;
     
-    // Date range
+    // Date range (activity date — works for drafts too)
     if (dateFrom || dateTo) {
-      const date = new Date(f.submitted_at);
+      const raw = f.submitted_at || f.updated_at || f.created_at || f.last_submitted_at;
+      const date = raw ? new Date(raw) : null;
+      if (!date || Number.isNaN(date.getTime())) return false;
       if (dateFrom && date < new Date(dateFrom)) return false;
       if (dateTo && date > new Date(dateTo + 'T23:59:59')) return false;
     }
@@ -579,8 +701,16 @@ function clearFilters() {
   setCustomSelectValue(document.getElementById('status-filter'), '');
   setCustomSelectValue(document.getElementById('region-filter'), '');
   setCustomSelectValue(document.getElementById('type-filter'), '');
-  document.getElementById('date-from').value = '';
-  document.getElementById('date-to').value = '';
+  const dateFrom = document.getElementById('date-from');
+  const dateTo = document.getElementById('date-to');
+  if (dateFrom) {
+    dateFrom.value = '';
+    dateFrom.classList.remove('has-value');
+  }
+  if (dateTo) {
+    dateTo.value = '';
+    dateTo.classList.remove('has-value');
+  }
   currentPage = 1;
   applyFilters();
 }
@@ -703,7 +833,7 @@ function renderTable() {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               <span>View</span>
             </button>
-            <button type="button" class="action-icon-btn" data-action="export" data-id="${id}" title="Export JSON">
+            <button type="button" class="action-icon-btn" data-action="export" data-id="${id}" title="Export">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Export</span>
             </button>
@@ -1218,37 +1348,124 @@ async function updateStatus(newStatus) {
 }
 
 // Export Functions
-function exportAllData() {
+let pendingExport = null;
+
+function initExportFormatDialog() {
+  const overlay = document.getElementById('export-format-modal');
+  const cancelBtn = document.getElementById('export-format-cancel');
+  const confirmBtn = document.getElementById('export-format-confirm');
+  if (!overlay) return;
+
+  const close = () => {
+    overlay.classList.add('hidden');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingExport = null;
+  };
+
+  cancelBtn?.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+  confirmBtn?.addEventListener('click', async () => {
+    const format = overlay.querySelector('input[name="export-format"]:checked')?.value || 'pdf';
+    const job = pendingExport;
+    close();
+    if (!job) return;
+    confirmBtn.disabled = true;
+    try {
+      if (job.mode === 'all') await exportAllData(format);
+      else if (job.mode === 'one' && job.id) await exportFacility(job.id, format);
+    } finally {
+      confirmBtn.disabled = false;
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.classList.contains('hidden')) close();
+  });
+}
+
+function openExportFormatModal({ mode, id } = {}) {
+  const overlay = document.getElementById('export-format-modal');
+  const subtitle = document.getElementById('export-format-subtitle');
+  if (!overlay) return;
+
+  if (mode === 'all' && !(filteredData || []).length) {
+    showToast('No facilities to export', 'warning');
+    return;
+  }
+
+  pendingExport = { mode, id };
+  if (subtitle) {
+    subtitle.textContent = mode === 'all'
+      ? `Export ${filteredData.length} filtered facilities`
+      : 'Export this facility submission';
+  }
+
+  const pdfRadio = overlay.querySelector('input[name="export-format"][value="pdf"]');
+  if (pdfRadio) pdfRadio.checked = true;
+
+  overlay.classList.remove('hidden');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function facilityListRows(source) {
+  return (source || []).map(f => ({
+    id: f.id,
+    facility_name: f.facility_name || '',
+    facility_email: f.facility_email || '',
+    region: f.region || '',
+    city: f.city || '',
+    facility_type: f.facility_type || '',
+    status: f.status || '',
+    submitted_at: f.submitted_at || '',
+    last_saved_at: f.last_submitted_at || f.last_saved_at || f.updated_at || '',
+    file_count: f.fileCount ?? 0,
+    completion_percentage: f.completionPercentage ?? ''
+  }));
+}
+
+function slugifyName(name) {
+  return (name || 'facility')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '') || 'facility';
+}
+
+async function exportAllData(format = 'pdf') {
   const source = filteredData || [];
   if (!source.length) {
     showToast('No facilities to export', 'warning');
     return;
   }
 
-  const data = source.map(f => ({
-    id: f.id,
-    facility_name: f.facility_name,
-    facility_email: f.facility_email,
-    region: f.region,
-    city: f.city,
-    facility_type: f.facility_type,
-    status: f.status,
-    submitted_at: f.submitted_at,
-    last_saved_at: f.last_saved_at || f.updated_at || null,
-    file_count: f.fileCount,
-    completion_percentage: f.completionPercentage
-  }));
+  const data = facilityListRows(source);
+  const stamp = formatDateFile(new Date());
+  const base = `helix-facilities-export-${stamp}`;
 
   try {
-    downloadJSON(data, `helix-facilities-export-${formatDateFile(new Date())}.json`);
-    showToast(`Exported ${data.length} facilities`, 'success');
+    if (format === 'json') {
+      downloadBlob(JSON.stringify(data, null, 2), `${base}.json`, 'application/json');
+    } else if (format === 'csv') {
+      downloadBlob(rowsToCsv(data, [
+        'facility_name', 'facility_email', 'region', 'city', 'facility_type',
+        'status', 'submitted_at', 'last_saved_at', 'file_count'
+      ]), `${base}.csv`, 'text/csv;charset=utf-8');
+    } else if (!printPdfReport({
+      title: 'Facility submissions export',
+      subtitle: `${data.length} facilities · generated ${formatDateTime(new Date().toISOString())}`,
+      bodyHtml: buildFacilitiesTableHtml(data)
+    })) {
+      return;
+    }
+    showToast(`Exported ${data.length} facilities as ${format.toUpperCase()}`, 'success');
   } catch (err) {
     console.error(err);
     showToast('Export failed', 'error');
   }
 }
 
-async function exportFacility(id) {
+async function exportFacility(id, format = 'pdf') {
   if (!id) return;
   let facility;
   if (apiMode) {
@@ -1265,13 +1482,21 @@ async function exportFacility(id) {
     showToast('Facility not found', 'error');
     return;
   }
+
+  const base = `${slugifyName(facility.facility_name)}-data`;
   try {
-    const name = (facility.facility_name || 'facility')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-    downloadJSON(facility, `${name || 'facility'}-data.json`);
-    showToast('Facility data exported', 'success');
+    if (format === 'json') {
+      downloadBlob(JSON.stringify(facility, null, 2), `${base}.json`, 'application/json');
+    } else if (format === 'csv') {
+      downloadBlob(facilityToCsv(facility), `${base}.csv`, 'text/csv;charset=utf-8');
+    } else if (!printPdfReport({
+      title: facility.facility_name || 'Facility submission',
+      subtitle: `Status: ${facility.status || '—'} · Generated ${formatDateTime(new Date().toISOString())}`,
+      bodyHtml: buildFacilityReportHtml(facility)
+    })) {
+      return;
+    }
+    showToast(`Facility exported as ${format.toUpperCase()}`, 'success');
   } catch (err) {
     console.error(err);
     showToast('Export failed', 'error');
@@ -1279,15 +1504,276 @@ async function exportFacility(id) {
 }
 
 function exportCurrentDetail() {
-  if (currentDetailId) {
-    exportFacility(currentDetailId);
+  if (currentDetailId) openExportFormatModal({ mode: 'one', id: currentDetailId });
+}
+
+function csvEscape(value) {
+  const str = value == null ? '' : String(value);
+  if (/[",\n\r]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
+  return str;
+}
+
+function rowsToCsv(rows, columns) {
+  const header = columns.join(',');
+  const lines = rows.map((row) => columns.map((col) => csvEscape(row[col])).join(','));
+  return `\uFEFF${[header, ...lines].join('\n')}`;
+}
+
+function facilityToCsv(facility) {
+  const answers = mergedAnswers(facility);
+  const rows = [
+    ['Field', 'Value'],
+    ['Facility name', facility.facility_name],
+    ['Email', facility.facility_email],
+    ['Phone', facility.facility_phone],
+    ['Region', facility.region],
+    ['City', facility.city],
+    ['Type', facility.facility_type],
+    ['Address', facility.facility_address],
+    ['Status', facility.status],
+    ['Submitted at', facility.submitted_at],
+    ['Primary contact', facility.primary_contact_name],
+    ['Primary email', facility.primary_contact_email],
+    ['Primary phone', facility.primary_contact_phone],
+    ['Secondary contact', facility.secondary_contact_name],
+    ['Secondary email', facility.secondary_contact_email],
+    ['Files attached', facility.fileCount],
+  ];
+
+  Object.entries(answers).forEach(([key, value]) => {
+    if (value == null || value === '') return;
+    if (rows.some((r) => r[0] === key)) return;
+    rows.push([key, Array.isArray(value) ? value.join('; ') : value]);
+  });
+
+  return `\uFEFF${rows.map((r) => r.map(csvEscape).join(',')).join('\n')}`;
+}
+
+function buildFacilitiesTableHtml(rows) {
+  const head = `
+    <tr>
+      <th>Facility</th><th>Email</th><th>Region</th><th>City</th>
+      <th>Type</th><th>Status</th><th>Submitted</th><th>Files</th>
+    </tr>`;
+  const body = rows.map((f) => `
+    <tr>
+      <td>${escapeHtml(f.facility_name)}</td>
+      <td>${escapeHtml(f.facility_email)}</td>
+      <td>${escapeHtml(f.region)}</td>
+      <td>${escapeHtml(f.city)}</td>
+      <td>${escapeHtml(f.facility_type)}</td>
+      <td>${escapeHtml(f.status)}</td>
+      <td>${escapeHtml(f.submitted_at ? formatDateTime(f.submitted_at) : 'Draft')}</td>
+      <td>${escapeHtml(String(f.file_count))}</td>
+    </tr>`).join('');
+  return `<table class="report-table"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
+function buildFacilityReportHtml(facility) {
+  const answers = mergedAnswers(facility);
+  const schema = getOnboardingSchema();
+  const sections = [];
+
+  sections.push(`
+    <div class="report-section">
+      <h2>Overview</h2>
+      <dl class="report-grid">
+        <div><dt>Status</dt><dd>${escapeHtml(facility.status || '—')}</dd></div>
+        <div><dt>Submitted</dt><dd>${escapeHtml(facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Draft')}</dd></div>
+        <div><dt>Email</dt><dd>${escapeHtml(facility.facility_email || '—')}</dd></div>
+        <div><dt>Phone</dt><dd>${escapeHtml(facility.facility_phone || '—')}</dd></div>
+        <div><dt>Region</dt><dd>${escapeHtml(facility.region || '—')}</dd></div>
+        <div><dt>City</dt><dd>${escapeHtml(facility.city || '—')}</dd></div>
+        <div><dt>Type</dt><dd>${escapeHtml(facility.facility_type || '—')}</dd></div>
+        <div><dt>Address</dt><dd>${escapeHtml(facility.facility_address || '—')}</dd></div>
+        <div><dt>Files</dt><dd>${escapeHtml(String(facility.fileCount ?? 0))}</dd></div>
+      </dl>
+    </div>
+  `);
+
+  if (schema?.sections?.length) {
+    schema.sections.forEach((section) => {
+      const fields = (section.fields || [])
+        .map((field) => {
+          const raw = answers[field.key];
+          if (raw == null || raw === '') return null;
+          const display = Array.isArray(raw) ? raw.join(', ') : String(raw);
+          return `<div><dt>${escapeHtml(field.label || field.key)}</dt><dd>${escapeHtml(display)}</dd></div>`;
+        })
+        .filter(Boolean)
+        .join('');
+      if (!fields) return;
+      sections.push(`
+        <div class="report-section">
+          <h2>${escapeHtml(section.title || section.id)}</h2>
+          <dl class="report-grid">${fields}</dl>
+        </div>
+      `);
+    });
   }
+
+  if (facility.files?.length) {
+    const fileRows = facility.files.map((file) => `
+      <tr>
+        <td>${escapeHtml(file.name || file.upload_key || 'File')}</td>
+        <td>${escapeHtml(file.upload_key || '—')}</td>
+        <td>${escapeHtml(file.status || '—')}</td>
+        <td>${escapeHtml(formatBytes(file.size))}</td>
+      </tr>
+    `).join('');
+    sections.push(`
+      <div class="report-section">
+        <h2>Attached files</h2>
+        <table class="report-table">
+          <thead><tr><th>Name</th><th>Key</th><th>Status</th><th>Size</th></tr></thead>
+          <tbody>${fileRows}</tbody>
+        </table>
+      </div>
+    `);
+  }
+
+  return sections.join('');
+}
+
+function printPdfReport({ title, subtitle, bodyHtml }) {
+  const win = window.open('', '_blank', 'noopener,noreferrer,width=960,height=720');
+  if (!win) {
+    showToast('Pop-up blocked — allow pop-ups to export PDF', 'error');
+    return false;
+  }
+
+  win.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${escapeHtml(title)}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      color: #1d1d1f;
+      margin: 0;
+      padding: 32px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #d2d2d7;
+      margin-bottom: 24px;
+    }
+    .report-brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #6e6e73;
+      margin-bottom: 6px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 4px;
+    }
+    .subtitle { color: #6e6e73; margin: 0; }
+    .report-section { margin-bottom: 22px; page-break-inside: avoid; }
+    .report-section h2 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e5e5ea;
+    }
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+      margin: 0;
+    }
+    .report-grid dt {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6e6e73;
+      margin-bottom: 2px;
+    }
+    .report-grid dd { margin: 0; font-weight: 500; }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .report-table th,
+    .report-table td {
+      border-bottom: 1px solid #e5e5ea;
+      text-align: left;
+      padding: 8px 6px;
+      vertical-align: top;
+    }
+    .report-table th {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6e6e73;
+      font-weight: 600;
+    }
+    .print-hint {
+      margin-top: 24px;
+      color: #6e6e73;
+      font-size: 11px;
+    }
+    @media print {
+      body { padding: 12px; }
+      .print-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-header">
+    <div>
+      <div class="report-brand">Helix Admin</div>
+      <h1>${escapeHtml(title)}</h1>
+      <p class="subtitle">${escapeHtml(subtitle || '')}</p>
+    </div>
+  </div>
+  ${bodyHtml}
+  <p class="print-hint">Use your browser print dialog and choose “Save as PDF”.</p>
+  <script>
+    window.onload = function () {
+      setTimeout(function () {
+        window.focus();
+        window.print();
+      }, 250);
+    };
+  <\/script>
+</body>
+</html>`);
+  win.document.close();
+  return true;
+}
+
+function downloadBlob(content, filename, mimeType) {
+  const blob = content instanceof Blob
+    ? content
+    : new Blob([content], { type: mimeType || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // Keep handlers reachable if anything still calls them by name
 window.openDetail = openDetail;
-window.exportFacility = exportFacility;
-window.exportAllData = exportAllData;
+window.exportFacility = (id) => openExportFormatModal({ mode: 'one', id });
+window.exportAllData = () => openExportFormatModal({ mode: 'all' });
 
 async function sendDetailReminder() {
   if (!currentDetailId || !apiMode) return;
@@ -1304,15 +1790,7 @@ async function sendDetailReminder() {
 }
 
 function downloadJSON(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadBlob(JSON.stringify(data, null, 2), filename, 'application/json');
 }
 
 // Utility Functions

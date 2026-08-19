@@ -30,7 +30,20 @@
             </div>
             <div class="field-group">
               <label for="admin-password">Password</label>
-              <input type="password" id="admin-password" class="field" placeholder="Enter your password" autocomplete="current-password" required />
+              <div class="password-field">
+                <input type="password" id="admin-password" class="field" placeholder="Enter your password" autocomplete="current-password" required />
+                <button type="button" class="password-toggle" id="toggle-password" aria-label="Show password" aria-pressed="false">
+                  <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
             </div>
             <button type="submit" class="btn primary full login-submit">Sign in</button>
           </form>
@@ -129,10 +142,16 @@
                   <option value="">All types</option>
                 </select>
               </div>
-              <div class="filter-group date-range">
-                <input type="date" id="date-from" class="field" aria-label="From date" />
-                <span>to</span>
-                <input type="date" id="date-to" class="field" aria-label="To date" />
+              <div class="filter-group date-range" title="Filter by last activity date">
+                <label class="date-field">
+                  <span class="date-field-label">From</span>
+                  <input type="date" id="date-from" class="field" aria-label="From date" />
+                </label>
+                <span class="date-range-sep">to</span>
+                <label class="date-field">
+                  <span class="date-field-label">To</span>
+                  <input type="date" id="date-to" class="field" aria-label="To date" />
+                </label>
               </div>
               <button class="btn ghost sm" id="clear-filters" type="button">Clear</button>
             </div>
@@ -230,7 +249,7 @@
           <div class="drawer-footer-primary">
             <button class="btn-export" id="detail-export" type="button">
               <span class="icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
-              Export JSON
+              Export
             </button>
             <button class="btn-reminder" id="detail-reminder" type="button">
               <span class="icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
@@ -271,6 +290,52 @@
         <div class="confirm-modal-actions">
           <button type="button" class="btn-confirm-cancel" id="confirm-delete-cancel">Cancel</button>
           <button type="button" class="btn-confirm-delete" id="confirm-delete-confirm">Confirm Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Format Modal -->
+    <div id="export-format-modal" class="confirm-modal-overlay hidden" aria-hidden="true">
+      <div class="confirm-modal export-modal" role="dialog" aria-labelledby="export-format-title" aria-modal="true">
+        <div class="confirm-modal-header">
+          <div class="confirm-modal-icon export-modal-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="export-format-title">Export data</h2>
+            <p class="export-modal-sub" id="export-format-subtitle">Choose a file format</p>
+          </div>
+        </div>
+        <div class="export-format-options" role="radiogroup" aria-label="Export format">
+          <label class="export-format-option">
+            <input type="radio" name="export-format" value="pdf" checked />
+            <span class="export-format-card">
+              <strong>PDF</strong>
+              <span>Printable report for sharing or filing</span>
+            </span>
+          </label>
+          <label class="export-format-option">
+            <input type="radio" name="export-format" value="csv" />
+            <span class="export-format-card">
+              <strong>CSV</strong>
+              <span>Spreadsheet-friendly for Excel or Sheets</span>
+            </span>
+          </label>
+          <label class="export-format-option">
+            <input type="radio" name="export-format" value="json" />
+            <span class="export-format-card">
+              <strong>JSON</strong>
+              <span>Raw data for developers and integrations</span>
+            </span>
+          </label>
+        </div>
+        <div class="confirm-modal-actions">
+          <button type="button" class="btn-confirm-cancel" id="export-format-cancel">Cancel</button>
+          <button type="button" class="btn primary" id="export-format-confirm">Download</button>
         </div>
       </div>
     </div>

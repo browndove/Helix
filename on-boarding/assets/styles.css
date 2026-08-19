@@ -903,13 +903,27 @@ section { padding: clamp(56px, 8vw, 112px) 0; }
 
 /* File upload steps (Departments / Units / Staff / Roles / Patients) */
 .upload-intro { margin: 0 0 20px; max-width: 68ch; color: var(--ink-muted); font-size: 15px; line-height: 1.55; }
-.upload-col-guide-lead { margin: -6px 0 12px; max-width: 68ch; }
+.upload-col-guide {
+  margin-bottom: 22px;
+}
+.upload-col-guide-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.upload-col-guide-lead { margin: 0; max-width: 68ch; flex: 1 1 240px; }
 .upload-col-guide-hint { color: var(--ink-subtle); }
+.upload-dl-template-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 .upload-col-strip {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 22px;
 }
 .upload-col-chip {
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
@@ -1085,6 +1099,14 @@ section { padding: clamp(56px, 8vw, 112px) 0; }
   line-height: 1.45;
 }
 .upload-sidebar-lead { margin: 0; }
+.upload-sidebar-card .upload-sidebar-dl,
+.upload-sidebar-card .upload-sidebar-ref {
+  width: 100%;
+  margin-top: 12px;
+}
+.upload-sidebar-card .upload-sidebar-ref {
+  margin-top: 8px;
+}
 
 .save-indicator {
   display: inline-flex;

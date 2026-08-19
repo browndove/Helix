@@ -381,9 +381,11 @@ def query_submissions(
     if facility_type:
         q = q.where(Submission.facility_type == facility_type)
     if date_from:
-        q = q.where(Submission.submitted_at >= datetime.fromisoformat(date_from))
+        activity = func.coalesce(Submission.submitted_at, Submission.updated_at, Submission.created_at)
+        q = q.where(activity >= datetime.fromisoformat(date_from))
     if date_to:
-        q = q.where(Submission.submitted_at <= datetime.fromisoformat(f"{date_to}T23:59:59"))
+        activity = func.coalesce(Submission.submitted_at, Submission.updated_at, Submission.created_at)
+        q = q.where(activity <= datetime.fromisoformat(f"{date_to}T23:59:59"))
 
     sort_map = {
         "facility_name": Submission.facility_name,
@@ -416,9 +418,11 @@ def query_submissions(
     if facility_type:
         count_q = count_q.where(Submission.facility_type == facility_type)
     if date_from:
-        count_q = count_q.where(Submission.submitted_at >= datetime.fromisoformat(date_from))
+        activity = func.coalesce(Submission.submitted_at, Submission.updated_at, Submission.created_at)
+        count_q = count_q.where(activity >= datetime.fromisoformat(date_from))
     if date_to:
-        count_q = count_q.where(Submission.submitted_at <= datetime.fromisoformat(f"{date_to}T23:59:59"))
+        activity = func.coalesce(Submission.submitted_at, Submission.updated_at, Submission.created_at)
+        count_q = count_q.where(activity <= datetime.fromisoformat(f"{date_to}T23:59:59"))
 
     total = db.scalar(count_q) or 0
     page = max(1, page)
