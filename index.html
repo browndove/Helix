@@ -125,9 +125,12 @@
       <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
         <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
         <div class="lg:col-span-6">
-          <div class="hx-reveal is-visible inline-flex items-center gap-2 rounded-full border border-brand-green/35 bg-brand-whitefr px-3 py-1 shadow-brand">
-            <span class="rounded-full bg-brand-green px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">100% HIPAA compliant</span>
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-brand-pewter">Clinical-grade security</span>
+          <div class="hx-reveal is-visible flex flex-wrap items-center gap-3">
+            <img src="assets/hipaa-compliant-badge.png" width="72" height="72" alt="HIPAA compliant" class="h-[4.5rem] w-[4.5rem] object-contain" decoding="async" />
+            <div class="inline-flex items-center gap-2 rounded-full border border-brand-green/35 bg-brand-whitefr px-3 py-1 shadow-brand">
+              <span class="rounded-full bg-brand-green px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">100% HIPAA compliant</span>
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-brand-pewter">Clinical-grade security</span>
+            </div>
           </div>
           <h1 id="hero-title" class="hx-reveal is-visible mt-6 text-balance text-4xl font-bold leading-[1.06] tracking-tight text-brand-charcoal sm:text-5xl lg:text-[3.35rem]">
             Clinical communication that saves lives.
@@ -201,10 +204,13 @@
     <!-- Trust — HIPAA / ops (moved from top ribbon for clearer sticky nav) -->
     <section class="border-b border-brand-grey bg-brand-whitefr py-4" aria-label="Helix Health Technology">
       <div class="mx-auto flex max-w-7xl flex-col gap-3 px-5 text-sm leading-snug text-brand-graphite sm:flex-row sm:items-center sm:justify-between lg:px-8">
-        <p class="max-w-4xl">
-          <span class="font-semibold text-brand-charcoal">Helix Health Technology.</span>
-          HIPAA-aligned messaging, routing, and audit trails — built for nurses, physicians, and hospital operations.
-        </p>
+        <div class="flex min-w-0 items-center gap-3">
+          <img src="assets/hipaa-compliant-badge.png" width="48" height="48" alt="" class="h-12 w-12 shrink-0 object-contain" decoding="async" />
+          <p class="max-w-4xl">
+            <span class="font-semibold text-brand-charcoal">Helix Health Technology.</span>
+            HIPAA-aligned messaging, routing, and audit trails — built for nurses, physicians, and hospital operations.
+          </p>
+        </div>
         <a href="#security" class="shrink-0 text-sm font-semibold text-[#0A4676] underline-offset-4 hover:underline">Security &amp; PHI overview</a>
       </div>
     </section>
@@ -366,30 +372,32 @@
     </section>
 
     <!-- Security -->
-    <section id="security" class="relative overflow-hidden bg-brand-charcoal py-20 text-white lg:py-28">
-      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_-30%,oklch(39.56%_0.0812_166.85_/_0.15),transparent)]" aria-hidden="true"></div>
+    <section id="security" class="relative overflow-hidden border-t border-brand-grey bg-brand-whitefr py-20 lg:py-28">
       <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
         <div class="hx-reveal grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">Security &amp; compliance</p>
-            <h2 class="mt-4 text-4xl font-bold leading-tight lg:text-[2.65rem]">Designed around protected health information (PHI).</h2>
-            <p class="mt-5 text-lg leading-relaxed text-white/72">
-              HIPAA-aligned safeguards, access controls, and auditability — reviewed with your privacy, security, and clinical IT stakeholders during deployment.
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green">Security &amp; compliance</p>
+            <h2 class="mt-4 text-4xl font-bold leading-tight text-brand-charcoal lg:text-[2.65rem]">Designed around protected health information (PHI).</h2>
+            <p class="mt-5 text-lg leading-relaxed text-brand-pewter">
+              HIPAA-aligned safeguards, access controls, and auditability. Reviewed with your privacy, security, and clinical IT stakeholders during deployment.
             </p>
+            <div class="mt-8 inline-flex h-[8.25rem] w-[8.25rem] items-center justify-center rounded-full border border-brand-grey bg-brand-whitefr p-2 shadow-brand">
+              <img src="assets/hipaa-compliant-badge.png" width="120" height="120" alt="HIPAA compliant seal" class="h-[7.25rem] w-[7.25rem] object-contain" decoding="async" />
+            </div>
           </div>
           <div class="hx-stagger grid gap-4 sm:grid-cols-2">
-            <div class="hx-reveal rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm ring-1 ring-brand-blue/[0.08] helix-panel-card helix-panel-card--inverse">
-              <h3 class="text-lg font-bold">Technical controls</h3>
-              <p class="mt-2 text-sm leading-relaxed text-white/65">Encryption, device posture, and integrations that respect hospital standards.</p>
-            </div>
-            <div class="hx-reveal rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm ring-1 ring-brand-green/[0.12] helix-panel-card helix-panel-card--inverse">
-              <h3 class="text-lg font-bold">Administrative policy</h3>
-              <p class="mt-2 text-sm leading-relaxed text-white/65">Retention, exports, and segregation mapped to your governance model.</p>
-            </div>
-            <div class="hx-reveal rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm ring-1 ring-brand-pink/[0.15] sm:col-span-2 helix-panel-card helix-panel-card--inverse">
-              <h3 class="text-lg font-bold">Clinical usability</h3>
-              <p class="mt-2 text-sm leading-relaxed text-white/65">Interfaces stay calm under pressure — fewer steps from signal to action.</p>
-            </div>
+            <article class="hx-reveal helix-panel-card helix-panel-card--soft helix-compliance-card rounded-xl border border-brand-grey bg-brand-whitefr p-6">
+              <h3 class="text-lg font-bold text-brand-charcoal">Technical controls</h3>
+              <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Encryption, device posture, and integrations that respect hospital standards.</p>
+            </article>
+            <article class="hx-reveal helix-panel-card helix-panel-card--soft helix-compliance-card rounded-xl border border-brand-grey bg-brand-whitefr p-6">
+              <h3 class="text-lg font-bold text-brand-charcoal">Administrative policy</h3>
+              <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Retention, exports, and segregation mapped to your governance model.</p>
+            </article>
+            <article class="hx-reveal helix-panel-card helix-panel-card--soft helix-compliance-card rounded-xl border border-brand-grey bg-brand-whitefr p-6 sm:col-span-2">
+              <h3 class="text-lg font-bold text-brand-charcoal">Clinical usability</h3>
+              <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Interfaces stay calm under pressure, with fewer steps from signal to action.</p>
+            </article>
           </div>
         </div>
       </div>
@@ -627,7 +635,10 @@
         </div>
 
         <div class="mt-8 flex flex-col gap-4 border-t border-brand-grey pt-6 text-xs text-brand-pewter sm:flex-row sm:items-center sm:justify-between">
-          <p>© <span id="year"></span> Helix Health Technology. All rights reserved.</p>
+          <div class="flex items-center gap-3">
+            <img src="assets/hipaa-compliant-badge.png" width="56" height="56" alt="HIPAA compliant" class="h-14 w-14 shrink-0 object-contain" decoding="async" />
+            <p>© <span id="year"></span> Helix Health Technology. All rights reserved.</p>
+          </div>
           <nav class="flex flex-wrap gap-x-5 gap-y-1" aria-label="Legal">
             <a href="#terms" class="hover:text-brand-charcoal">Terms</a>
             <a href="#privacy" class="hover:text-brand-charcoal">Privacy</a>
