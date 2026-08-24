@@ -676,13 +676,19 @@ async function applyFilters() {
     // Type
     if (type && f.facility_type !== type) return false;
     
-    // Date range (activity date — works for drafts too)
+    // Date range (last saved / created — works for drafts)
     if (dateFrom || dateTo) {
-      const raw = f.submitted_at || f.updated_at || f.created_at || f.last_submitted_at;
+      const raw = f.updated_at || f.last_submitted_at || f.submitted_at || f.created_at;
       const date = raw ? new Date(raw) : null;
       if (!date || Number.isNaN(date.getTime())) return false;
-      if (dateFrom && date < new Date(dateFrom)) return false;
-      if (dateTo && date > new Date(dateTo + 'T23:59:59')) return false;
+      if (dateFrom) {
+        const [y, m, d] = dateFrom.split('-').map(Number);
+        if (date < new Date(y, m - 1, d, 0, 0, 0, 0)) return false;
+      }
+      if (dateTo) {
+        const [y, m, d] = dateTo.split('-').map(Number);
+        if (date > new Date(y, m - 1, d, 23, 59, 59, 999)) return false;
+      }
     }
     
     return true;
