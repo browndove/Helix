@@ -30,6 +30,8 @@
         { key: "primary_phone_country", label: "Primary Phone Country", type: "text" },
         { key: "primary_phone", label: "Primary Phone", type: "phone-intl" },
         { key: "primary_email", label: "Primary Email", type: "email" },
+        { key: "emergency_contact", label: "Emergency Contact", type: "phone-intl" },
+        { key: "emergency_contact_country", label: "Emergency Contact Country", type: "text" },
       ],
     },
     {

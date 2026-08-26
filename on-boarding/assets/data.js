@@ -316,6 +316,9 @@ const SECTIONS = [
         placeholder: "name@facility.org",
         meaning: "Best email address for the primary contact.",
         guidance: "Must include an @. Used for onboarding communication and account setup." },
+      { key: "emergency_contact", label: "Emergency Contact", required: true, type: "phone-intl",
+        meaning: "Phone number to reach in an urgent situation during or after onboarding.",
+        guidance: "Pick the country and enter the local number. Use a line that is answered after hours when possible." },
     ],
   },
 
