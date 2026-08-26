@@ -22,6 +22,26 @@ let detailCache = null;
 const customSelectRegistry = new WeakMap();
 let customSelectOutsideListener = false;
 
+/** Last-saved / activity time for a row (must match API date filter). */
+function activityTimestamp(f) {
+  return f?.updated_at || f?.created_at || f?.submitted_at || null;
+}
+
+/**
+ * Convert an <input type="date"> value (local calendar day) to an ISO bound.
+ * Sends full instants so the API matches what the admin sees in the table.
+ */
+function localDateBoundISO(dateStr, endOfDay = false) {
+  if (!dateStr) return undefined;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return undefined;
+  const local = endOfDay
+    ? new Date(y, m - 1, d, 23, 59, 59, 999)
+    : new Date(y, m - 1, d, 0, 0, 0, 0);
+  if (Number.isNaN(local.getTime())) return undefined;
+  return local.toISOString();
+}
+
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
 const dashboardScreen = document.getElementById('dashboard-screen');
@@ -630,8 +650,19 @@ async function applyFilters() {
   const status = document.getElementById('status-filter')?.value || '';
   const region = document.getElementById('region-filter')?.value || '';
   const type = document.getElementById('type-filter')?.value || '';
-  const dateFrom = document.getElementById('date-from')?.value || '';
-  const dateTo = document.getElementById('date-to')?.value || '';
+  let dateFrom = document.getElementById('date-from')?.value || '';
+  let dateTo = document.getElementById('date-to')?.value || '';
+
+  // Keep range ordered so From/To never silently exclude everything.
+  if (dateFrom && dateTo && dateFrom > dateTo) {
+    const swap = dateFrom;
+    dateFrom = dateTo;
+    dateTo = swap;
+    const fromEl = document.getElementById('date-from');
+    const toEl = document.getElementById('date-to');
+    if (fromEl) fromEl.value = dateFrom;
+    if (toEl) toEl.value = dateTo;
+  }
 
   if (apiMode) {
     try {
@@ -640,8 +671,8 @@ async function applyFilters() {
         status,
         region,
         facility_type: type,
-        date_from: dateFrom || undefined,
-        date_to: dateTo || undefined,
+        date_from: localDateBoundISO(dateFrom, false),
+        date_to: localDateBoundISO(dateTo, true),
         sort: sortField,
         order: sortDirection,
         page: currentPage,
@@ -660,6 +691,17 @@ async function applyFilters() {
   }
 
   const searchLower = search.toLowerCase();
+  let fromLocal = null;
+  let toLocal = null;
+  if (dateFrom) {
+    const [y, m, d] = dateFrom.split('-').map(Number);
+    fromLocal = new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+  if (dateTo) {
+    const [y, m, d] = dateTo.split('-').map(Number);
+    toLocal = new Date(y, m - 1, d, 23, 59, 59, 999);
+  }
+
   filteredData = mockFacilities.filter(f => {
     // Search
     if (searchLower) {
@@ -676,19 +718,13 @@ async function applyFilters() {
     // Type
     if (type && f.facility_type !== type) return false;
     
-    // Date range (last saved / created — works for drafts)
-    if (dateFrom || dateTo) {
-      const raw = f.updated_at || f.last_submitted_at || f.submitted_at || f.created_at;
+    // Date range — same field as "Last saved" column / API filter
+    if (fromLocal || toLocal) {
+      const raw = activityTimestamp(f);
       const date = raw ? new Date(raw) : null;
       if (!date || Number.isNaN(date.getTime())) return false;
-      if (dateFrom) {
-        const [y, m, d] = dateFrom.split('-').map(Number);
-        if (date < new Date(y, m - 1, d, 0, 0, 0, 0)) return false;
-      }
-      if (dateTo) {
-        const [y, m, d] = dateTo.split('-').map(Number);
-        if (date > new Date(y, m - 1, d, 23, 59, 59, 999)) return false;
-      }
+      if (fromLocal && date < fromLocal) return false;
+      if (toLocal && date > toLocal) return false;
     }
     
     return true;
@@ -780,10 +816,8 @@ async function changePage(page) {
 }
 
 function lastSavedLabel(f) {
-  if (f.last_submitted_at) return formatDateTime(f.last_submitted_at);
-  if (f.submitted && f.submitted_at) return formatDateTime(f.submitted_at);
-  if (f.updated_at) return formatDateTime(f.updated_at);
-  return null;
+  const raw = activityTimestamp(f);
+  return raw ? formatDateTime(raw) : null;
 }
 
 function formatLastSaved(f) {
@@ -1425,7 +1459,7 @@ function facilityListRows(source) {
     facility_type: f.facility_type || '',
     status: f.status || '',
     submitted_at: f.submitted_at || '',
-    last_saved_at: f.last_submitted_at || f.last_saved_at || f.updated_at || '',
+    last_saved_at: activityTimestamp(f) || f.last_saved_at || '',
     file_count: f.fileCount ?? 0,
     completion_percentage: f.completionPercentage ?? ''
   }));

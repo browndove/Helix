@@ -49,6 +49,53 @@
     .filter(Boolean);
   const ALL_SORTED = [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name));
 
+  /** Dial digits for an ISO (e.g. GH → "233"). */
+  function dialDigitsForIso(iso) {
+    const c = COUNTRY_BY_ISO[iso] || COUNTRY_BY_ISO[DEFAULT_ISO];
+    return String(c?.code || "").replace(/\D/g, "");
+  }
+
+  /**
+   * National significant number only.
+   * Stored/server values may look like "+233 209182633" — strip the dial
+   * prefix so the field next to the flag never shows "233 233…".
+   */
+  function nationalPhoneDigits(raw, iso) {
+    let digits = String(raw || "").replace(/\D/g, "");
+    if (!digits) return "";
+    const country = COUNTRY_BY_ISO[iso] || COUNTRY_BY_ISO[DEFAULT_ISO];
+    const dial = dialDigitsForIso(iso);
+    const maxLen = country?.maxLen || 15;
+    if (dial && digits.startsWith(dial) && digits.length > dial.length) {
+      const rest = digits.slice(dial.length);
+      // Prefer stripped form when it looks like a national number
+      // (exact maxLen, or shorter leftover after a full E.164 paste).
+      if (rest.length <= maxLen && (rest.length === maxLen || digits.length > maxLen)) {
+        digits = rest;
+      }
+    }
+    return digits.slice(0, maxLen);
+  }
+
+  function phoneIsoForField(key, answers = state.answers) {
+    return answers[key + "_iso"] || answers[key + "_country"] || defaultIso;
+  }
+
+  /** Normalize phone answers after load/sync: national digits + `_iso`. */
+  function normalizePhoneAnswers(answers) {
+    if (!answers || typeof answers !== "object") return answers || {};
+    const out = { ...answers };
+    ALL_FIELDS.forEach((f) => {
+      if (f.type !== "phone-intl") return;
+      const iso = out[f.key + "_iso"] || out[f.key + "_country"] || defaultIso;
+      out[f.key + "_iso"] = iso;
+      if (out[f.key] != null && out[f.key] !== "") {
+        out[f.key] = nationalPhoneDigits(out[f.key], iso);
+      }
+    });
+    return out;
+  }
+
   /* Detected-once default country from IP geolocation. Falls back to GH. */
   let defaultIso = DEFAULT_ISO;
 
@@ -104,7 +151,7 @@
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
       return Object.assign(defaultState(), parsed, {
-        answers: Object.assign({}, parsed.answers || {}),
+        answers: normalizePhoneAnswers(Object.assign({}, parsed.answers || {})),
         uploads: Object.assign(defaultUploads(), parsed.uploads || {}),
         meta: Object.assign(defaultState().meta, parsed.meta || {}, {
           portal_phase: isValidPortalPhase(parsed.meta?.portal_phase)
@@ -126,7 +173,14 @@
     return detail === "Submission not found" || err.message === "Submission not found";
   }
 
+  /** Cloud drafts only start once we have a real facility email. */
+  function isFacilityEmailReady(email = state.answers.facility_email) {
+    const trimmed = String(email || "").trim();
+    return trimmed.includes("@") && trimmed.length >= 3;
+  }
+
   async function createServerSubmission() {
+    if (!isFacilityEmailReady()) return null;
     const existingId = await lookupDraftIdByEmail(state.answers.facility_email);
     if (existingId) {
       state.meta.server_submission_id = existingId;
@@ -153,23 +207,26 @@
   }
 
   async function resolveServerSubmissionId() {
-    const email = (state.answers.facility_email || "").trim();
-    if (email) {
-      const existingId = await lookupDraftIdByEmail(email);
-      if (existingId) {
-        if (state.meta.server_submission_id !== existingId) {
-          state.meta.server_submission_id = existingId;
-          scheduleSave();
-        }
-        return existingId;
+    // Do not create nameless/email-less admin rows from abandoned form opens.
+    if (!isFacilityEmailReady()) return null;
+
+    const email = String(state.answers.facility_email || "").trim();
+    const existingId = await lookupDraftIdByEmail(email);
+    if (existingId) {
+      if (state.meta.server_submission_id !== existingId) {
+        state.meta.server_submission_id = existingId;
+        scheduleSave();
       }
+      return existingId;
     }
+    // Upgrade a prior local-linked draft (if any) once email is known.
     if (state.meta.server_submission_id) return state.meta.server_submission_id;
     return createServerSubmission();
   }
 
   async function rebindDraftByEmail(email) {
     if (!window.HelixOnboardingApi?.enabled()) return;
+    if (!isFacilityEmailReady(email)) return;
     const existingId = await lookupDraftIdByEmail(email);
     if (!existingId || existingId === state.meta.server_submission_id) return;
     state.meta.server_submission_id = existingId;
@@ -179,8 +236,9 @@
 
   /** Rebind or recreate server id when localStorage points at a deleted submission. */
   async function recoverServerSubmissionId() {
-    const email = (state.answers.facility_email || "").trim();
-    const existingId = email ? await lookupDraftIdByEmail(email) : null;
+    if (!isFacilityEmailReady()) return null;
+    const email = String(state.answers.facility_email || "").trim();
+    const existingId = await lookupDraftIdByEmail(email);
     if (existingId) {
       state.meta.server_submission_id = existingId;
       scheduleSave();
@@ -192,17 +250,25 @@
 
   async function withSubmissionRecovery(fn) {
     let id = await resolveServerSubmissionId();
+    if (!id) {
+      const err = new Error("Enter a facility email before saving to Helix.");
+      err.status = 400;
+      throw err;
+    }
     try {
       return await fn(id);
     } catch (err) {
       if (!isSubmissionNotFound(err)) throw err;
       const reboundId = await recoverServerSubmissionId();
+      if (!reboundId) throw err;
       return fn(reboundId);
     }
   }
 
   async function syncToApi() {
     if (!window.HelixOnboardingApi?.enabled()) return;
+    // Keep progress local until an email exists — avoids empty admin drafts.
+    if (!isFacilityEmailReady()) return;
     const payload = buildSubmissionPayload();
     try {
       const row = await withSubmissionRecovery((id) =>
@@ -237,7 +303,7 @@
     if (row.submitted != null) state.meta.submitted = row.submitted;
     if (row.submitted_at) state.meta.submitted_at = row.submitted_at;
     if (row.answers && typeof row.answers === "object") {
-      state.answers = Object.assign({}, state.answers, row.answers);
+      state.answers = normalizePhoneAnswers(Object.assign({}, state.answers, row.answers));
     }
     if (row.uploads_meta && typeof row.uploads_meta === "object") {
       const uploads = Object.assign(defaultUploads(), row.uploads_meta);
@@ -1243,11 +1309,10 @@
           <input type="hidden" ${baseAttrs} value="${escapeAttr(safeVal)}" />
         </div>`;
     } else if (field.type === "phone-intl") {
-      const isoKey     = field.key + "_iso";
-      const currentIso = state.answers[isoKey] || defaultIso;
+      const currentIso = phoneIsoForField(field.key);
       const country    = COUNTRY_BY_ISO[currentIso] || COUNTRY_BY_ISO[DEFAULT_ISO];
       const maxLen     = country.maxLen;
-      const digits     = safeVal.replace(/\D/g, "").slice(0, maxLen);
+      const digits     = nationalPhoneDigits(safeVal, currentIso);
       const pattern    = getPhonePattern(country.iso, maxLen);
       const formatted  = formatPhoneDigits(digits, country.iso, maxLen);
       control = `
@@ -1386,9 +1451,9 @@
             const v = state.answers[f.key];
             let display;
             if (f.type === "phone-intl") {
-              const iso = state.answers[f.key + "_iso"] || defaultIso;
+              const iso = phoneIsoForField(f.key);
               const c   = COUNTRY_BY_ISO[iso] || COUNTRY_BY_ISO[DEFAULT_ISO];
-              const digits = String(v || "").replace(/\D/g, "");
+              const digits = nationalPhoneDigits(v, iso);
               display = digits ? `${c.code} ${digits}` : "";
             } else {
               display = v == null ? "" : String(v);
@@ -1517,7 +1582,7 @@
     const selStart = input.selectionStart == null ? input.value.length : input.selectionStart;
     const rawBefore = (input.value.slice(0, selStart).match(/\d/g) || []).length;
 
-    const digits    = (input.value || "").replace(/\D/g, "").slice(0, maxLen);
+    const digits    = nationalPhoneDigits(input.value, iso);
     const formatted = formatPhoneDigits(digits, iso, maxLen);
     if (input.value !== formatted) input.value = formatted;
 
@@ -1563,7 +1628,7 @@
     const field = ALL_FIELDS.find(f => f.key === input.dataset.field);
     const iso = wrap.dataset.iso;
     const country = COUNTRY_BY_ISO[iso] || COUNTRY_BY_ISO[DEFAULT_ISO];
-    const digits = (input.value || "").replace(/\D/g, "");
+    const digits = nationalPhoneDigits(input.value, iso);
     let invalid = false;
     let message = "";
 
@@ -1715,7 +1780,7 @@
 
     // Re-cap + reformat the input to match the new country pattern
     const input = wrap.querySelector("[data-phone-input]");
-    const digits = (input.value || "").replace(/\D/g, "").slice(0, country.maxLen);
+    const digits = nationalPhoneDigits(input.value, iso);
     const pattern = getPhonePattern(country.iso, country.maxLen);
     input.value = formatPhoneDigits(digits, country.iso, country.maxLen);
     input.maxLength = pattern.length;
@@ -1926,18 +1991,18 @@
     document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
-  /** Flat, human-readable payload — phone numbers merge into "+233 209182633". */
+  /** Flat payload — phones stay national digits; country lives in `_country`. */
   function buildSubmissionPayload() {
     const answers = {};
     ALL_FIELDS.forEach(f => {
       if (!isFieldVisible(f)) return;
       const raw = state.answers[f.key];
       if (f.type === "phone-intl") {
-        const iso = state.answers[f.key + "_iso"] || defaultIso;
-        const c   = COUNTRY_BY_ISO[iso] || COUNTRY_BY_ISO[DEFAULT_ISO];
-        const digits = String(raw || "").replace(/\D/g, "");
-        answers[f.key] = digits ? `${c.code} ${digits}` : "";
+        const iso = phoneIsoForField(f.key);
+        const digits = nationalPhoneDigits(raw, iso);
+        answers[f.key] = digits;
         answers[f.key + "_country"] = iso;
+        answers[f.key + "_iso"] = iso;
       } else {
         answers[f.key] = raw ?? "";
       }
