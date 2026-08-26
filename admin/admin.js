@@ -1016,6 +1016,31 @@ function formatAnswerValue(value) {
   return String(value);
 }
 
+function phoneIsoForAnswer(answers, key) {
+  const iso = answers?.[key + '_iso'] || answers?.[key + '_country'];
+  return iso ? String(iso).trim().toUpperCase() : '';
+}
+
+function formatPhoneAnswer(answers, key) {
+  const raw = answers?.[key];
+  if (raw === null || raw === undefined || raw === '') return null;
+  const text = String(raw).trim();
+  if (!text) return null;
+  if (text.includes('+')) return text;
+  const iso = phoneIsoForAnswer(answers, key);
+  const dial = getOnboardingSchema()?.phoneDialByIso?.[iso];
+  if (dial) return `${dial} ${text}`;
+  if (iso) return `${iso} ${text}`;
+  return text;
+}
+
+function emergencyContactDisplay(facility, answers = mergedAnswers(facility)) {
+  return (
+    formatPhoneAnswer(answers, 'emergency_contact')
+    || formatAnswerValue(facility.emergency_contact)
+  );
+}
+
 function buildDrawerCard(title, icon, bodyHtml, modifier = '') {
   const modClass = modifier ? ` ${modifier}` : '';
   return `
@@ -1070,7 +1095,11 @@ function mergedAnswers(facility) {
   return a;
 }
 
-function formatFieldDisplay(field, raw) {
+function formatFieldDisplay(field, raw, answers = null) {
+  if (field.type === 'phone-intl' && answers) {
+    const phone = formatPhoneAnswer(answers, field.key);
+    return phone ? escapeHtml(phone) : null;
+  }
   const value = formatAnswerValue(raw);
   if (value === null) return null;
   if (field.type === 'email') return mailtoLink(value);
@@ -1080,7 +1109,7 @@ function formatFieldDisplay(field, raw) {
 function buildSchemaSection(section, answers, { showEmpty = true } = {}) {
   const items = section.fields
     .map((field) => {
-      const display = formatFieldDisplay(field, answers[field.key]);
+      const display = formatFieldDisplay(field, answers[field.key], answers);
       if (!showEmpty && display === null) return null;
       return {
         label: field.label,
@@ -1135,11 +1164,19 @@ function buildSubmissionMetaCard(facility) {
       </a>`
     : 'Not provided';
 
+  const answers = mergedAnswers(facility);
+  const emergency = emergencyContactDisplay(facility, answers);
+
   const footerGrid = `
     <div class="info-grid timeline-footer-grid">
       ${renderInfoField('Created', facility.created_at ? formatDateTime(facility.created_at) : '—', { valueClass: 'mono-muted' })}
       ${renderInfoField('Last Updated', facility.updated_at ? formatDateTime(facility.updated_at) : '—', { valueClass: 'mono-muted' })}
       ${renderInfoField('Facility Email', emailValue, { full: true, empty: !facility.facility_email })}
+      ${renderInfoField(
+        'Emergency Contact',
+        emergency ? escapeHtml(emergency) : 'Not provided',
+        { full: true, empty: !emergency, valueClass: emergency ? 'semibold' : '' }
+      )}
     </div>
   `;
 
@@ -1157,12 +1194,11 @@ function buildFacilityInfoCard(answers) {
   ];
   const extraFields = [
     { key: 'facility_email', label: 'Facility Email', type: 'email' },
-    { key: 'facility_phone_country', label: 'Facility Phone Country' },
-    { key: 'facility_phone', label: 'Facility Phone' },
+    { key: 'facility_phone', label: 'Facility Phone', type: 'phone-intl' },
   ];
 
   const items = coreFields.map((field) => {
-    const display = formatFieldDisplay({ type: 'text' }, answers[field.key]);
+    const display = formatFieldDisplay({ type: 'text' }, answers[field.key], answers);
     return {
       label: field.label,
       value: display || 'Not provided',
@@ -1173,7 +1209,7 @@ function buildFacilityInfoCard(answers) {
   });
 
   extraFields.forEach((field) => {
-    const display = formatFieldDisplay(field, answers[field.key]);
+    const display = formatFieldDisplay(field, answers[field.key], answers);
     if (display === null) return;
     items.push({
       label: field.label,
@@ -1575,8 +1611,10 @@ function facilityToCsv(facility) {
     ['Primary contact', facility.primary_contact_name],
     ['Primary email', facility.primary_contact_email],
     ['Primary phone', facility.primary_contact_phone],
+    ['Emergency contact', emergencyContactDisplay(facility, answers)],
     ['Secondary contact', facility.secondary_contact_name],
     ['Secondary email', facility.secondary_contact_email],
+    ['Secondary phone', facility.secondary_contact_phone],
     ['Files attached', facility.fileCount],
   ];
 
@@ -1622,6 +1660,7 @@ function buildFacilityReportHtml(facility) {
         <div><dt>Submitted</dt><dd>${escapeHtml(facility.submitted_at ? formatDateTime(facility.submitted_at) : 'Draft')}</dd></div>
         <div><dt>Email</dt><dd>${escapeHtml(facility.facility_email || '—')}</dd></div>
         <div><dt>Phone</dt><dd>${escapeHtml(facility.facility_phone || '—')}</dd></div>
+        <div><dt>Emergency contact</dt><dd>${escapeHtml(emergencyContactDisplay(facility, answers) || '—')}</dd></div>
         <div><dt>Region</dt><dd>${escapeHtml(facility.region || '—')}</dd></div>
         <div><dt>City</dt><dd>${escapeHtml(facility.city || '—')}</dd></div>
         <div><dt>Type</dt><dd>${escapeHtml(facility.facility_type || '—')}</dd></div>
@@ -1635,9 +1674,12 @@ function buildFacilityReportHtml(facility) {
     schema.sections.forEach((section) => {
       const fields = (section.fields || [])
         .map((field) => {
-          const raw = answers[field.key];
-          if (raw == null || raw === '') return null;
-          const display = Array.isArray(raw) ? raw.join(', ') : String(raw);
+          const display = field.type === 'phone-intl'
+            ? formatPhoneAnswer(answers, field.key)
+            : (answers[field.key] == null || answers[field.key] === ''
+              ? null
+              : (Array.isArray(answers[field.key]) ? answers[field.key].join(', ') : String(answers[field.key])));
+          if (display == null || display === '') return null;
           return `<div><dt>${escapeHtml(field.label || field.key)}</dt><dd>${escapeHtml(display)}</dd></div>`;
         })
         .filter(Boolean)
