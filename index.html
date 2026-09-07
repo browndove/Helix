@@ -1,454 +1,1014 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth scroll-pt-[5rem]">
+<html lang="en" class="scroll-smooth scroll-pt-[6rem]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Helix Health — Clinical Communication for Hospitals</title>
-  <meta name="description" content="Helix Health — 100% HIPAA-compliant clinical communication. Replace pagers with secure messaging, routing, voice and video for modern care teams.">
-  <link rel="canonical" href="https://www.helixhealth.example/">
-  <meta property="og:title" content="Helix Health — Clinical Communication">
-  <meta property="og:description" content="100% HIPAA-compliant clinical communication — replace pagers with secure, instant messaging, routing, and voice/video for care teams.">
+  <title>Helix Health — One Platform. Connected Teams. Better Care.</title>
+  <meta name="description" content="Helix Health brings critical communication, staff scheduling, clinical resources, and operational insights into one intelligent platform for hospitals.">
+  <link rel="canonical" href="https://www.helixhealthtechnology.com/">
+  <meta property="og:title" content="Helix Health — One Platform. Connected Teams. Better Care.">
+  <meta property="og:description" content="Critical communication, staff scheduling, clinical resources, and operational insights in one secure platform built for hospitals.">
   <meta property="og:type" content="website">
 
   <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              charcoal: "oklch(14.89% 0.0027 248.08)",
-              green: "oklch(39.56% 0.0812 166.85)",
-              greenlight: "oklch(87.91% 0.0171 166.85)",
-              blue: "oklch(83.46% 0.0735 257.42)",
-              pink: "oklch(87.47% 0.114 327.97)",
-              yellow: "oklch(92.75% 0.1157 97.52)",
-              gold: "oklch(66.45% 0.1516 62.96)",
-              teal: "oklch(47.69% 0.0847 225.96)",
-              whitefr: "oklch(100% 0 0)",
-              off: "oklch(98.21% 0 129.63)",
-              grey: "oklch(88.22% 0 0)",
-              pewter: "oklch(55.55% 0 0)",
-              graphite: "oklch(33.1% 0.0104 253.98)",
-            },
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', "ui-sans-serif", "system-ui", "sans-serif"],
-          },
-          boxShadow: {
-            brand: "0 4px 24px oklch(14.89% 0.0027 248.08 / 0.08)",
-            "brand-lg": "0 16px 48px oklch(14.89% 0.0027 248.08 / 0.12)",
-          },
-        },
-      },
-    };
-  </script>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/custom.css">
-  <link rel="icon" href="brand-logo.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/helix-logo.svg" type="image/svg+xml">
 </head>
 <body class="bg-brand-off font-sans text-brand-charcoal antialiased">
 
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header id="hx-header" class="sticky top-0 z-[60] w-full border-b border-brand-grey/60 bg-brand-off/90 backdrop-blur-xl">
+  <!-- ============================== HEADER ============================== -->
+  <header id="hx-header" class="sticky top-0 z-[60] w-full border-b border-brand-grey bg-brand-whitefr">
     <div class="mx-auto max-w-7xl px-3 py-2 sm:px-6 lg:px-8">
-      <div id="helix-nav-pill" class="flex flex-wrap items-center gap-3 rounded-full border border-brand-grey/80 bg-brand-whitefr/95 px-4 py-2.5 shadow-brand backdrop-blur-xl transition-shadow duration-300 lg:gap-4 lg:px-6">
-        <a href="#" class="flex shrink-0 items-center gap-2.5 rounded-full pr-1 no-underline" aria-label="Helix Health home">
-          <img src="assets/helix-logo.svg" width="40" height="34" alt="" class="h-9 w-auto shrink-0 object-contain" decoding="async" />
+      <div id="helix-nav-pill" class="flex items-center gap-2 rounded-full border border-brand-grey/80 bg-brand-whitefr px-4 py-2.5 shadow-brand transition-shadow duration-300 lg:px-5">
+        <a href="index.html" class="flex shrink-0 items-center gap-2.5 rounded-full pr-1 no-underline" aria-label="Helix Health home">
+          <img src="assets/helix-logo.svg" width="40" height="34" alt="" class="h-9 w-auto shrink-0 object-contain" decoding="async">
           <span class="text-base font-bold tracking-tight text-brand-charcoal">Helix Health</span>
         </a>
 
-        <nav class="order-last hidden w-full basis-full justify-center gap-1 lg:order-none lg:flex lg:w-auto lg:basis-auto lg:flex-1" aria-label="Primary">
-          <a href="#platform" class="rounded-full px-3 py-2 text-sm font-medium text-brand-graphite transition hover:bg-brand-grey/70">Platform</a>
-          <a href="#features" class="rounded-full px-3 py-2 text-sm font-medium text-brand-graphite transition hover:bg-brand-grey/70">Capabilities</a>
-          <a href="#compare" class="rounded-full px-3 py-2 text-sm font-medium text-brand-graphite transition hover:bg-brand-grey/70">Vs pagers</a>
-          <a href="#security" class="rounded-full px-3 py-2 text-sm font-medium text-brand-graphite transition hover:bg-brand-grey/70">Security</a>
-          <a href="on-boarding/index.html" class="rounded-full px-3 py-2 text-sm font-medium text-brand-graphite transition hover:bg-brand-grey/70">On-boarding</a>
-          <a href="#contact" class="rounded-full px-3 py-2 text-sm font-medium text-brand-graphite transition hover:bg-brand-grey/70">Contact</a>
+        <nav class="ml-3 hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+          <div class="hx-nav-item">
+            <button type="button" class="hx-nav-trigger" aria-expanded="false" aria-haspopup="true">
+              Products
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="hx-menu hx-menu--left">
+              <div class="hx-menu__panel">
+                <div class="hx-menu__grid">
+                  <a class="hx-menu__link" href="communication.html">
+                    <span class="hx-menu__icon bg-brand-green">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </span>
+                    <span>
+                      <span class="hx-menu__title">Critical Communication</span>
+                      <span class="hx-menu__desc">Secure messaging, alerts, and escalation workflows.</span>
+                    </span>
+                  </a>
+                  <a class="hx-menu__link" href="scheduling.html">
+                    <span class="hx-menu__icon bg-brand-navy">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    </span>
+                    <span>
+                      <span class="hx-menu__title">Staff Scheduling</span>
+                      <span class="hx-menu__desc">Rosters, shift swaps, and live coverage visibility.</span>
+                    </span>
+                  </a>
+                  <a class="hx-menu__link" href="clinical-resources.html">
+                    <span class="hx-menu__icon bg-brand-teal">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </span>
+                    <span>
+                      <span class="hx-menu__title">Clinical Resources</span>
+                      <span class="hx-menu__desc">20,000+ medications, 250+ calculators, AI assistant.</span>
+                    </span>
+                  </a>
+                  <a class="hx-menu__link" href="operational-insights.html">
+                    <span class="hx-menu__icon bg-brand-gold">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 3.5-4 3 2.5L20 7"/></svg>
+                    </span>
+                    <span>
+                      <span class="hx-menu__title">Operational Insights</span>
+                      <span class="hx-menu__desc">Dashboards and reports for faster decisions.</span>
+                    </span>
+                  </a>
+                  <a class="hx-menu__link" href="security.html">
+                    <span class="hx-menu__icon bg-brand-charcoal">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </span>
+                    <span>
+                      <span class="hx-menu__title">Security &amp; Compliance</span>
+                      <span class="hx-menu__desc">How we protect protected health information (PHI).</span>
+                    </span>
+                  </a>
+                  <a class="hx-menu__link" href="index.html#platform">
+                    <span class="hx-menu__icon bg-brand-pewter">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                    </span>
+                    <span>
+                      <span class="hx-menu__title">Platform overview</span>
+                      <span class="hx-menu__desc">See how the four modules work as one system.</span>
+                    </span>
+                  </a>
+                </div>
+                <div class="hx-menu__foot">
+                  <p class="text-xs text-brand-pewter">One login. One directory. One audit trail.</p>
+                  <button type="button" data-open-demo class="helix-btn helix-btn--primary helix-btn--sm">Request a demo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hx-nav-item">
+            <button type="button" class="hx-nav-trigger" aria-expanded="false" aria-haspopup="true">
+              Solutions
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="hx-menu">
+              <div class="hx-menu__panel">
+                <div class="hx-menu__grid hx-menu__grid--single">
+                  <a class="hx-menu__link" href="solutions.html#doctors"><span class="hx-menu__icon bg-brand-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v6a4 4 0 0 0 8 0V2"/><path d="M12 12v3a5 5 0 0 0 10 0v-2"/></svg></span><span><span class="hx-menu__title">For Doctors</span><span class="hx-menu__desc">Critical updates and clinical tools in one place.</span></span></a>
+                  <a class="hx-menu__link" href="solutions.html#nurses"><span class="hx-menu__icon bg-brand-navy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 21s-7-4.35-7-9a4 4 0 0 1 7-2.65A4 4 0 0 1 19 12c0 4.65-7 9-7 9z"/></svg></span><span><span class="hx-menu__title">For Nurses</span><span class="hx-menu__desc">Coordinate care and escalate faster.</span></span></a>
+                  <a class="hx-menu__link" href="solutions.html#pharmacists"><span class="hx-menu__icon bg-brand-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m10.5 20.5-7-7a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7z"/><path d="m8.5 8.5 7 7"/></svg></span><span><span class="hx-menu__title">For Pharmacists</span><span class="hx-menu__desc">Drug information and interaction checks.</span></span></a>
+                  <a class="hx-menu__link" href="solutions.html#administrators"><span class="hx-menu__icon bg-brand-gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 21h18M6 21V9l6-5 6 5v12"/></svg></span><span><span class="hx-menu__title">For Administrators</span><span class="hx-menu__desc">Track performance and improve outcomes.</span></span></a>
+                  <a class="hx-menu__link" href="solutions.html#facilities"><span class="hx-menu__icon bg-brand-pewter"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg></span><span><span class="hx-menu__title">By facility type</span><span class="hx-menu__desc">Teaching, district, and specialist hospitals.</span></span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hx-nav-item">
+            <button type="button" class="hx-nav-trigger" aria-expanded="false" aria-haspopup="true">
+              Resources
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="hx-menu">
+              <div class="hx-menu__panel">
+                <div class="hx-menu__grid hx-menu__grid--single">
+                  <a class="hx-menu__link" href="resources.html"><span class="hx-menu__icon bg-brand-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span><span><span class="hx-menu__title">Resource hub</span><span class="hx-menu__desc">Guides, briefs, and rollout material.</span></span></a>
+                  <a class="hx-menu__link" href="resources.html#checklist"><span class="hx-menu__icon bg-brand-navy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span><span><span class="hx-menu__title">Implementation checklist</span><span class="hx-menu__desc">What to prepare before go-live.</span></span></a>
+                  <a class="hx-menu__link" href="on-boarding/index.html"><span class="hx-menu__icon bg-brand-gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></span><span><span class="hx-menu__title">Facility on-boarding</span><span class="hx-menu__desc">Start or resume your facility checklist.</span></span></a>
+                  <a class="hx-menu__link" href="resources.html#faq"><span class="hx-menu__icon bg-brand-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.3"/><path d="M12 17h.01"/></svg></span><span><span class="hx-menu__title">FAQ</span><span class="hx-menu__desc">Answers on security, rollout, and how Helix works.</span></span></a>
+                  <a class="hx-menu__link" href="company.html#news"><span class="hx-menu__icon bg-brand-gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4h13v16H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v10a2 2 0 0 1-3 1.7"/><path d="M8 8h5M8 12h5M8 16h5"/></svg></span><span><span class="hx-menu__title">News &amp; media</span><span class="hx-menu__desc">Announcements from Helix Health.</span></span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hx-nav-item">
+            <button type="button" class="hx-nav-trigger" aria-expanded="false" aria-haspopup="true">
+              Company
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="hx-menu">
+              <div class="hx-menu__panel">
+                <div class="hx-menu__grid hx-menu__grid--single">
+                  <a class="hx-menu__link" href="company.html"><span class="hx-menu__icon bg-brand-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M10 21v-5h4v5"/></svg></span><span><span class="hx-menu__title">About Helix Health</span><span class="hx-menu__desc">Who we are and why we build this.</span></span></a>
+                  <a class="hx-menu__link" href="company.html#news"><span class="hx-menu__icon bg-brand-navy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4h13v16H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v10a2 2 0 0 1-3 1.7"/></svg></span><span><span class="hx-menu__title">News and Media</span><span class="hx-menu__desc">Press notes and product updates.</span></span></a>
+                  <a class="hx-menu__link" href="company.html#partners"><span class="hx-menu__icon bg-brand-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M16 11a4 4 0 1 0-8 0"/><circle cx="12" cy="7" r="3"/><path d="M4 21v-1a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v1"/></svg></span><span><span class="hx-menu__title">Partners</span><span class="hx-menu__desc">Work with us on deployments.</span></span></a>
+                  <a class="hx-menu__link" href="contact.html"><span class="hx-menu__icon bg-brand-gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="m4 6 8 6 8-6"/></svg></span><span><span class="hx-menu__title">Contact us</span><span class="hx-menu__desc">Talk to sales, support, or partnerships.</span></span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </nav>
 
         <div class="ml-auto hidden items-center gap-2 lg:flex">
-          <div class="relative group">
-            <button type="button" class="rounded-full px-3 py-2 text-sm font-semibold text-brand-graphite hover:bg-brand-grey/60 flex items-center gap-1">Log in <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="group-hover:rotate-180 transition-transform duration-200"><path d="m6 9 6 6 6-6"/></svg></button>
-            <div class="hidden group-hover:block absolute right-0 top-full pt-1 w-56 bg-brand-whitefr border border-brand-grey/80 rounded-xl shadow-brand-lg z-50 overflow-hidden">
-              <a href="https://admin.helixhealth.app/login" class="block px-4 py-3.5 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition first:rounded-t-xl border-b border-brand-grey/40">Helix Admin Dashboard</a>
-              <a href="https://analytics.helixhealth.app/login?from=%2F" class="block px-4 py-3.5 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition border-b border-brand-grey/40">Helix Analytics</a>
-              <button type="button" class="w-full text-left px-4 py-3.5 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition last:rounded-b-xl">Helix Webapp</button>
+          <div class="hx-nav-item">
+            <button type="button" class="hx-nav-trigger" aria-expanded="false" aria-haspopup="true">
+              Login
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="hx-menu hx-menu--right">
+              <div class="hx-menu__panel">
+                <div class="hx-menu__grid hx-menu__grid--single">
+                  <a class="hx-menu__link" href="https://admin.helixhealth.app/login"><span class="hx-menu__title">Helix Admin Dashboard</span></a>
+                  <a class="hx-menu__link" href="https://analytics.helixhealth.app/login?from=%2F"><span class="hx-menu__title">Helix Analytics</span></a>
+                  <a class="hx-menu__link" href="on-boarding/index.html"><span class="hx-menu__title">Facility on-boarding</span></a>
+                </div>
+              </div>
             </div>
           </div>
           <button type="button" data-open-demo class="helix-btn helix-btn--primary">Request a demo</button>
         </div>
 
         <button type="button" id="hx-nav-open" class="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-brand-grey bg-brand-whitefr text-brand-charcoal lg:hidden" aria-expanded="false" aria-controls="hx-nav-drawer" aria-label="Open menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Mobile nav -->
+  <!-- ============================ MOBILE NAV ============================ -->
   <div id="hx-nav-drawer" class="hx-nav-drawer fixed inset-0 z-[80] lg:hidden" aria-hidden="true">
     <button type="button" class="absolute inset-0 bg-brand-charcoal/45 backdrop-blur-sm" data-close-nav tabindex="-1" aria-label="Close menu"></button>
     <div class="hx-nav-drawer-inner absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l border-brand-grey bg-brand-whitefr shadow-brand-lg">
       <div class="flex items-center justify-between border-b border-brand-grey px-5 py-4">
         <span class="text-base font-bold">Menu</span>
         <button type="button" id="hx-nav-close" class="flex h-10 w-10 items-center justify-center rounded-full text-brand-graphite hover:bg-brand-off" aria-label="Close navigation">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
-      <nav class="flex flex-col gap-1 p-4" aria-label="Mobile">
-        <a href="#platform" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Platform</a>
-        <a href="#features" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Capabilities</a>
-        <a href="#compare" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Vs pagers</a>
-        <a href="#security" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Security</a>
-        <a href="on-boarding/index.html" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>On-boarding</a>
-        <a href="#contact" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-brand-off" data-close-nav>Contact</a>
-        <div class="pt-3 border-t border-brand-grey mt-3">
-          <p class="text-[11px] font-bold uppercase tracking-wide text-brand-pewter px-4 py-3">Log in</p>
-          <a href="https://admin.helixhealth.app/login" class="block px-4 py-3 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition rounded-lg" data-close-nav>Helix Admin Dashboard</a>
-          <a href="https://analytics.helixhealth.app/login?from=%2F" class="block px-4 py-3 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition rounded-lg" data-close-nav>Helix Analytics</a>
-          <button type="button" class="w-full text-left px-4 py-3 text-sm font-medium text-brand-charcoal hover:bg-brand-greenlight/20 transition rounded-lg">Helix Webapp</button>
-        </div>
+      <nav class="flex-1 overflow-y-auto p-3" aria-label="Mobile">
+        <details class="hx-drawer-group" open>
+          <summary>Products <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="hx-drawer-group__body">
+            <a href="communication.html" data-close-nav>Critical Communication</a>
+            <a href="scheduling.html" data-close-nav>Staff Scheduling</a>
+            <a href="clinical-resources.html" data-close-nav>Clinical Resources</a>
+            <a href="operational-insights.html" data-close-nav>Operational Insights</a>
+            <a href="security.html" data-close-nav>Security &amp; Compliance</a>
+            <a href="index.html#platform" data-close-nav>Platform overview</a>
+          </div>
+        </details>
+        <details class="hx-drawer-group">
+          <summary>Solutions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="hx-drawer-group__body">
+            <a href="solutions.html#doctors" data-close-nav>For Doctors</a>
+            <a href="solutions.html#nurses" data-close-nav>For Nurses</a>
+            <a href="solutions.html#pharmacists" data-close-nav>For Pharmacists</a>
+            <a href="solutions.html#administrators" data-close-nav>For Administrators</a>
+            <a href="solutions.html#facilities" data-close-nav>By facility type</a>
+          </div>
+        </details>
+        <details class="hx-drawer-group">
+          <summary>Resources <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="hx-drawer-group__body">
+            <a href="resources.html" data-close-nav>Resource hub</a>
+            <a href="resources.html#checklist" data-close-nav>Implementation checklist</a>
+            <a href="on-boarding/index.html" data-close-nav>Facility on-boarding</a>
+            <a href="resources.html#faq" data-close-nav>FAQ</a>
+            <a href="company.html#news" data-close-nav>News &amp; media</a>
+          </div>
+        </details>
+        <details class="hx-drawer-group">
+          <summary>Company <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="hx-drawer-group__body">
+            <a href="company.html" data-close-nav>About Helix Health</a>
+            <a href="company.html#news" data-close-nav>News and Media</a>
+            <a href="company.html#partners" data-close-nav>Partners</a>
+            <a href="contact.html" data-close-nav>Contact us</a>
+          </div>
+        </details>
+        <details class="hx-drawer-group">
+          <summary>Login <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="hx-drawer-group__body">
+            <a href="https://admin.helixhealth.app/login" data-close-nav>Helix Admin Dashboard</a>
+            <a href="https://analytics.helixhealth.app/login?from=%2F" data-close-nav>Helix Analytics</a>
+            <a href="on-boarding/index.html" data-close-nav>Facility on-boarding</a>
+          </div>
+        </details>
       </nav>
-      <div class="mt-auto border-t border-brand-grey p-5">
+      <div class="border-t border-brand-grey p-5">
         <button type="button" data-open-demo class="helix-btn helix-btn--primary helix-btn--block justify-center" data-close-nav>Request a demo</button>
       </div>
     </div>
   </div>
 
   <main id="main">
-    <!-- Hero -->
-    <section class="relative overflow-hidden pb-20 pt-6 sm:pb-24 sm:pt-8 lg:pb-28 lg:pt-8" aria-labelledby="hero-title">
+
+    <!-- ============================== HERO ============================== -->
+    <section class="relative overflow-hidden pb-16 pt-10 sm:pb-20 lg:pb-24 lg:pt-14" aria-labelledby="hero-title">
       <div class="helix-hero-wash" aria-hidden="true"></div>
       <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
-        <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-        <div class="lg:col-span-6">
-          <div class="hx-reveal is-visible inline-flex items-center gap-2 rounded-full border border-brand-green/35 bg-brand-whitefr px-3 py-1 shadow-brand">
-            <span class="rounded-full bg-brand-green px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">100% HIPAA compliant</span>
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-brand-pewter">Clinical-grade security</span>
-          </div>
-          <h1 id="hero-title" class="hx-reveal is-visible mt-6 text-balance text-4xl font-bold leading-[1.06] tracking-tight text-brand-charcoal sm:text-5xl lg:text-[3.35rem]">
-            Clinical communication that saves lives.
-          </h1>
-          <p class="hx-reveal is-visible mt-5 max-w-lg text-lg leading-relaxed text-brand-pewter">
-            Replace legacy pagers with a secure, instant, and intelligent platform built specifically for modern care teams. Fast, reliable, and built for clinical environments.
-          </p>
-          <div class="hx-reveal is-visible mt-8 flex flex-wrap items-center gap-3">
-            <button type="button" data-open-demo class="helix-btn helix-btn--primary">Request a demo</button>
-            <a href="#platform" class="helix-btn helix-btn--outline">Explore platform</a>
-          </div>
-        </div>
+        <div class="grid items-center gap-14 lg:grid-cols-12 lg:gap-8">
 
-        <div class="relative flex justify-center lg:col-span-6 lg:justify-end">
-          <div class="flex w-fit max-w-full flex-col items-center pt-2">
-            <p class="mb-3 w-full text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-pewter">Live workflow preview</p>
-            <div class="helix-phone-frame shrink-0">
-              <div class="helix-phone-frame__inner">
-                <div class="helix-chat-demo" id="helix-chat-demo" aria-label="Example animated clinical chat (preview only)">
-                  <div class="helix-chat-demo__header">
-                    <div class="helix-chat-demo__avatar" aria-hidden="true">MICU</div>
-                    <div class="helix-chat-demo__title">
-                      <strong>MICU · Cardiology consult</strong>
-                      <span>Encrypted · on-call routing</span>
+          <div class="lg:col-span-6">
+            <div class="hx-reveal is-visible inline-flex items-center gap-2 rounded-full border border-brand-green/35 bg-brand-whitefr px-3 py-1 shadow-brand">
+              <span class="rounded-full bg-brand-green px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">Built for hospitals</span>
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-brand-pewter">Designed for care</span>
+            </div>
+
+            <h1 id="hero-title" class="hx-reveal is-visible mt-6 text-balance text-[2.6rem] font-bold leading-[1.05] tracking-tight text-brand-charcoal sm:text-6xl lg:text-[3.9rem]">
+              <span class="block">One Platform.</span>
+              <span class="block">Connected Teams.</span>
+              <span class="block text-brand-green">Better Care.</span>
+            </h1>
+
+            <p class="hx-reveal is-visible mt-6 max-w-xl text-lg leading-relaxed text-brand-pewter">
+              Helix Health brings critical communication, staff scheduling, and clinical resources into one intelligent platform — helping hospitals work better, together.
+            </p>
+
+            <div class="hx-reveal is-visible mt-8 flex flex-wrap items-center gap-3">
+              <button type="button" data-open-demo class="helix-btn helix-btn--primary px-7">
+                Request a Demo
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+              <a href="#platform" class="helix-btn helix-btn--outline px-7">Explore the Platform</a>
+            </div>
+
+            <dl class="hx-stagger mt-12 grid gap-x-4 gap-y-6 sm:grid-cols-3">
+              <div class="hx-reveal is-visible hx-trust">
+                <span class="hx-trust__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                </span>
+                <div>
+                  <dt class="whitespace-nowrap text-sm font-bold text-brand-charcoal">Secure &amp; Compliant</dt>
+                  <dd class="mt-0.5 text-sm leading-snug text-brand-pewter">Your data is protected</dd>
+                </div>
+              </div>
+              <div class="hx-reveal is-visible hx-trust">
+                <span class="hx-trust__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 .5-8.97A6.5 6.5 0 0 0 5.2 9.5 4.5 4.5 0 0 0 6 19z"/><path d="M12 12v6"/><path d="m9.5 14.5 2.5-2.5 2.5 2.5"/></svg>
+                </span>
+                <div>
+                  <dt class="whitespace-nowrap text-sm font-bold text-brand-charcoal">Easy to Deploy</dt>
+                  <dd class="mt-0.5 text-sm leading-snug text-brand-pewter">Cloud-based, works anywhere</dd>
+                </div>
+              </div>
+              <div class="hx-reveal is-visible hx-trust">
+                <span class="hx-trust__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/><path d="M12 6v4M10 8h4"/><path d="M10 13h4M10 17h4"/></svg>
+                </span>
+                <div>
+                  <dt class="whitespace-nowrap text-sm font-bold text-brand-charcoal">Local Support</dt>
+                  <dd class="mt-0.5 text-sm leading-snug text-brand-pewter">We are here for you</dd>
+                </div>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Phone -->
+          <div class="relative flex justify-center lg:col-span-6 lg:justify-end">
+            <div class="helix-hero-blob" aria-hidden="true"></div>
+            <div class="relative z-[1] flex w-fit max-w-full flex-col items-center">
+              <p class="mb-3 w-full text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-pewter">Live workflow preview</p>
+              <div class="helix-phone-frame shrink-0">
+                <div class="helix-phone-frame__inner">
+                  <div class="hxp" id="hx-phone" aria-label="Animated preview of the Helix Health mobile app">
+
+                    <div class="hxp__status">
+                      <span>07:42</span>
+                      <span class="hxp__status-icons" aria-hidden="true">
+                        <svg width="13" height="10" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                        <svg width="13" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 4.2a10 10 0 0 1 14 0"/><path d="M3.6 7a6.4 6.4 0 0 1 8.8 0"/><circle cx="8" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+                        <svg width="17" height="10" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="0.7" y="0.7" width="17" height="10.6" rx="2.6"/><rect x="2.4" y="2.4" width="12" height="7.2" rx="1.4" fill="currentColor" stroke="none"/><path d="M19.6 4.2v3.6" stroke-linecap="round" stroke-width="2"/></svg>
+                      </span>
                     </div>
-                    <span class="helix-chat-demo__live">Live</span>
-                  </div>
-                  <div class="helix-chat-demo__thread">
-                    <div class="helix-chat-demo__msg helix-chat-demo__msg--in" data-chat-msg>
-                      <div class="helix-chat-demo__meta">ED physician · now</div>
-                      Chest pain with STEMI pattern on EKG — can cardiology review before cath lab activation?
+
+                    <div class="hxp__stage">
+
+                      <!-- Scene 1 — Home -->
+                      <section class="hxp__scene is-active" data-scene="home" data-dwell="4600" id="hxp-panel-home" role="tabpanel" aria-labelledby="hxp-tab-home">
+                        <div class="hxp__greet">
+                          <span class="hxp__avatar" aria-hidden="true">AM</span>
+                          <span class="hxp__greet-text">
+                            <span>Good morning</span>
+                            <strong>Dr. Ama Mensah</strong>
+                          </span>
+                        </div>
+
+                        <div class="hxp__card hxp__alert">
+                          <span class="hxp__alert-tag"><i aria-hidden="true"></i> Critical alert</span>
+                          <p class="hxp__alert-title">CODE BLUE — ICU Bed 4</p>
+                          <p class="hxp__alert-sub">Escalated to on-call team · Tap to respond</p>
+                        </div>
+
+                        <p class="hxp__label">Today's schedule <span>Wed 12</span></p>
+                        <div class="hxp__card">
+                          <div class="hxp__row">
+                            <span class="hxp__time">07:00<br>19:00</span>
+                            <span class="hxp__row-main"><strong>ICU ward round</strong><span>Handover with night team</span></span>
+                            <span class="hxp__chip hxp__chip--green">On duty</span>
+                          </div>
+                          <div class="hxp__row">
+                            <span class="hxp__time">13:00</span>
+                            <span class="hxp__row-main"><strong>Theatre list — OR 3</strong><span>4 cases · anaesthesia confirmed</span></span>
+                            <span class="hxp__chip hxp__chip--blue">Next</span>
+                          </div>
+                        </div>
+
+                        <p class="hxp__label">Clinical resources</p>
+                        <div class="hxp__tiles">
+                          <div class="hxp__tile">
+                            <span class="hxp__tile-icon bg-brand-teal" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m10.5 20.5-7-7a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7z"/><path d="m8.5 8.5 7 7"/></svg></span>
+                            <strong>Drug information</strong>
+                            <span>Dosing &amp; interactions</span>
+                          </div>
+                          <div class="hxp__tile">
+                            <span class="hxp__tile-icon bg-brand-green" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2"/></svg></span>
+                            <strong>Calculators</strong>
+                            <span>CrCl, GCS, MAP</span>
+                          </div>
+                          <div class="hxp__tile">
+                            <span class="hxp__tile-icon bg-brand-navy" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                            <strong>Guidelines</strong>
+                            <span>National &amp; local</span>
+                          </div>
+                          <div class="hxp__tile">
+                            <span class="hxp__tile-icon bg-brand-gold" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>
+                            <strong>Protocols</strong>
+                            <span>Sepsis, STEMI</span>
+                          </div>
+                        </div>
+                      </section>
+
+                      <!-- Scene 2 — Messages -->
+                      <section class="hxp__scene" data-scene="messages" data-dwell="6200" id="hxp-panel-messages" role="tabpanel" aria-labelledby="hxp-tab-messages">
+                        <div class="hxp__thread-head">
+                          <span class="hxp__avatar" aria-hidden="true">ICU</span>
+                          <span class="hxp__greet-text">
+                            <strong>MICU · Cardiology consult</strong>
+                            <span>Encrypted · on-call routing</span>
+                          </span>
+                          <span class="hxp__chip hxp__chip--green">Live</span>
+                        </div>
+                        <div class="hxp__thread">
+                          <div class="hxp__msg hxp__msg--in" data-msg>
+                            <span class="hxp__msg-meta">ED physician · now</span>
+                            Chest pain with STEMI pattern on ECG — can cardiology review before cath lab activation?
+                          </div>
+                          <div class="hxp__msg hxp__msg--out" data-msg>
+                            On it. Pulling last troponin and activating the STEMI pathway — ETA 90 seconds.
+                          </div>
+                          <div class="hxp__msg hxp__msg--in" data-msg>
+                            <span class="hxp__msg-meta">Pharmacist on call · 42s</span>
+                            Heparin bolus verified for Pt. MRN ******12 — documented in the thread.
+                          </div>
+                          <div class="hxp__msg hxp__msg--out" data-msg>
+                            Cath team paged with bed assignment OR-3. Closing the loop here.
+                          </div>
+                          <div class="hxp__typing is-shown" aria-hidden="true"><i></i><i></i><i></i></div>
+                        </div>
+                      </section>
+
+                      <!-- Scene 3 — Shifts -->
+                      <section class="hxp__scene" data-scene="shifts" data-dwell="5200" id="hxp-panel-shifts" role="tabpanel" aria-labelledby="hxp-tab-shifts">
+                        <div class="hxp__week" aria-hidden="true">
+                          <span class="hxp__day"><span>M</span><b>11</b><i></i></span>
+                          <span class="hxp__day hxp__day--off"><span>T</span><b>12</b><i></i></span>
+                          <span class="hxp__day is-today"><span>W</span><b>13</b><i></i></span>
+                          <span class="hxp__day hxp__day--off"><span>T</span><b>14</b><i></i></span>
+                          <span class="hxp__day"><span>F</span><b>15</b><i></i></span>
+                          <span class="hxp__day hxp__day--off"><span>S</span><b>16</b><i></i></span>
+                          <span class="hxp__day hxp__day--off"><span>S</span><b>17</b><i></i></span>
+                        </div>
+
+                        <p class="hxp__label">My roster <span>March</span></p>
+                        <div class="hxp__card">
+                          <div class="hxp__row">
+                            <span class="hxp__time">Mon<br>11</span>
+                            <span class="hxp__row-main"><strong>Night · Emergency</strong><span>19:00 – 07:00 · Team B</span></span>
+                            <span class="hxp__chip hxp__chip--blue">Confirmed</span>
+                          </div>
+                          <div class="hxp__row">
+                            <span class="hxp__time">Wed<br>13</span>
+                            <span class="hxp__row-main"><strong>Day · ICU</strong><span>07:00 – 19:00 · Team A</span></span>
+                            <span class="hxp__chip hxp__chip--green">On duty</span>
+                          </div>
+                          <div class="hxp__row">
+                            <span class="hxp__time">Fri<br>15</span>
+                            <span class="hxp__row-main"><strong>Swap requested</strong><span>With Dr. K. Boateng · pending</span></span>
+                            <span class="hxp__chip hxp__chip--amber">Pending</span>
+                          </div>
+                        </div>
+
+                        <p class="hxp__label">Coverage right now</p>
+                        <div class="hxp__card">
+                          <div class="hxp__row">
+                            <span class="hxp__row-main"><strong>Emergency</strong><span>6 of 6 clinicians on shift</span></span>
+                            <span class="hxp__chip hxp__chip--green">Full</span>
+                          </div>
+                          <div class="hxp__row">
+                            <span class="hxp__row-main"><strong>Paediatrics</strong><span>3 of 4 · 1 gap at 22:00</span></span>
+                            <span class="hxp__chip hxp__chip--amber">Gap</span>
+                          </div>
+                        </div>
+
+                        <p class="hxp__label">Open shifts <span>2 available</span></p>
+                        <div class="hxp__card">
+                          <div class="hxp__row">
+                            <span class="hxp__time">Sat<br>16</span>
+                            <span class="hxp__row-main"><strong>Night · Paediatrics</strong><span>19:00 – 07:00 · 1 slot</span></span>
+                            <span class="hxp__chip hxp__chip--blue">Pick up</span>
+                          </div>
+                        </div>
+                      </section>
+
+                      <!-- Scene 4 — Tools -->
+                      <section class="hxp__scene" data-scene="tools" data-dwell="5400" id="hxp-panel-tools" role="tabpanel" aria-labelledby="hxp-tab-tools">
+                        <p class="hxp__search">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                          Search 20,000+ medications
+                        </p>
+
+                        <div class="hxp__ai">
+                          <p class="hxp__ai-head">
+                            <i aria-hidden="true"><svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/></svg></i>
+                            Helix AI assistant
+                          </p>
+                          <p class="hxp__ai-q">Ceftriaxone dosing in renal impairment?</p>
+                          <p class="hxp__ai-a">No adjustment needed above CrCl 10 mL/min. Cap at 2 g daily with hepatic impairment. <b>2 sources</b></p>
+                        </div>
+
+                        <p class="hxp__label">Calculator</p>
+                        <div class="hxp__card">
+                          <p class="text-[0.6875rem] font-bold leading-tight">Creatinine clearance</p>
+                          <p class="text-[0.5625rem] text-brand-pewter">Cockcroft–Gault</p>
+                          <div class="mt-1.5">
+                            <div class="hxp__calc-row"><span>Age</span><b>64 years</b></div>
+                            <div class="hxp__calc-row"><span>Weight</span><b>72 kg</b></div>
+                            <div class="hxp__calc-row"><span>Serum creatinine</span><b>1.4 mg/dL</b></div>
+                          </div>
+                        </div>
+                        <div class="hxp__result">
+                          <span>Estimated CrCl</span>
+                          <strong>48 mL/min</strong>
+                          <em>Moderate impairment — review renal dosing</em>
+                        </div>
+
+                        <p class="hxp__label">Interaction check</p>
+                        <div class="hxp__card">
+                          <div class="hxp__row">
+                            <span class="hxp__row-main"><strong>Warfarin + Ciprofloxacin</strong><span>Increased bleeding risk · monitor INR</span></span>
+                            <span class="hxp__chip hxp__chip--amber">Major</span>
+                          </div>
+                        </div>
+                      </section>
+
                     </div>
-                    <div class="helix-chat-demo__msg helix-chat-demo__msg--out" data-chat-msg>
-                      On it. Pulling last troponin and activating STEMI pathway — ETA 90 seconds.
+
+                    <div class="hxp__tabs" role="tablist" aria-label="App sections">
+                      <button type="button" class="hxp__tab is-active" data-scene-target="home" role="tab" aria-selected="true" id="hxp-tab-home" aria-controls="hxp-panel-home">
+                        <span class="hxp__tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+                        Home
+                      </button>
+                      <button type="button" class="hxp__tab" data-scene-target="messages" role="tab" aria-selected="false" id="hxp-tab-messages" aria-controls="hxp-panel-messages">
+                        <span class="hxp__tab-icon" aria-hidden="true">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>
+                          <span class="hxp__badge">3</span>
+                        </span>
+                        Messages
+                      </button>
+                      <button type="button" class="hxp__tab" data-scene-target="shifts" role="tab" aria-selected="false" id="hxp-tab-shifts" aria-controls="hxp-panel-shifts">
+                        <span class="hxp__tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+                        Shifts
+                      </button>
+                      <button type="button" class="hxp__tab" data-scene-target="tools" role="tab" aria-selected="false" id="hxp-tab-tools" aria-controls="hxp-panel-tools">
+                        <span class="hxp__tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 1 5.3 5L18 13l-7 7-4-4 7-7z"/><path d="m5 19 2-2"/></svg></span>
+                        Tools
+                      </button>
                     </div>
-                    <div class="helix-chat-demo__msg helix-chat-demo__msg--in" data-chat-msg>
-                      <div class="helix-chat-demo__meta">Pharmacist on call · 42s</div>
-                      Heparin bolus verified for Pt. MRN ******12 — documented in the thread.
-                    </div>
-                    <div class="helix-chat-demo__msg helix-chat-demo__msg--out" data-chat-msg>
-                      Cath team paged with bed assignment OR-3. Thanks all — closing the loop here.
-                    </div>
-                    <div class="helix-chat-demo__typing" id="helix-chat-typing" aria-hidden="true">
-                      <span></span><span></span><span></span>
-                    </div>
+
+                    <div class="pb-1.5"><span class="hxp__home-bar" aria-hidden="true"></span></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        </div>
 
-        <div class="hx-stagger mt-10 grid min-w-0 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-4">
-            <div class="hx-reveal is-visible helix-panel-card helix-panel-card--soft min-w-0 overflow-hidden rounded-xl border border-brand-grey bg-brand-whitefr p-4 shadow-brand helix-rail-card border-l-brand-green">
-              <p class="text-2xl font-bold tracking-tight text-brand-charcoal">Low latency</p>
-              <p class="mt-2 text-sm leading-snug text-brand-pewter [overflow-wrap:anywhere]">Ultra-low latency delivery for critical alerts on modern hospital networks.</p>
-            </div>
-            <div class="hx-reveal is-visible helix-panel-card helix-panel-card--soft min-w-0 overflow-hidden rounded-xl border border-brand-grey bg-brand-whitefr p-4 shadow-brand helix-rail-card border-l-brand-pink">
-              <p class="text-xl font-bold tracking-tight text-brand-charcoal sm:text-2xl">End-to-end encryption</p>
-              <p class="mt-2 text-sm leading-snug text-brand-pewter [overflow-wrap:anywhere]">End-to-end encrypted messaging built for protected health information (PHI) and the highest healthcare standards.</p>
-            </div>
-            <div class="hx-reveal is-visible helix-panel-card helix-panel-card--soft min-w-0 overflow-hidden rounded-xl border border-brand-grey bg-brand-whitefr p-4 shadow-brand helix-rail-card border-l-brand-blue">
-              <p class="text-2xl font-bold tracking-tight text-brand-charcoal">Read receipts</p>
-              <p class="mt-2 text-sm leading-snug text-brand-pewter [overflow-wrap:anywhere]">Facility-wide broadcasts and urgent threads with delivered &amp; read visibility.</p>
-            </div>
         </div>
       </div>
     </section>
 
-    <!-- Trust — HIPAA / ops (moved from top ribbon for clearer sticky nav) -->
-    <section class="border-b border-brand-grey bg-brand-whitefr py-4" aria-label="Helix Health Technology">
-      <div class="mx-auto flex max-w-7xl flex-col gap-3 px-5 text-sm leading-snug text-brand-graphite sm:flex-row sm:items-center sm:justify-between lg:px-8">
-        <p class="max-w-4xl">
-          <span class="font-semibold text-brand-charcoal">Helix Health Technology.</span>
-          HIPAA-aligned messaging, routing, and audit trails — built for nurses, physicians, and hospital operations.
-        </p>
-        <a href="#security" class="shrink-0 text-sm font-semibold text-[#0A4676] underline-offset-4 hover:underline">Security &amp; PHI overview</a>
-      </div>
-    </section>
-
-    <!-- Strip -->
-    <section class="border-b border-brand-grey bg-brand-whitefr py-12" aria-label="Care settings">
+    <!-- ========================== CARE SETTINGS ========================== -->
+    <!-- Swap these chips for partner hospital logos once naming permission is confirmed. -->
+    <section class="border-y border-brand-grey bg-brand-whitefr py-10" aria-label="Where Helix Health is used">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
-        <p class="hx-reveal text-center text-[11px] font-bold uppercase tracking-[0.2em] text-brand-pewter">Where Helix is designed to excel</p>
-        <div class="hx-reveal mt-6 flex flex-wrap justify-center gap-2">
-          <span class="helix-pill rounded-full border border-brand-grey bg-brand-off px-4 py-2 text-sm font-medium text-brand-graphite">Acute care</span>
-          <span class="helix-pill rounded-full border border-brand-grey bg-brand-off px-4 py-2 text-sm font-medium text-brand-graphite">Perioperative</span>
-          <span class="helix-pill rounded-full border border-brand-grey bg-brand-off px-4 py-2 text-sm font-medium text-brand-graphite">Emergency</span>
-          <span class="helix-pill rounded-full border border-brand-grey bg-brand-off px-4 py-2 text-sm font-medium text-brand-graphite">ICU</span>
-          <span class="helix-pill rounded-full border border-brand-grey bg-brand-off px-4 py-2 text-sm font-medium text-brand-graphite">Ambulatory hubs</span>
+        <p class="hx-reveal text-center text-[11px] font-bold uppercase tracking-[0.2em] text-brand-pewter">Built for the places where every second counts</p>
+        <div class="hx-reveal mt-6 flex flex-wrap justify-center gap-2.5">
+          <span class="hx-facility"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 8v8M8 12h8"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg>Emergency</span>
+          <span class="hx-facility"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>Intensive care</span>
+          <span class="hx-facility"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11"/><path d="M4 14h16M9 7V4h6v3"/></svg>Theatre &amp; perioperative</span>
+          <span class="hx-facility"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 20h18M6 20V8h12v12"/><path d="M10 12h4M12 10v4"/></svg>Inpatient wards</span>
+          <span class="hx-facility"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m10.5 20.5-7-7a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7z"/><path d="m8.5 8.5 7 7"/></svg>Pharmacy</span>
+          <span class="hx-facility"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 21h18M6 21V7l6-4 6 4v14"/></svg>Administration</span>
         </div>
       </div>
     </section>
 
-    <!-- Platform & core capabilities -->
-    <section id="platform" class="border-t border-brand-grey bg-brand-off py-20 lg:py-28">
+    <!-- ======================== ALL-IN-ONE PLATFORM ======================== -->
+    <section id="platform" class="scroll-mt-28 border-b border-brand-grey bg-brand-off py-20 lg:py-28">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
         <div class="hx-reveal mx-auto max-w-3xl text-center">
-          <div class="mx-auto h-1 w-12 rounded-full bg-gradient-to-r from-brand-green to-brand-blue"></div>
-          <h2 class="mt-5 text-4xl font-bold tracking-tight text-brand-charcoal lg:text-[2.65rem]">One platform for every shift</h2>
-          <p class="mt-4 text-lg leading-relaxed text-brand-pewter">
-            Identity-aware routing keeps accountability high and noise low — without sacrificing speed at the bedside.
+          <p class="hx-eyebrow">All-in-One Platform</p>
+          <h2 class="mt-4 text-balance text-4xl font-bold leading-snug tracking-tight text-brand-charcoal lg:text-[2.85rem] lg:leading-[1.28]">Everything Hospitals Need in One Place</h2>
+          <div class="mx-auto mt-5 hx-rule"></div>
+          <p class="mt-6 text-lg leading-relaxed text-brand-pewter">
+            Helix Health unites communication, operations, and clinical knowledge so your team can focus on what matters most — your patients.
           </p>
         </div>
 
-        <div id="features" class="scroll-mt-28">
-          <div class="hx-reveal mx-auto mt-16 max-w-3xl text-center">
-            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0A4676]">Core platform</p>
-            <h3 class="mt-3 text-3xl font-bold tracking-tight text-brand-charcoal lg:text-4xl">Everything your care teams need in one platform.</h3>
-            <p class="mt-4 text-lg text-brand-pewter">
-              Built from the ground up for the realities of modern clinical workflows. Helix Health removes friction so you can focus on patient care.
-            </p>
-          </div>
+        <div class="hx-stagger mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <a href="communication.html" class="hx-reveal hx-pillar" style="--hx-accent: #0A4676">
+            <span class="hx-pillar__icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>
+            </span>
+            <h3 class="mt-6 text-xl font-bold tracking-tight text-brand-charcoal">Critical Communication</h3>
+            <p class="mt-3 text-sm leading-relaxed text-brand-pewter">Reach the right people instantly with secure messaging, alerts, and escalation workflows.</p>
+            <span class="hx-pillar__more">Learn more <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
 
-          <div class="hx-stagger mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-green helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Role-based sign-in</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Nurses, surgeons, and specialists see exactly what they need — interfaces tailored to clinical roles.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-pink helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Secure messaging</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">End-to-end encrypted messaging that meets the highest standards of healthcare data security.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-blue helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Integrated calling</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Escalate from text to video, voice, or carrier calls instantly without leaving patient context.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-yellow helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Care team groups</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Automatically grouped chats from active patient assignments — groups update when shifts change.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-teal helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Intelligent routing</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Messages reach the right on-call provider — without guessing who to page.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-gold helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Ultra-low latency</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Engineered for speed — critical alerts can bypass normal queues for sub-second delivery targets.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-green helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Hospital broadcasts</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Facility-wide alerts during emergencies, with read receipts and escalation paths your policy defines.</p>
-            </article>
-            <article class="hx-reveal flex min-h-[168px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-6 helix-rail-card border-l-brand-pink helix-panel-card helix-panel-card--soft">
-              <h4 class="text-lg font-bold leading-snug text-brand-charcoal">Admin analytics</h4>
-              <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Dashboards for IT and administrators to monitor response times, usage, and system health.</p>
-            </article>
-          </div>
+          <a href="scheduling.html" class="hx-reveal hx-pillar" style="--hx-accent: oklch(47.69% 0.0847 225.96)">
+            <span class="hx-pillar__icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3v3H8z"/></svg>
+            </span>
+            <h3 class="mt-6 text-xl font-bold tracking-tight text-brand-charcoal">Staff Scheduling</h3>
+            <p class="mt-3 text-sm leading-relaxed text-brand-pewter">Smart scheduling and shift management that reduces gaps and improves coverage.</p>
+            <span class="hx-pillar__more">Learn more <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
 
-          <div class="mt-12 flex justify-center">
-            <button type="button" data-open-demo class="helix-btn helix-btn--outline">Book a walkthrough</button>
-          </div>
+          <a href="clinical-resources.html" class="hx-reveal hx-pillar" style="--hx-accent: oklch(47.69% 0.0847 225.96)">
+            <span class="hx-pillar__icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M12 7v5M9.5 9.5h5"/></svg>
+            </span>
+            <h3 class="mt-6 text-xl font-bold tracking-tight text-brand-charcoal">Clinical Resources</h3>
+            <p class="mt-3 text-sm leading-relaxed text-brand-pewter">Access essential drug information, guidelines, calculators, and protocols at the point of care.</p>
+            <span class="hx-pillar__more">Learn more <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
+
+          <a href="operational-insights.html" class="hx-reveal hx-pillar" style="--hx-accent: oklch(66.45% 0.1516 62.96)">
+            <span class="hx-pillar__icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 3.5-4 3 2.5L20 7"/></svg>
+            </span>
+            <h3 class="mt-6 text-xl font-bold tracking-tight text-brand-charcoal">Operational Insights</h3>
+            <p class="mt-3 text-sm leading-relaxed text-brand-pewter">Real-time dashboards and reports to help you make faster, data-driven decisions.</p>
+            <span class="hx-pillar__more">Learn more <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
         </div>
       </div>
     </section>
 
-    <!-- Compare -->
-    <section id="compare" class="border-t border-brand-grey bg-brand-whitefr py-20 lg:py-28">
+    <!-- ========================== DEEP DIVE TABS ========================== -->
+    <section class="border-b border-brand-grey bg-brand-whitefr py-20 lg:py-24" aria-labelledby="deepdive-title">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
         <div class="hx-reveal mx-auto max-w-3xl text-center">
-          <div class="mx-auto h-1 w-12 rounded-full bg-gradient-to-r from-brand-green to-brand-blue"></div>
-          <h2 class="mt-5 text-4xl font-bold tracking-tight">Why Helix Health?</h2>
-          <p class="mt-4 text-lg text-brand-pewter">
-            Conventional pagers are obsolete. Many alternatives are complex and costly to operate well. See how we stack up against the status quo.
-          </p>
-        </div>
-        <div class="hx-reveal mt-12 overflow-x-auto rounded-xl border border-brand-grey shadow-brand">
-          <table class="w-full min-w-[820px] border-collapse text-left text-sm">
-            <thead>
-              <tr class="border-b border-brand-grey bg-brand-off">
-                <th class="px-4 py-4 font-bold text-brand-charcoal lg:px-6">Feature</th>
-                <th class="px-4 py-4 font-bold text-brand-graphite lg:px-6">Legacy pagers</th>
-                <th class="px-4 py-4 font-bold text-brand-graphite lg:px-6">Existing clinical messaging apps</th>
-                <th class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-bold text-brand-charcoal lg:px-6">Helix Health</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-brand-grey text-brand-pewter">
-              <tr class="bg-brand-whitefr">
-                <th class="px-4 py-4 font-semibold text-brand-charcoal lg:px-6">Instant delivery</th>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">One-way, indirect</td>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Varies by product; not always built for on-call paging workflows</td>
-                <td class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-medium text-brand-charcoal lg:px-6">Built for sub-second critical paths</td>
-              </tr>
-              <tr class="bg-brand-whitefr">
-                <th class="px-4 py-4 font-semibold text-brand-charcoal lg:px-6">HIPAA compliant</th>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Limited traceability</td>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Often yes — depends on deployment and business associate agreement (BAA) coverage</td>
-                <td class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-medium text-brand-charcoal lg:px-6">100% HIPAA-aligned by design</td>
-              </tr>
-              <tr class="bg-brand-whitefr">
-                <th class="px-4 py-4 font-semibold text-brand-charcoal lg:px-6">Rich media &amp; video</th>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">No</td>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Frequently; video and carrier paths vary widely</td>
-                <td class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-medium text-brand-charcoal lg:px-6">Chat, voice, video &amp; carrier escalation</td>
-              </tr>
-              <tr class="bg-brand-whitefr">
-                <th class="px-4 py-4 font-semibold text-brand-charcoal lg:px-6">Modern native user interface</th>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Hardware-centric</td>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Mobile and web common; clinical polish varies</td>
-                <td class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-medium text-brand-charcoal lg:px-6">Calm, role-aware clinical user experience</td>
-              </tr>
-              <tr class="bg-brand-whitefr">
-                <th class="px-4 py-4 font-semibold text-brand-charcoal lg:px-6">Role-based context</th>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Coarse groups</td>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Often directory-based; coverage rules differ by vendor</td>
-                <td class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-medium text-brand-charcoal lg:px-6">Coverage-aware routing &amp; sign-in</td>
-              </tr>
-              <tr class="bg-brand-whitefr">
-                <th class="px-4 py-4 font-semibold text-brand-charcoal lg:px-6">Sub-second latency</th>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Unpredictable</td>
-                <td class="px-4 py-4 text-brand-graphite lg:px-6">Can be strong; not always prioritized for code/critical paths</td>
-                <td class="border-l-2 border-brand-green bg-brand-greenlight px-4 py-4 font-medium text-brand-charcoal lg:px-6">Critical alerts prioritized end-to-end</td>
-              </tr>
-            </tbody>
-          </table>
+          <p class="hx-eyebrow">A closer look</p>
+          <h2 id="deepdive-title" class="mt-4 text-3xl font-bold tracking-tight lg:text-4xl">One system, four connected modules</h2>
+          <p class="mt-4 text-lg text-brand-pewter">Every module shares the same directory, roles, and audit trail — so nothing falls between systems.</p>
         </div>
 
-        <div class="hx-stagger mt-12 grid gap-4 lg:grid-cols-3">
-          <article class="hx-reveal flex min-h-[160px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-8 helix-rail-card border-l-brand-green helix-panel-card helix-panel-card--soft">
-            <p class="text-3xl font-bold tracking-tight text-brand-charcoal">&lt;150ms</p>
-            <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Typical delivery targets on modern facility networks — engineered for urgency when it counts.*</p>
-          </article>
-          <article class="hx-reveal flex min-h-[160px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-8 helix-rail-card border-l-brand-pink helix-panel-card helix-panel-card--soft">
-            <p class="text-3xl font-bold tracking-tight text-brand-charcoal">100%</p>
-            <p class="mt-4 text-sm leading-relaxed text-brand-pewter">HIPAA-aligned architecture with governance your security team can review.</p>
-          </article>
-          <article class="hx-reveal flex min-h-[160px] flex-col justify-between rounded-lg border border-brand-grey bg-brand-whitefr p-8 helix-rail-card border-l-brand-blue helix-panel-card helix-panel-card--soft">
-            <p class="text-3xl font-bold tracking-tight text-brand-charcoal">Role + person</p>
-            <p class="mt-4 text-sm leading-relaxed text-brand-pewter">Route to named clinicians or active cohorts — never guess who to page again.</p>
-          </article>
+        <div class="mt-12" data-tabs>
+          <div class="flex justify-center overflow-x-auto pb-1">
+            <div class="hx-tabs" role="tablist" aria-label="Platform modules">
+              <button type="button" class="hx-tab" data-tab="comm" role="tab" aria-selected="true" aria-controls="panel-comm" id="tab-comm">Communication</button>
+              <button type="button" class="hx-tab" data-tab="sched" role="tab" aria-selected="false" aria-controls="panel-sched" id="tab-sched">Scheduling</button>
+              <button type="button" class="hx-tab" data-tab="clin" role="tab" aria-selected="false" aria-controls="panel-clin" id="tab-clin">Clinical resources</button>
+              <button type="button" class="hx-tab" data-tab="ops" role="tab" aria-selected="false" aria-controls="panel-ops" id="tab-ops">Operational insights</button>
+            </div>
+          </div>
+
+          <div class="mt-10">
+            <div class="hx-tabpanel grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14" data-tabpanel="comm" id="panel-comm" role="tabpanel" aria-labelledby="tab-comm">
+              <div>
+                <h3 class="text-2xl font-bold tracking-tight lg:text-3xl">Messages that always find the right clinician</h3>
+                <p class="mt-4 text-base leading-relaxed text-brand-pewter">Route by role, not by guesswork. Helix knows who is on call, escalates when no one responds, and keeps the whole conversation in one auditable thread.</p>
+                <ul class="mt-7 space-y-3.5">
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Role-based routing tied to the live on-call roster</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Automatic escalation when a critical message goes unread</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Facility-wide broadcasts with delivered and read visibility</li>
+                </ul>
+                <a href="communication.html" class="helix-btn helix-btn--outline mt-8">Explore Critical Communication</a>
+              </div>
+              <div class="hx-dash">
+                <div class="hx-dash__bar"><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="ml-2 text-xs font-semibold text-brand-pewter">Escalation monitor</span></div>
+                <div class="space-y-3 p-5">
+                  <div class="flex items-center gap-3 rounded-xl border border-brand-grey bg-brand-off p-3.5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-green text-xs font-bold text-white">ED</span>
+                    <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold">Sepsis alert — Ward C</p><p class="text-xs text-brand-pewter">Delivered to 4 · read by 4</p></div>
+                    <span class="rounded-full bg-brand-greenlight px-2.5 py-1 text-[11px] font-bold text-brand-green">Resolved</span>
+                  </div>
+                  <div class="flex items-center gap-3 rounded-xl border border-brand-grey bg-brand-off p-3.5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-navy text-xs font-bold text-white">ICU</span>
+                    <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold">Ventilator review request</p><p class="text-xs text-brand-pewter">Escalated to consultant after 2 min</p></div>
+                    <span class="rounded-full bg-brand-blue/50 px-2.5 py-1 text-[11px] font-bold text-brand-navy">Active</span>
+                  </div>
+                  <div class="flex items-center gap-3 rounded-xl border border-brand-grey bg-brand-off p-3.5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-charcoal text-xs font-bold text-white">OR</span>
+                    <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold">Theatre delay — OR 3</p><p class="text-xs text-brand-pewter">Broadcast to 12 staff</p></div>
+                    <span class="rounded-full bg-brand-yellow/60 px-2.5 py-1 text-[11px] font-bold text-brand-charcoal">Notified</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hx-tabpanel grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14" data-tabpanel="sched" id="panel-sched" role="tabpanel" aria-labelledby="tab-sched" hidden>
+              <div>
+                <h3 class="text-2xl font-bold tracking-tight lg:text-3xl">Rosters that stay accurate all month</h3>
+                <p class="mt-4 text-base leading-relaxed text-brand-pewter">Build schedules once, publish to every phone, and let staff request swaps that respect your coverage rules. Gaps surface before they become incidents.</p>
+                <ul class="mt-7 space-y-3.5">
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Drag-and-drop rosters by unit, team, and grade</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Swap requests with approval chains and audit history</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Live coverage view that flags gaps before the shift starts</li>
+                </ul>
+                <a href="scheduling.html" class="helix-btn helix-btn--outline mt-8">Explore Staff Scheduling</a>
+              </div>
+              <div class="hx-dash">
+                <div class="hx-dash__bar"><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="ml-2 text-xs font-semibold text-brand-pewter">Weekly roster — Emergency</span></div>
+                <div class="p-5">
+                  <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-brand-pewter">
+                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                  </div>
+                  <div class="mt-2 grid grid-cols-7 gap-1.5">
+                    <span class="rounded-md bg-brand-greenlight py-3"></span>
+                    <span class="rounded-md bg-brand-green py-3"></span>
+                    <span class="rounded-md bg-brand-greenlight py-3"></span>
+                    <span class="rounded-md bg-brand-blue py-3"></span>
+                    <span class="rounded-md bg-brand-green py-3"></span>
+                    <span class="rounded-md bg-brand-yellow py-3"></span>
+                    <span class="rounded-md bg-brand-greenlight py-3"></span>
+                    <span class="rounded-md bg-brand-blue py-3"></span>
+                    <span class="rounded-md bg-brand-greenlight py-3"></span>
+                    <span class="rounded-md bg-brand-green py-3"></span>
+                    <span class="rounded-md bg-brand-greenlight py-3"></span>
+                    <span class="rounded-md bg-brand-greenlight py-3"></span>
+                    <span class="rounded-md bg-brand-green py-3"></span>
+                    <span class="rounded-md bg-brand-blue py-3"></span>
+                  </div>
+                  <div class="mt-5 space-y-2.5">
+                    <div class="flex items-center justify-between rounded-xl border border-brand-grey bg-brand-off px-3.5 py-3">
+                      <div><p class="text-sm font-bold">Night shift · 19:00–07:00</p><p class="text-xs text-brand-pewter">6 of 6 clinicians assigned</p></div>
+                      <span class="rounded-full bg-brand-greenlight px-2.5 py-1 text-[11px] font-bold text-brand-green">Full</span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-xl border border-brand-grey bg-brand-off px-3.5 py-3">
+                      <div><p class="text-sm font-bold">Paediatrics · 22:00</p><p class="text-xs text-brand-pewter">1 open slot — 3 eligible staff</p></div>
+                      <span class="rounded-full bg-brand-yellow/70 px-2.5 py-1 text-[11px] font-bold text-brand-charcoal">Gap</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hx-tabpanel grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14" data-tabpanel="clin" id="panel-clin" role="tabpanel" aria-labelledby="tab-clin" hidden>
+              <div>
+                <h3 class="text-2xl font-bold tracking-tight lg:text-3xl">Clinical answers without leaving the ward</h3>
+                <p class="mt-4 text-base leading-relaxed text-brand-pewter">Over 20,000 medications, more than 250 calculators, and your own approved protocols — searchable in seconds, on the same device your team already carries.</p>
+                <ul class="mt-7 space-y-3.5">
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>20,000+ drug monographs with renal and paediatric dosing</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>250+ clinical calculators and interaction checking by severity</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>An in-house AI assistant that answers clinical questions with sources</li>
+                </ul>
+                <a href="clinical-resources.html" class="helix-btn helix-btn--outline mt-8">Explore Clinical Resources</a>
+              </div>
+              <div class="hx-dash">
+                <div class="hx-dash__bar"><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="ml-2 text-xs font-semibold text-brand-pewter">Drug reference</span></div>
+                <div class="p-5">
+                  <div class="flex items-center gap-2 rounded-full border border-brand-grey bg-brand-off px-4 py-2.5 text-sm text-brand-pewter">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    Vancomycin
+                  </div>
+                  <div class="mt-4 rounded-xl border border-brand-grey p-4">
+                    <p class="text-sm font-bold">Adult dosing</p>
+                    <p class="mt-1.5 text-xs leading-relaxed text-brand-pewter">15–20 mg/kg every 8–12 hours. Adjust interval for creatinine clearance below 50 mL/min.</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span class="rounded-full bg-brand-greenlight px-2.5 py-1 text-[11px] font-bold text-brand-green">Renal adjust</span>
+                      <span class="rounded-full bg-brand-yellow/60 px-2.5 py-1 text-[11px] font-bold text-brand-charcoal">Monitor levels</span>
+                    </div>
+                  </div>
+                  <div class="mt-3 rounded-xl border border-brand-grey p-4">
+                    <p class="text-sm font-bold">Interaction — Gentamicin</p>
+                    <p class="mt-1.5 text-xs leading-relaxed text-brand-pewter">Additive nephrotoxicity. Monitor renal function and consider alternatives.</p>
+                    <span class="mt-3 inline-block rounded-full bg-brand-pink/60 px-2.5 py-1 text-[11px] font-bold text-brand-charcoal">Major</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hx-tabpanel grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14" data-tabpanel="ops" id="panel-ops" role="tabpanel" aria-labelledby="tab-ops" hidden>
+              <div>
+                <h3 class="text-2xl font-bold tracking-tight lg:text-3xl">See how your hospital actually runs</h3>
+                <p class="mt-4 text-base leading-relaxed text-brand-pewter">Response times, escalation rates, shift coverage, and adoption by unit — reported in one place so management decisions rest on evidence, not anecdote.</p>
+                <ul class="mt-7 space-y-3.5">
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Live dashboards by unit, team, and time of day</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Scheduled reports for management and board meetings</li>
+                  <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Exportable audit trails for quality and compliance reviews</li>
+                </ul>
+                <a href="operational-insights.html" class="helix-btn helix-btn--outline mt-8">Explore Operational Insights</a>
+              </div>
+              <div class="hx-dash">
+                <div class="hx-dash__bar"><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="hx-dash__dot"></span><span class="ml-2 text-xs font-semibold text-brand-pewter">Response time — last 7 days</span></div>
+                <div class="p-5">
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="rounded-xl border border-brand-grey bg-brand-off p-3"><p class="text-xs text-brand-pewter">Median</p><p class="mt-1 text-xl font-bold">38s</p></div>
+                    <div class="rounded-xl border border-brand-grey bg-brand-off p-3"><p class="text-xs text-brand-pewter">Escalated</p><p class="mt-1 text-xl font-bold">4.2%</p></div>
+                    <div class="rounded-xl border border-brand-grey bg-brand-off p-3"><p class="text-xs text-brand-pewter">Coverage</p><p class="mt-1 text-xl font-bold">97%</p></div>
+                  </div>
+                  <figure class="mt-5">
+                    <figcaption class="flex items-baseline justify-between">
+                      <span class="text-xs font-semibold text-brand-pewter">Messages sent</span>
+                      <span class="text-xs font-bold text-brand-charcoal">11,280 this week <span class="text-brand-green">+18%</span></span>
+                    </figcaption>
+                    <svg class="hx-trend mt-3" viewBox="0 0 320 120" role="img" aria-label="Line chart of messages sent each day this week: 1,520 Monday, 1,780 Tuesday, 1,640 Wednesday, peaking at 2,120 Thursday, then easing to 1,080 by Sunday.">
+                      <defs>
+                        <linearGradient id="hxTrendFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#0A4676" stop-opacity="0.28"/>
+                          <stop offset="100%" stop-color="#0A4676" stop-opacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <line class="hx-trend__grid" x1="0" y1="20" x2="320" y2="20"/>
+                      <line class="hx-trend__grid" x1="0" y1="50" x2="320" y2="50"/>
+                      <line class="hx-trend__grid" x1="0" y1="80" x2="320" y2="80"/>
+                      <line class="hx-trend__grid" x1="0" y1="110" x2="320" y2="110"/>
+                      <path class="hx-trend__area" d="M23 69 L69 48 L114 59 L160 21 L206 34 L251 96 L297 104 L297 118 L23 118 Z"/>
+                      <path class="hx-trend__line" d="M23 69 L69 48 L114 59 L160 21 L206 34 L251 96 L297 104"/>
+                      <circle class="hx-trend__dot" cx="23" cy="69" r="3.2" style="animation-delay: .5s"/>
+                      <circle class="hx-trend__dot" cx="69" cy="48" r="3.2" style="animation-delay: .7s"/>
+                      <circle class="hx-trend__dot" cx="114" cy="59" r="3.2" style="animation-delay: .9s"/>
+                      <circle class="hx-trend__dot hx-trend__dot--peak" cx="160" cy="21" r="4.5" style="animation-delay: 1.1s"/>
+                      <circle class="hx-trend__dot" cx="206" cy="34" r="3.2" style="animation-delay: 1.3s"/>
+                      <circle class="hx-trend__dot" cx="251" cy="96" r="3.2" style="animation-delay: 1.5s"/>
+                      <circle class="hx-trend__dot" cx="297" cy="104" r="3.2" style="animation-delay: 1.7s"/>
+                    </svg>
+                    <div class="hx-trend__days" aria-hidden="true">
+                      <span>Mon</span><span>Tue</span><span>Wed</span><b>Thu</b><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                  </figure>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <p class="mt-4 text-center text-[11px] text-brand-pewter">Comparisons are generalized; evaluate your specific contract, integrations, and clinical workflows.</p>
-        <p class="mt-6 text-center text-xs text-brand-pewter">*Illustrative — finalize SLAs with your implementation team.</p>
       </div>
     </section>
 
-    <!-- Security -->
-    <section id="security" class="relative overflow-hidden border-t border-brand-grey bg-brand-whitefr py-20 lg:py-28">
+    <!-- ============================= METRICS ============================= -->
+    <section class="relative overflow-hidden bg-brand-navy py-20 text-white lg:py-24" aria-labelledby="metrics-title">
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_-25%,oklch(83.46%_0.0735_257.42_/_0.22),transparent)]" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="hx-reveal mx-auto max-w-2xl text-center">
+          <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">By the numbers</p>
+          <h2 id="metrics-title" class="mt-4 text-3xl font-bold tracking-tight lg:text-4xl">Growing with the hospitals we serve</h2>
+        </div>
+
+        <div class="hx-stagger mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="hx-reveal hx-metric">
+            <span class="hx-metric__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V8l6-4 6 4v13"/><path d="M10 12h4M12 10v4"/></svg></span>
+            <p class="hx-metric__value"><span data-count-to="15" data-count-suffix="+">0</span></p>
+            <p class="hx-metric__label">Health facilities onboarded</p>
+          </div>
+          <div class="hx-reveal hx-metric">
+            <span class="hx-metric__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <p class="hx-metric__value"><span data-count-to="1000" data-count-suffix="+">0</span></p>
+            <p class="hx-metric__label">Healthcare workers</p>
+          </div>
+          <div class="hx-reveal hx-metric">
+            <span class="hx-metric__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M10 2h4M12 2v3M19 6l1.5-1.5"/></svg></span>
+            <p class="hx-metric__value"><span data-count-to="30" data-count-prefix="<" data-count-suffix="s">&lt;0s</span></p>
+            <p class="hx-metric__label">Median read time</p>
+          </div>
+          <div class="hx-reveal hx-metric">
+            <span class="hx-metric__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg></span>
+            <p class="hx-metric__value"><span data-count-to="99.9" data-count-decimals="1" data-count-suffix="%">0</span></p>
+            <p class="hx-metric__label">Platform uptime</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== BUILT FOR EVERY ROLE ========================== -->
+    <section id="roles" class="scroll-mt-28 border-b border-brand-grey bg-brand-off py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="hx-reveal mx-auto max-w-3xl text-center">
+          <p class="hx-eyebrow">Built for Every Role</p>
+          <h2 class="mt-4 text-balance text-4xl font-bold leading-snug tracking-tight text-brand-charcoal lg:text-[2.85rem] lg:leading-[1.35]">Supporting Every Part of the Hospital</h2>
+          <div class="mx-auto mt-5 hx-rule"></div>
+          <p class="mt-6 text-lg leading-relaxed text-brand-pewter">
+            From the emergency department to administration, Helix Health helps every team communicate, coordinate, and deliver care more effectively.
+          </p>
+        </div>
+
+        <div class="hx-stagger mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <a class="hx-reveal hx-role" href="solutions.html#doctors">
+            <span class="hx-role__media">
+              <img src="assets/img/role-doctor.jpg" width="900" height="600" loading="lazy" decoding="async" alt="Doctor in a white coat holding a tablet in a hospital corridor">
+              <span class="hx-role__tag">Doctors</span>
+            </span>
+            <span class="hx-role__body">
+              <span class="block text-sm leading-relaxed text-brand-pewter">Get critical updates, access clinical tools, and collaborate seamlessly.</span>
+              <span class="hx-role__more">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </span>
+          </a>
+
+          <a class="hx-reveal hx-role" href="solutions.html#nurses">
+            <span class="hx-role__media">
+              <img src="assets/img/role-nurse.jpg" width="900" height="600" loading="lazy" decoding="async" alt="Nurse in teal scrubs at a hospital nurses station">
+              <span class="hx-role__tag">Nurses</span>
+            </span>
+            <span class="hx-role__body">
+              <span class="block text-sm leading-relaxed text-brand-pewter">Stay informed, coordinate care, and escalate faster.</span>
+              <span class="hx-role__more">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </span>
+          </a>
+
+          <a class="hx-reveal hx-role" href="solutions.html#pharmacists">
+            <span class="hx-role__media">
+              <img src="assets/img/role-pharmacist.jpg" width="900" height="600" loading="lazy" decoding="async" alt="Pharmacist in a white coat checking medication in a hospital pharmacy">
+              <span class="hx-role__tag">Pharmacists</span>
+            </span>
+            <span class="hx-role__body">
+              <span class="block text-sm leading-relaxed text-brand-pewter">Access drug information, check drug interactions, and support safer care.</span>
+              <span class="hx-role__more">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </span>
+          </a>
+
+          <a class="hx-reveal hx-role" href="solutions.html#administrators">
+            <span class="hx-role__media">
+              <img src="assets/img/role-administrator.jpg" width="900" height="600" loading="lazy" decoding="async" alt="Hospital administrator working at a laptop in an office">
+              <span class="hx-role__tag">Administrators</span>
+            </span>
+            <span class="hx-role__body">
+              <span class="block text-sm leading-relaxed text-brand-pewter">Optimize operations, track performance, and improve outcomes.</span>
+              <span class="hx-role__more">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= SECURITY ============================= -->
+    <section class="relative overflow-hidden bg-brand-navy py-20 text-white lg:py-24">
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_20%_-30%,oklch(83.46%_0.0735_257.42_/_0.16),transparent)]" aria-hidden="true"></div>
       <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
         <div class="hx-reveal grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green">Security &amp; compliance</p>
-            <h2 class="mt-4 text-4xl font-bold leading-tight text-brand-charcoal lg:text-[2.65rem]">Designed around protected health information (PHI).</h2>
-            <p class="mt-5 text-lg leading-relaxed text-brand-pewter">
-              HIPAA-aligned safeguards, access controls, and auditability. Reviewed with your privacy, security, and clinical IT stakeholders during deployment.
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">Security &amp; compliance</p>
+            <h2 class="mt-4 text-3xl font-bold leading-tight lg:text-[2.6rem]">Designed around protected health information (PHI).</h2>
+            <p class="mt-5 text-lg leading-relaxed text-white/70">
+              Encryption in transit and at rest, role-based access, and complete audit trails — reviewed with your privacy, security, and clinical IT stakeholders before go-live.
             </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="security.html" class="helix-btn helix-btn--inverse">Security overview</a>
+              <a href="legal.html#baa" class="helix-btn helix-btn--glass border-white/30">Business associate agreement</a>
+            </div>
           </div>
           <div class="hx-stagger grid gap-4 sm:grid-cols-2">
-            <article class="hx-reveal helix-panel-card helix-panel-card--soft helix-compliance-card rounded-xl border border-brand-grey bg-brand-whitefr p-6">
-              <h3 class="text-lg font-bold text-brand-charcoal">Technical controls</h3>
-              <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Encryption, device posture, and integrations that respect hospital standards.</p>
-            </article>
-            <article class="hx-reveal helix-panel-card helix-panel-card--soft helix-compliance-card rounded-xl border border-brand-grey bg-brand-whitefr p-6">
-              <h3 class="text-lg font-bold text-brand-charcoal">Administrative policy</h3>
-              <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Retention, exports, and segregation mapped to your governance model.</p>
-            </article>
-            <article class="hx-reveal helix-panel-card helix-panel-card--soft helix-compliance-card rounded-xl border border-brand-grey bg-brand-whitefr p-6 sm:col-span-2">
-              <h3 class="text-lg font-bold text-brand-charcoal">Clinical usability</h3>
-              <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Interfaces stay calm under pressure, with fewer steps from signal to action.</p>
-            </article>
+            <div class="hx-reveal helix-panel-card helix-panel-card--inverse rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm">
+              <h3 class="text-lg font-bold">Technical controls</h3>
+              <p class="mt-2 text-sm leading-relaxed text-white/65">Encryption, device posture, and integrations that respect hospital standards.</p>
+            </div>
+            <div class="hx-reveal helix-panel-card helix-panel-card--inverse rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm">
+              <h3 class="text-lg font-bold">Administrative policy</h3>
+              <p class="mt-2 text-sm leading-relaxed text-white/65">Retention, exports, and segregation mapped to your governance model.</p>
+            </div>
+            <div class="hx-reveal helix-panel-card helix-panel-card--inverse rounded-xl border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm sm:col-span-2">
+              <h3 class="text-lg font-bold">Clinical usability</h3>
+              <p class="mt-2 text-sm leading-relaxed text-white/65">Interfaces stay calm under pressure — fewer steps between signal and action.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Demo journey -->
-    <section id="demo-journey" class="border-t border-brand-grey bg-brand-off py-16 lg:py-20">
+    <!-- =========================== IMPLEMENTATION =========================== -->
+    <section class="border-b border-brand-grey bg-brand-whitefr py-20 lg:py-24">
       <div class="mx-auto max-w-7xl px-5 lg:px-8">
-        <div class="hx-reveal mx-auto max-w-3xl text-center">
-          <h2 class="text-3xl font-bold tracking-tight text-brand-charcoal lg:text-4xl">Ready to upgrade your hospital&apos;s communication?</h2>
-          <p class="mt-4 text-lg text-brand-pewter">
-            Schedule a personalized demo to see how Helix Health can reduce response times, improve patient outcomes, and secure your clinical data.
-          </p>
-        </div>
-        <ol class="hx-stagger mt-12 grid gap-6 lg:grid-cols-3">
-          <li class="hx-reveal rounded-xl border border-brand-grey bg-brand-whitefr p-8 shadow-brand helix-panel-card helix-panel-card--soft">
-            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-green text-lg font-bold text-white">1</span>
-            <h3 class="mt-5 text-lg font-bold text-brand-charcoal">Discovery call</h3>
-            <p class="mt-2 text-sm leading-relaxed text-brand-pewter">A brief 15-minute call to understand your facility&apos;s unique challenges.</p>
-          </li>
-          <li class="hx-reveal rounded-xl border border-brand-grey bg-brand-whitefr p-8 shadow-brand helix-panel-card helix-panel-card--soft">
-            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#0A4676] text-lg font-bold text-white">2</span>
-            <h3 class="mt-5 text-lg font-bold text-brand-charcoal">Tailored demo</h3>
-            <p class="mt-2 text-sm leading-relaxed text-brand-pewter">A deep dive into the features that matter most to your care teams.</p>
-          </li>
-          <li class="hx-reveal rounded-xl border border-brand-grey bg-brand-whitefr p-8 shadow-brand helix-panel-card helix-panel-card--soft">
-            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-pink text-lg font-bold text-brand-charcoal">3</span>
-            <h3 class="mt-5 text-lg font-bold text-brand-charcoal">Pilot program</h3>
-            <p class="mt-2 text-sm leading-relaxed text-brand-pewter">Risk-free trial implementation in a controlled unit of your choice.</p>
-          </li>
-        </ol>
-        <div class="mt-10 flex justify-center">
-          <button type="button" data-open-demo class="helix-btn helix-btn--primary px-8">Request a demo</button>
+        <div class="grid gap-14 lg:grid-cols-2 lg:items-center">
+          <div class="hx-reveal">
+            <p class="hx-eyebrow">Getting started</p>
+            <h2 class="mt-4 text-3xl font-bold tracking-tight lg:text-4xl">Live in weeks, not quarters</h2>
+            <p class="mt-4 text-lg leading-relaxed text-brand-pewter">
+              Helix Health is cloud-based, so there is no hardware to install. Most facilities start with one unit, prove the workflow, then expand.
+            </p>
+            <div class="mt-9 space-y-8">
+              <div class="hx-step">
+                <span class="hx-step__num">1</span>
+                <h3 class="text-lg font-bold">Discovery call</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-brand-pewter">A short conversation to understand your units, on-call structure, and current pain points.</p>
+              </div>
+              <div class="hx-step">
+                <span class="hx-step__num">2</span>
+                <h3 class="text-lg font-bold">Tailored demo</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-brand-pewter">We configure a walkthrough around the workflows that matter most to your care teams.</p>
+              </div>
+              <div class="hx-step">
+                <span class="hx-step__num">3</span>
+                <h3 class="text-lg font-bold">Pilot and rollout</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-brand-pewter">Start in a controlled unit with training and local support, then scale facility-wide.</p>
+              </div>
+            </div>
+            <div class="mt-10 flex flex-wrap gap-3">
+              <button type="button" data-open-demo class="helix-btn helix-btn--primary">Request a Demo</button>
+              <a href="resources.html#checklist" class="helix-btn helix-btn--outline">Implementation checklist</a>
+              <a href="on-boarding/index.html" class="helix-btn helix-btn--outline">Start on-boarding</a>
+            </div>
+          </div>
+
+          <div class="hx-reveal rounded-2xl border border-brand-grey bg-brand-off p-8 shadow-brand lg:p-10">
+            <h3 class="text-xl font-bold">What your team gets on day one</h3>
+            <ul class="mt-6 space-y-4">
+              <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>A verified staff directory mapped to your units and roles</li>
+              <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>On-call rosters published to every phone</li>
+              <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Escalation rules written with your clinical leads</li>
+              <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Your protocols and formulary loaded into clinical resources</li>
+              <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Admin dashboard access for your operations team</li>
+              <li class="hx-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>On-site or virtual training for every shift pattern</li>
+            </ul>
+            <p class="mt-8 rounded-xl border border-brand-grey bg-brand-whitefr p-4 text-sm leading-relaxed text-brand-pewter">
+              Need something specific for your facility? Talk to us about integrations, offline behaviour, and data residency on the
+              <a href="contact.html" class="font-semibold text-brand-green hover:underline">contact page</a>.
+            </p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- CTA -->
-    <section class="py-12 lg:py-20">
+    <!-- ============================== CTA ============================== -->
+    <section class="py-14 lg:py-20">
       <div class="hx-reveal mx-auto max-w-7xl px-5 lg:px-8">
         <div class="relative overflow-hidden rounded-3xl bg-brand-green px-8 py-12 shadow-brand-lg lg:flex lg:items-center lg:justify-between lg:gap-12 lg:px-14 lg:py-14">
           <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-blue/25 blur-3xl" aria-hidden="true"></div>
           <div class="relative max-w-xl">
             <h2 class="text-3xl font-bold tracking-tight text-white lg:text-4xl">See Helix Health in your hospital.</h2>
-            <p class="mt-3 text-sm leading-relaxed text-white/85">Routing, roles, integrations, and analytics — tailored to your environment.</p>
+            <p class="mt-3 text-base leading-relaxed text-white/85">Communication, scheduling, clinical resources, and insights — configured around your units.</p>
           </div>
           <div class="relative mt-8 flex shrink-0 flex-wrap gap-3 lg:mt-0">
-            <button type="button" data-open-demo class="helix-btn helix-btn--inverse">Request a demo</button>
-            <a href="#contact" class="helix-btn helix-btn--glass border-white/30">Contact sales</a>
+            <button type="button" data-open-demo class="helix-btn helix-btn--inverse">Request a Demo</button>
+            <a href="contact.html" class="helix-btn helix-btn--glass border-white/30">Contact sales</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Contact -->
-    <section id="contact" class="border-t border-brand-grey bg-brand-off py-20 lg:py-28">
+    <!-- ============================= CONTACT ============================= -->
+    <section id="contact" class="scroll-mt-28 border-t border-brand-grey bg-brand-off py-20 lg:py-28">
       <div class="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-2 lg:gap-16 lg:px-8">
         <div class="hx-reveal">
-          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0A4676]">Get in touch</p>
-          <div class="mt-3 h-1 w-12 rounded-full bg-gradient-to-r from-brand-green to-brand-blue"></div>
+          <p class="hx-eyebrow">Get in touch</p>
+          <div class="mt-3 hx-rule"></div>
           <h2 class="mt-5 text-4xl font-bold tracking-tight">We&apos;d love to hear from you</h2>
           <p class="mt-4 text-lg text-brand-pewter">
             Whether you have a question about our platform, compliance, or pricing — our team is ready to help.
@@ -459,17 +1019,23 @@
               <dd class="mt-2"><a class="text-lg font-semibold text-brand-green hover:underline" href="tel:+233543571525">+233 543 571 525</a></dd>
             </div>
             <div>
-              <dt class="text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Support</dt>
+              <dt class="text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Email</dt>
               <dd class="mt-2"><a class="text-lg font-semibold text-brand-green hover:underline" href="mailto:support@helixhealth.app">support@helixhealth.app</a></dd>
+              <dd class="mt-1 text-sm text-brand-pewter">Sales, support, and partnership enquiries all reach the same team.</dd>
+            </div>
+            <div>
+              <dt class="text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Hours</dt>
+              <dd class="mt-2 text-lg font-semibold text-brand-charcoal">Mon – Fri, 08:00 – 18:00 GMT</dd>
+              <dd class="mt-1 text-sm text-brand-pewter">Critical incident support for live facilities runs 24/7.</dd>
             </div>
           </dl>
         </div>
-        <div class="hx-reveal rounded-xl border border-brand-grey bg-gradient-to-br from-brand-whitefr to-brand-greenlight/35 p-8 shadow-brand lg:p-10 helix-panel-card helix-panel-card--soft">
+        <div class="hx-reveal helix-panel-card helix-panel-card--soft rounded-xl border border-brand-grey bg-gradient-to-br from-brand-whitefr to-brand-greenlight/35 p-8 shadow-brand lg:p-10">
           <h3 class="text-xl font-bold text-brand-charcoal">Quick message</h3>
           <form id="contact-form" class="hx-form-contact mt-6 space-y-5" action="https://formsubmit.co/support@helixhealth.app" method="post" novalidate>
             <div>
               <label for="cf-email" class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Work email</label>
-              <input id="cf-email" type="email" name="email" required autocomplete="email" class="hx-field mt-2 w-full rounded-lg border border-brand-grey bg-brand-whitefr px-4 py-3 text-sm" placeholder="you@healthsystem.org">
+              <input id="cf-email" type="email" name="email" required autocomplete="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}" title="Enter a valid email address, for example name@hospital.org" inputmode="email" class="hx-field mt-2 w-full rounded-lg border border-brand-grey bg-brand-whitefr px-4 py-3 text-sm" placeholder="you@healthsystem.org">
             </div>
             <div>
               <label for="cf-topic" class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Topic</label>
@@ -489,6 +1055,10 @@
               <label for="cf-msg" class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Message</label>
               <textarea id="cf-msg" name="message" rows="4" required class="hx-field mt-2 w-full rounded-lg border border-brand-grey bg-brand-whitefr px-4 py-3 text-sm" placeholder="How can we help?"></textarea>
             </div>
+            <label class="flex items-start gap-3 text-xs text-brand-pewter">
+              <input type="checkbox" name="consent" required class="hx-field mt-0.5 h-4 w-4 rounded border-brand-grey text-brand-green">
+              <span>By submitting, you agree to our <a href="legal.html#privacy" class="font-semibold text-brand-green hover:underline">Privacy Policy</a>.</span>
+            </label>
             <button type="submit" class="helix-btn helix-btn--primary helix-btn--block justify-center">Send message</button>
             <p id="contact-form-status" class="text-center text-sm font-semibold text-brand-green" role="status" aria-live="polite"></p>
           </form>
@@ -497,118 +1067,96 @@
     </section>
   </main>
 
+  <!-- ============================== FOOTER ============================== -->
   <footer class="helix-footer-slab border-t border-brand-grey py-8 lg:py-10">
     <div class="helix-footer-slab-inner mx-auto max-w-7xl px-4 lg:px-8">
-      <div class="sr-only">
-        <h2 id="privacy">Privacy policy</h2>
-        <p>For the complete privacy policy, contact Helix Health Technology.</p>
-        <h2 id="terms">Terms of service</h2>
-        <p>For complete terms of use, contact Helix Health Technology.</p>
-        <h2 id="baa">Business associate agreement</h2>
-        <p>For BAA-related questions, contact your Helix Health Technology representative.</p>
-        <h2 id="subscription-agreement">Subscription agreement</h2>
-        <p>For subscription terms, contact Helix Health Technology.</p>
-        <h2 id="checklist">Checklist</h2>
-        <p>Procurement and readiness resources from Helix Health Technology.</p>
-        <h2 id="news">News and Media</h2>
-        <p>Updates and announcements from Helix Health Technology.</p>
-      </div>
       <div class="rounded-[1.75rem] border border-brand-grey bg-brand-whitefr px-6 py-8 shadow-brand sm:px-10 lg:rounded-[2rem] lg:px-12 lg:py-9">
-        <div class="grid gap-10 text-center sm:grid-cols-2 sm:text-left lg:grid-cols-5 lg:gap-8">
+        <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0A4676]">Product</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-navy">Products</p>
             <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
-              <li><a href="#platform" class="hover:text-brand-charcoal">Platform</a></li>
-              <li><a href="#features" class="hover:text-brand-charcoal">Capabilities</a></li>
-              <li><a href="#compare" class="hover:text-brand-charcoal">Vs pagers</a></li>
-              <li><a href="#security" class="hover:text-brand-charcoal">Security</a></li>
+              <li><a href="communication.html" class="hover:text-brand-charcoal">Critical Communication</a></li>
+              <li><a href="scheduling.html" class="hover:text-brand-charcoal">Staff Scheduling</a></li>
+              <li><a href="clinical-resources.html" class="hover:text-brand-charcoal">Clinical Resources</a></li>
+              <li><a href="operational-insights.html" class="hover:text-brand-charcoal">Operational Insights</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-navy">Solutions</p>
+            <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
+              <li><a href="solutions.html#doctors" class="hover:text-brand-charcoal">For Doctors</a></li>
+              <li><a href="solutions.html#nurses" class="hover:text-brand-charcoal">For Nurses</a></li>
+              <li><a href="solutions.html#pharmacists" class="hover:text-brand-charcoal">For Pharmacists</a></li>
+              <li><a href="solutions.html#administrators" class="hover:text-brand-charcoal">For Administrators</a></li>
+              <li><a href="solutions.html#facilities" class="hover:text-brand-charcoal">By facility type</a></li>
+            </ul>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-navy">Resources</p>
+            <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
+              <li><a href="resources.html" class="hover:text-brand-charcoal">Resource hub</a></li>
+              <li><a href="resources.html#checklist" class="hover:text-brand-charcoal">Checklist</a></li>
               <li><a href="on-boarding/index.html" class="hover:text-brand-charcoal">On-boarding</a></li>
+              <li><a href="resources.html#faq" class="hover:text-brand-charcoal">FAQ</a></li>
+              <li><a href="security.html" class="hover:text-brand-charcoal">Trust &amp; compliance</a></li>
             </ul>
           </div>
           <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0A4676]">Clinical use</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-navy">Company</p>
             <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
-              <li><a href="#platform" class="hover:text-brand-charcoal">Acute &amp; perioperative</a></li>
-              <li><a href="#platform" class="hover:text-brand-charcoal">Emergency &amp; ICU</a></li>
-              <li><a href="#compare" class="hover:text-brand-charcoal">Routing &amp; coverage</a></li>
-              <li><a href="#features" class="hover:text-brand-charcoal">Care teams &amp; broadcasts</a></li>
+              <li><a href="company.html" class="hover:text-brand-charcoal">Helix Health Technology</a></li>
+              <li><a href="company.html#news" class="hover:text-brand-charcoal">News and Media</a></li>
+              <li><a href="contact.html" class="hover:text-brand-charcoal">Contact Us</a></li>
+              <li><a href="company.html#partners" class="hover:text-brand-charcoal">Partners</a></li>
             </ul>
           </div>
           <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0A4676]">Resources</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-navy">Legal</p>
             <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
-              <li><a href="#security" class="hover:text-brand-charcoal">Trust &amp; compliance</a></li>
-              <li><a href="#contact" class="hover:text-brand-charcoal">Contact sales</a></li>
-              <li><button type="button" data-open-demo class="hover:text-brand-charcoal sm:text-left">Request a demo</button></li>
-              <li><a href="on-boarding/index.html" class="hover:text-brand-charcoal">Checklist</a></li>
-            </ul>
-          </div>
-          <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0A4676]">Company</p>
-            <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
-              <li><a href="#contact" class="hover:text-brand-charcoal">Helix Health Technology</a></li>
-              <li><a href="#news" class="hover:text-brand-charcoal">News and Media</a></li>
-              <li><a href="#contact" class="hover:text-brand-charcoal">Contact Us</a></li>
-              <li><a href="#contact" class="hover:text-brand-charcoal">Partners</a></li>
-            </ul>
-          </div>
-          <div>
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0A4676]">Legal</p>
-            <ul class="mt-4 space-y-2.5 text-sm text-brand-graphite">
-              <li><a href="#privacy" class="hover:text-brand-charcoal">Privacy</a></li>
-              <li><a href="#terms" class="hover:text-brand-charcoal">Terms</a></li>
-              <li><a href="#baa" class="hover:text-brand-charcoal">BAA</a></li>
-              <li><a href="#subscription-agreement" class="hover:text-brand-charcoal">Subscription agreement</a></li>
+              <li><a href="legal.html#privacy" class="hover:text-brand-charcoal">Privacy</a></li>
+              <li><a href="legal.html#terms" class="hover:text-brand-charcoal">Terms</a></li>
+              <li><a href="legal.html#baa" class="hover:text-brand-charcoal">BAA</a></li>
+              <li><a href="legal.html#subscription-agreement" class="hover:text-brand-charcoal">Subscription agreement</a></li>
             </ul>
           </div>
         </div>
 
-        <hr class="my-8 border-brand-grey" />
+        <hr class="my-8 border-brand-grey">
 
-        <div class="flex flex-col items-center gap-10 text-center lg:flex-row lg:items-start lg:justify-between lg:text-left">
-          <div class="w-full max-w-lg">
-            <a href="#" class="inline-flex items-center justify-center gap-3 no-underline lg:justify-start" aria-label="Helix Health home">
-              <img src="assets/helix-logo.svg" width="48" height="41" alt="" class="h-11 w-auto shrink-0 object-contain" decoding="async" />
-              <span class="text-2xl font-bold tracking-tight text-[#0A4676]">Helix Health</span>
+        <div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+          <div class="max-w-lg">
+            <a href="index.html" class="inline-flex items-center gap-3 no-underline" aria-label="Helix Health home">
+              <img src="assets/helix-logo.svg" width="48" height="41" alt="" class="h-11 w-auto shrink-0 object-contain" decoding="async">
+              <span class="text-2xl font-bold tracking-tight text-brand-navy">Helix Health</span>
             </a>
             <p class="mt-5 text-sm leading-relaxed text-brand-pewter">
-              Helix Health Technology is focused on clinical communication: secure messaging, routing, voice and video, and audit-ready operations for hospitals and health systems.
+              Helix Health Technology unites clinical communication, staff scheduling, clinical resources, and operational insights in one secure platform for hospitals and health systems.
             </p>
             <p class="mt-5 text-[11px] font-bold uppercase tracking-[0.12em] text-brand-pewter">Mobile apps</p>
-            <div class="mt-3 flex w-full flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-              <a href="https://apps.apple.com/us/app/helix-health/id6761296684" class="helix-store-badge inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-brand-grey bg-brand-charcoal px-4 py-2.5 text-xs font-semibold text-white shadow-brand transition hover:bg-brand-graphite sm:w-auto" rel="noopener noreferrer" target="_blank" aria-label="Download on the App Store">
+            <div class="mt-3 flex flex-wrap gap-3">
+              <a href="https://apps.apple.com/app/helix-health/id6761296684" class="helix-store-badge inline-flex items-center gap-2.5 rounded-xl border border-brand-grey bg-brand-charcoal px-4 py-2.5 text-xs font-semibold text-white shadow-brand transition hover:bg-brand-graphite" rel="noopener noreferrer" target="_blank" aria-label="Download on the App Store">
                 <svg class="helix-store-badge__icon shrink-0 overflow-visible" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                 </svg>
                 App Store
               </a>
-              <a href="https://play.google.com/store/apps/details?id=com.helixhealth.app&amp;hl=en-US&amp;ah=n5SLXXqVTsBQomyghhbBHA2nEew" class="helix-store-badge inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-brand-grey bg-brand-whitefr px-4 py-2.5 text-xs font-semibold text-brand-charcoal shadow-brand transition hover:bg-brand-off sm:w-auto" rel="noopener noreferrer" target="_blank" aria-label="Get Helix Health on Google Play">
+              <a href="https://play.google.com/store/apps/details?id=com.helixhealth.app" class="helix-store-badge inline-flex items-center gap-2.5 rounded-xl border border-brand-grey bg-brand-whitefr px-4 py-2.5 text-xs font-semibold text-brand-charcoal shadow-brand transition hover:bg-brand-off" rel="noopener noreferrer" target="_blank" aria-label="Get Helix Health on Google Play">
                 <svg class="helix-store-badge__icon shrink-0" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
-                  <path fill="#34A853" d="M3.609 1.814 13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92z"/>
-                  <path fill="#FBBC04" d="m16.794 15.001-3.002-3.001 2.998-2.998 3.86 2.205c.815.466.815 1.601 0 2.067l-3.856 2.727z"/>
-                  <path fill="#EA4335" d="M16.794 15.001 13.792 12 3.609 22.186a.997.997 0 0 0 1.024.054l12.16-7.239z"/>
-                  <path fill="#4285F4" d="M3.609 1.814a.997.997 0 0 1 1.024.054L16.794 8.998 13.792 12 3.609 1.814z"/>
+                  <path fill="#0A4676" d="M3.6 2.2c-.4 0-.7.1-.9.3-.4.4-.4 1-.1 1.6l2.1 3.6L14.5 12 4.7 17.3l-2.1 3.6c-.3.6-.3 1.2.1 1.6.2.2.5.3.9.3.3 0 .6-.1.9-.3l12-7c.5-.3.8-.8.8-1.3s-.3-1-.8-1.3l-12-7c-.3-.2-.6-.3-.9-.3z"/>
+                  <path fill="#34A853" d="M17.4 8.5l-2.9 2.9 2.9 2.9 3.7-2.1c1-.6 1-2.1 0-2.7l-3.7-2z"/>
+                  <path fill="#FBBC04" d="M3.6 2.2c-.1 0-.2 0-.3.1l8.9 8.9 2.9-2.9L4.5 1.9c-.3-.2-.6-.3-.9-.3z"/>
+                  <path fill="#EA4335" d="M3.3 22.1c.1 0 .2 0 .3-.1l9.1-9.1-2.9-2.9-8.9 8.9c-.2.3-.3.6-.3.9 0 .3.1.6.3.9.2.2.5.3.9.3h-.2z"/>
                 </svg>
                 Google Play
               </a>
             </div>
           </div>
-          <div class="w-full lg:max-w-xs">
+          <div class="min-w-0 lg:min-w-[22rem] lg:max-w-none lg:shrink-0">
             <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-pewter">Follow</p>
-            <ul class="mt-3 flex flex-wrap justify-center gap-2 lg:justify-start" role="list">
+            <ul class="mt-3 flex flex-wrap gap-2" role="list">
               <li>
-                <a href="https://www.linkedin.com" class="flex h-11 w-11 items-center justify-center rounded-full border border-brand-grey text-brand-graphite transition hover:border-brand-charcoal hover:bg-brand-off hover:text-brand-charcoal" rel="noopener noreferrer" target="_blank" aria-label="LinkedIn">
+                <a href="https://www.linkedin.com/company/helix-health-technologies/" class="flex h-11 w-11 items-center justify-center rounded-full border border-brand-grey text-brand-graphite transition hover:border-brand-charcoal hover:bg-brand-off hover:text-brand-charcoal" rel="noopener noreferrer" target="_blank" aria-label="LinkedIn">
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                </a>
-              </li>
-              <li>
-                <a href="https://wa.me/233543571525" class="flex h-11 w-11 items-center justify-center rounded-full border border-brand-grey text-brand-graphite transition hover:border-brand-charcoal hover:bg-brand-off hover:text-brand-charcoal" rel="noopener noreferrer" target="_blank" aria-label="WhatsApp">
-                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.11 4.86A10.02 10.02 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.27-1.38a9.9 9.9 0 0 0 4.72 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.85-7.05zm-7.07 15.25h-.01a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.13.82.83-3.05-.2-.31a8.21 8.21 0 0 1-1.26-4.36c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.42 5.83c0 4.54-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.96-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.99-1.22-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.77-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01-.16 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.57.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.46-.6 1.66-1.17.21-.58.21-1.07.14-1.17-.06-.1-.22-.16-.47-.28z"/></svg>
-                </a>
-              </li>
-              <li>
-                <a href="https://www.x.com" class="flex h-11 w-11 items-center justify-center rounded-full border border-brand-grey text-brand-graphite transition hover:border-brand-charcoal hover:bg-brand-off hover:text-brand-charcoal" rel="noopener noreferrer" target="_blank" aria-label="X (Twitter)">
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </a>
               </li>
               <li>
@@ -617,30 +1165,33 @@
                 </a>
               </li>
             </ul>
-            <div class="mt-5 flex flex-wrap items-center justify-center gap-4 lg:justify-start" aria-label="Compliance marks">
-              <div class="flex h-[5.5rem] w-[5.5rem] items-center justify-center">
-                <img src="assets/hipaa-compliant-badge.png" width="88" height="88" alt="HIPAA compliant" class="h-full w-full scale-[1.26] object-contain" decoding="async" />
-              </div>
-              <div class="flex h-[5.5rem] w-[5.5rem] items-center justify-center">
-                <img src="assets/dpc-logo.png" width="88" height="88" alt="DPC" class="h-full w-full object-contain" decoding="async" />
-              </div>
+
+            <p class="mt-8 text-[11px] font-bold uppercase tracking-[0.12em] text-brand-pewter">Compliance</p>
+            <div class="mt-3 flex flex-row flex-nowrap items-center gap-3">
+              <a href="security.html" class="inline-flex h-[52px] shrink-0 items-center justify-center rounded-xl border border-brand-grey bg-brand-whitefr px-3.5 shadow-brand transition hover:border-brand-charcoal" aria-label="HIPAA compliant — read about security and compliance">
+                <img src="assets/hipaa-compliant.svg" width="74" height="42" alt="HIPAA compliant" class="h-9 w-auto max-w-[5.5rem]" loading="lazy" decoding="async">
+              </a>
+              <a href="security.html" class="inline-flex h-[52px] shrink-0 items-center justify-center rounded-xl border border-brand-grey bg-brand-whitefr px-3.5 shadow-brand transition hover:border-brand-charcoal" aria-label="Registered with Ghana's Data Protection Commission — read about security and compliance">
+                <img src="assets/dpc-logo.svg" width="104" height="30" alt="Data Protection Commission, Ghana" class="h-6 w-auto max-w-[7.25rem]" loading="lazy" decoding="async">
+              </a>
             </div>
           </div>
-          <div class="w-full max-w-sm rounded-2xl border border-brand-grey bg-brand-off/80 p-6 lg:shrink-0">
+          <div class="max-w-sm rounded-2xl border border-brand-grey bg-brand-off/80 p-6 lg:shrink-0">
             <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-pewter">Next step</p>
-            <p class="mt-3 text-sm leading-relaxed text-brand-graphite">See routing, roles, and integrations tailored to your hospital. We typically respond within one business day.</p>
-            <button type="button" data-open-demo class="helix-btn helix-btn--primary mt-5 w-full justify-center">Request a demo</button>
+            <p class="mt-3 text-sm leading-relaxed text-brand-graphite">See routing, rosters, and dashboards tailored to your hospital — we typically respond within one business day.</p>
+            <button type="button" data-open-demo class="helix-btn helix-btn--primary mt-5 w-full justify-center sm:w-auto">Request a demo</button>
           </div>
         </div>
 
-        <div class="mt-8 flex flex-col items-center gap-4 border-t border-brand-grey pt-6 text-center text-xs text-brand-pewter sm:flex-row sm:items-center sm:justify-between sm:text-left">
+        <div class="mt-8 flex flex-col gap-4 border-t border-brand-grey pt-6 text-xs text-brand-pewter sm:flex-row sm:items-center sm:justify-between">
           <p>© <span id="year"></span> Helix Health Technology. All rights reserved.</p>
-          <nav class="flex flex-wrap justify-center gap-x-5 gap-y-1 sm:justify-end" aria-label="Legal">
-            <a href="#terms" class="hover:text-brand-charcoal">Terms</a>
-            <a href="#privacy" class="hover:text-brand-charcoal">Privacy</a>
-            <a href="#baa" class="hover:text-brand-charcoal">BAA</a>
-            <a href="#subscription-agreement" class="hover:text-brand-charcoal">Subscription agreement</a>
-            <a href="#security" class="hover:text-brand-charcoal">Security</a>
+          <nav class="flex flex-wrap gap-x-5 gap-y-1" aria-label="Legal">
+            <a href="legal.html#terms" class="hover:text-brand-charcoal">Terms</a>
+            <a href="legal.html#privacy" class="hover:text-brand-charcoal">Privacy</a>
+            <a href="legal.html#baa" class="hover:text-brand-charcoal">BAA</a>
+            <a href="legal.html#subscription-agreement" class="hover:text-brand-charcoal">Subscription agreement</a>
+            <a href="legal.html#cookies" class="hover:text-brand-charcoal">Cookies</a>
+            <a href="security.html" class="hover:text-brand-charcoal">Security</a>
             <button type="button" id="open-cookie-settings" class="text-left hover:text-brand-charcoal">Cookie preferences</button>
           </nav>
         </div>
@@ -648,7 +1199,7 @@
     </div>
   </footer>
 
-  <!-- Demo modal -->
+  <!-- ============================ DEMO MODAL ============================ -->
   <div class="hx-modal" id="demo-modal" hidden role="dialog" aria-modal="true" aria-labelledby="demo-title">
     <div class="hx-modal-backdrop" data-close-demo tabindex="-1"></div>
     <div class="hx-modal-sheet p-8 sm:p-10">
@@ -667,34 +1218,34 @@
           </div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Job title *</label>
-          <input type="text" name="jobTitle" required autocomplete="organization-title" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="Chief of Surgery">
+          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter" for="demo-title-field">Job title *</label>
+          <input id="demo-title-field" type="text" name="jobTitle" required autocomplete="organization-title" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="Chief of Surgery">
         </div>
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Facility / hospital name *</label>
-          <input type="text" name="facility" required autocomplete="organization" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="Memorial General Hospital">
+          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter" for="demo-facility">Facility / hospital name *</label>
+          <input id="demo-facility" type="text" name="facility" required autocomplete="organization" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="Memorial General Hospital">
         </div>
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Work email *</label>
-          <input type="email" name="email" required autocomplete="email" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="jane.doe@hospital.org">
+          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter" for="demo-email">Work email *</label>
+          <input id="demo-email" type="email" name="email" required autocomplete="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}" title="Enter a valid email address, for example name@hospital.org" inputmode="email" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="kwasi.boateng@hospital.org">
         </div>
         <div class="grid gap-4 sm:grid-cols-2 sm:items-end">
           <div>
-            <label class="block min-h-[2.5rem] text-[11px] font-bold uppercase tracking-wide text-brand-pewter sm:flex sm:items-end">Phone number</label>
-            <input type="tel" name="phone" autocomplete="tel" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="+233 543 571 525">
+            <label class="block min-h-[2.5rem] text-[11px] font-bold uppercase tracking-wide text-brand-pewter sm:flex sm:items-end" for="demo-phone">Phone number</label>
+            <input id="demo-phone" type="tel" name="phone" autocomplete="tel" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="+233 543 571 525">
           </div>
           <div>
-            <label class="block min-h-[2.5rem] text-[11px] font-bold uppercase tracking-wide text-brand-pewter sm:flex sm:items-end" title="Estimated number of licensed users">Est. users</label>
-            <input type="number" name="estimatedUsers" min="1" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="e.g. 500" aria-label="Estimated number of users">
+            <label class="block min-h-[2.5rem] text-[11px] font-bold uppercase tracking-wide text-brand-pewter sm:flex sm:items-end" for="demo-users" title="Estimated number of licensed users">Est. users</label>
+            <input id="demo-users" type="number" name="estimatedUsers" min="1" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="e.g. 500">
           </div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter">Additional details (optional)</label>
-          <textarea name="details" rows="3" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="Tell us about your current communication setup…"></textarea>
+          <label class="block text-[11px] font-bold uppercase tracking-wide text-brand-pewter" for="demo-details">Additional details (optional)</label>
+          <textarea id="demo-details" name="details" rows="3" class="hx-field mt-1.5 w-full rounded-lg border border-brand-grey px-3 py-2.5 text-sm" placeholder="Tell us about your current communication setup…"></textarea>
         </div>
         <label class="flex items-start gap-3 text-xs text-brand-pewter">
           <input type="checkbox" name="consent" required class="hx-field mt-0.5 h-4 w-4 rounded border-brand-grey text-brand-green">
-          <span>By submitting, you agree to our <a href="#privacy" class="font-semibold text-brand-green hover:underline">Privacy Policy</a> and <a href="#terms" class="font-semibold text-brand-green hover:underline">Terms of Service</a>.</span>
+          <span>By submitting, you agree to our <a href="legal.html#privacy" class="font-semibold text-brand-green hover:underline">Privacy Policy</a> and <a href="legal.html#terms" class="font-semibold text-brand-green hover:underline">Terms of Service</a>.</span>
         </label>
         <button type="submit" class="helix-btn helix-btn--primary helix-btn--block justify-center">Submit request</button>
         <p id="demo-form-status" class="text-center text-sm font-semibold text-brand-green" role="status" aria-live="polite"></p>
@@ -702,6 +1253,7 @@
     </div>
   </div>
 
+  <!-- ============================== COOKIES ============================== -->
   <div class="hx-cookie" id="cookie-banner" hidden role="dialog" aria-labelledby="cookie-title">
     <div class="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
       <div>

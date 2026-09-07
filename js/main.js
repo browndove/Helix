@@ -162,18 +162,20 @@
       demoForm.classList.add("hx-form--attempted");
       if (!demoForm.reportValidity()) return;
 
-      // Collect fields
-      var firstName = qs("[name='firstName']", demoForm).value.trim();
-      var lastName = qs("[name='lastName']", demoForm).value.trim();
-      var jobTitle = qs("[name='jobTitle']", demoForm).value.trim();
-      var facility = qs("[name='facility']", demoForm).value.trim();
-      var email = qs("[name='email']", demoForm).value.trim();
-      var phone = qs("[name='phone']", demoForm).value.trim();
-      var estimatedUsers = qs("[name='estimatedUsers']", demoForm).value.trim();
-      var details = qs("[name='details']", demoForm).value.trim();
+      function fieldVal(name) {
+        var el = qs("[name='" + name + "']", demoForm);
+        return el ? el.value.trim() : "";
+      }
+      var firstName = fieldVal("firstName");
+      var lastName = fieldVal("lastName");
+      var jobTitle = fieldVal("jobTitle");
+      var facility = fieldVal("facility");
+      var email = fieldVal("email");
+      var phone = fieldVal("phone");
+      var estimatedUsers = fieldVal("estimatedUsers");
+      var details = fieldVal("details");
       var fullName = (firstName + " " + lastName).trim();
 
-      // Build a clean, readable email body
       var lines = [];
       lines.push("New Demo Request");
       lines.push("================");
@@ -198,7 +200,6 @@
       lines.push("Submitted from helix-website demo form.");
       var prettyMessage = lines.join("\n");
 
-      // Send only curated, labeled fields so the email is clean
       var formData = new FormData();
       formData.append("Name", fullName);
       formData.append("Email", email);
@@ -208,7 +209,7 @@
       formData.append("Estimated Users", estimatedUsers);
       formData.append("Details", details);
       formData.append("message", prettyMessage);
-      formData.append("_subject", "New Demo Request \u2014 " + (fullName || email));
+      formData.append("_subject", "New Demo Request — " + (fullName || email));
       formData.append("_format", "plain");
       if (email) formData.append("_replyto", email);
 
@@ -217,93 +218,30 @@
       fetch(demoForm.action, {
         method: "POST",
         body: formData,
-        headers: { "Accept": "application/json" }
+        headers: { Accept: "application/json" },
       })
-      .then(function(response) {
-        if (response.ok) {
-          demoStatus.textContent = "✓ Demo request sent successfully! We'll be in touch within one business day.";
-          demoForm.reset();
-          demoForm.classList.remove("hx-form--attempted");
-          qsa(".hx-field", demoForm).forEach(function (el) {
-            el.classList.remove("hx-touched");
-          });
-          setTimeout(closeDemo, 3000);
-        } else {
+        .then(function (response) {
+          if (response.ok) {
+            demoStatus.textContent =
+              "✓ Demo request sent successfully! We'll be in touch within one business day.";
+            demoForm.reset();
+            demoForm.classList.remove("hx-form--attempted");
+            qsa(".hx-field", demoForm).forEach(function (el) {
+              el.classList.remove("hx-touched");
+            });
+            setTimeout(closeDemo, 3000);
+          } else {
+            demoStatus.textContent = "Error sending request. Please try again.";
+          }
+        })
+        .catch(function () {
           demoStatus.textContent = "Error sending request. Please try again.";
-        }
-      })
-      .catch(function() {
-        demoStatus.textContent = "Error sending request. Please try again.";
-      });
+        });
     });
   }
 
   var contactForm = qs("#contact-form");
   var contactStatus = qs("#contact-form-status");
-
-  if (contactForm && contactStatus) {
-    contactForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      contactForm.classList.add("hx-form--attempted");
-      if (!contactForm.reportValidity()) return;
-
-      var email = qs("[name='email']", contactForm).value.trim();
-      var topic = qs("[name='topic']", contactForm).value.trim();
-      var message = qs("[name='message']", contactForm).value.trim();
-      var nameField = qs("[name='name']", contactForm);
-      var senderName = nameField ? nameField.value.trim() : "";
-
-      // Build a clean, readable email body
-      var lines = [];
-      lines.push("New Contact Message");
-      lines.push("===================");
-      lines.push("");
-      lines.push("From:    " + (senderName || "(not provided)"));
-      lines.push("Email:   " + (email || "-"));
-      lines.push("Topic:   " + (topic || "-"));
-      lines.push("");
-      lines.push("MESSAGE");
-      lines.push("-------");
-      lines.push(message || "(empty)");
-      lines.push("");
-      lines.push("--");
-      lines.push("Submitted from helix-website contact form.");
-      var prettyMessage = lines.join("\n");
-
-      var formData = new FormData();
-      if (senderName) formData.append("Name", senderName);
-      formData.append("Email", email);
-      formData.append("Topic", topic);
-      formData.append("Message", message);
-      formData.append("message", prettyMessage);
-      formData.append("_subject", "Helix Contact \u2014 " + (topic || "New Message"));
-      formData.append("_format", "plain");
-      if (email) formData.append("_replyto", email);
-
-      contactStatus.textContent = "Sending...";
-
-      fetch(contactForm.action, {
-        method: "POST",
-        body: formData,
-        headers: { "Accept": "application/json" }
-      })
-      .then(function(response) {
-        if (response.ok) {
-          contactStatus.textContent = "✓ Message sent! We'll get back to you soon.";
-          contactForm.reset();
-          contactForm.classList.remove("hx-form--attempted");
-          qsa(".hx-field", contactForm).forEach(function (el) {
-            el.classList.remove("hx-touched");
-          });
-        } else {
-          contactStatus.textContent = "Error sending message. Please try again.";
-        }
-      })
-      .catch(function() {
-        contactStatus.textContent = "Error sending message. Please try again.";
-      });
-    });
-  }
 
   /* Blur validation highlight (demo + contact + cookie prefs) */
   function wireFieldBlur(root) {
@@ -325,58 +263,85 @@
   var prefsCard = qs(".hx-prefs-card");
   if (prefsCard) wireFieldBlur(prefsCard);
 
-  /* Animated hero chat */
-  var chatRoot = qs("#helix-chat-demo");
-  var chatMsgs = chatRoot ? qsa("[data-chat-msg]", chatRoot) : [];
-  var chatTyping = qs("#helix-chat-typing");
-  var chatTimer = null;
+  if (contactForm && contactStatus) {
+    contactForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      contactForm.classList.add("hx-form--attempted");
+      if (!contactForm.reportValidity()) return;
 
-  function clearChatAnim() {
-    if (chatTimer) clearTimeout(chatTimer);
-    chatTimer = null;
-  }
+      var email = qs("[name='email']", contactForm).value.trim();
+      var topicEl = qs("[name='topic']", contactForm);
+      var topic = topicEl ? topicEl.value.trim() : "";
+      var messageEl = qs("[name='message']", contactForm);
+      var message = messageEl ? messageEl.value.trim() : "";
+      var firstEl = qs("[name='firstName']", contactForm);
+      var lastEl = qs("[name='lastName']", contactForm);
+      var nameEl = qs("[name='name']", contactForm);
+      var facilityEl = qs("[name='facility']", contactForm);
+      var phoneEl = qs("[name='phone']", contactForm);
+      var senderName = (
+        ((firstEl && firstEl.value) || "") +
+        " " +
+        ((lastEl && lastEl.value) || "")
+      ).trim();
+      if (!senderName && nameEl) senderName = nameEl.value.trim();
+      var facility = facilityEl ? facilityEl.value.trim() : "";
+      var phone = phoneEl ? phoneEl.value.trim() : "";
 
-  function runChatLoop() {
-    if (!chatRoot || !chatMsgs.length) return;
-    var reduced =
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      chatMsgs.forEach(function (m) {
-        m.classList.add("helix-chat-demo__msg--show");
-      });
-      return;
-    }
-    var step = 0;
-    function clearAll() {
-      chatMsgs.forEach(function (m) {
-        m.classList.remove("helix-chat-demo__msg--show");
-      });
-      if (chatTyping) chatTyping.classList.remove("helix-chat-demo__typing--on");
-    }
-    function tick() {
-      clearChatAnim();
-      if (step < chatMsgs.length) {
-        chatMsgs[step].classList.add("helix-chat-demo__msg--show");
-        step++;
-        chatTimer = setTimeout(tick, step === chatMsgs.length ? 900 : 780);
-      } else if (step === chatMsgs.length) {
-        if (chatTyping) chatTyping.classList.add("helix-chat-demo__typing--on");
-        step++;
-        chatTimer = setTimeout(tick, 1100);
-      } else {
-        if (chatTyping) chatTyping.classList.remove("helix-chat-demo__typing--on");
-        step++;
-        chatTimer = setTimeout(function () {
-          clearAll();
-          step = 0;
-          tick();
-        }, 2200);
-      }
-    }
-    clearAll();
-    tick();
+      var lines = [];
+      lines.push("New Contact Message");
+      lines.push("===================");
+      lines.push("");
+      lines.push("From:     " + (senderName || "(not provided)"));
+      lines.push("Email:    " + (email || "-"));
+      if (facility) lines.push("Facility: " + facility);
+      if (phone) lines.push("Phone:    " + phone);
+      lines.push("Topic:    " + (topic || "-"));
+      lines.push("");
+      lines.push("MESSAGE");
+      lines.push("-------");
+      lines.push(message || "(empty)");
+      lines.push("");
+      lines.push("--");
+      lines.push("Submitted from helix-website contact form.");
+      var prettyMessage = lines.join("\n");
+
+      var formData = new FormData();
+      if (senderName) formData.append("Name", senderName);
+      formData.append("Email", email);
+      if (facility) formData.append("Facility", facility);
+      if (phone) formData.append("Phone", phone);
+      formData.append("Topic", topic);
+      formData.append("Message", message);
+      formData.append("message", prettyMessage);
+      formData.append("_subject", "Helix Contact — " + (topic || "New Message"));
+      formData.append("_format", "plain");
+      if (email) formData.append("_replyto", email);
+
+      contactStatus.textContent = "Sending...";
+
+      fetch(contactForm.action, {
+        method: "POST",
+        body: formData,
+        headers: { Accept: "application/json" },
+      })
+        .then(function (response) {
+          if (response.ok) {
+            contactStatus.textContent = "✓ Message sent! We'll get back to you soon.";
+            contactForm.reset();
+            contactForm.classList.remove("hx-form--attempted");
+            qsa(".hx-field", contactForm).forEach(function (el) {
+              el.classList.remove("hx-touched");
+            });
+          } else {
+            contactStatus.textContent = "Error sending message. Please try again.";
+          }
+        })
+        .catch(function () {
+          contactStatus.textContent = "Error sending message. Please try again.";
+        });
+    });
   }
-  runChatLoop();
 
   /* Cookies */
   function getPrefs() {
@@ -461,10 +426,269 @@
       hideBanner();
     });
 
+  /* ---------------------------------------------------------------------
+     Header mega menu — hover on pointer devices, click/keyboard everywhere
+     --------------------------------------------------------------------- */
+  var navItems = qsa(".hx-nav-item");
+
+  function closeMenus(except) {
+    navItems.forEach(function (item) {
+      if (item === except) return;
+      item.classList.remove("is-open");
+      var trigger = qs(".hx-nav-trigger", item);
+      if (trigger) trigger.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  navItems.forEach(function (item) {
+    var trigger = qs(".hx-nav-trigger", item);
+    if (!trigger) return;
+    trigger.addEventListener("click", function (e) {
+      e.preventDefault();
+      var willOpen = !item.classList.contains("is-open");
+      closeMenus(item);
+      item.classList.toggle("is-open", willOpen);
+      trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
+    item.addEventListener("mouseleave", function () {
+      item.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest || !e.target.closest(".hx-nav-item")) closeMenus(null);
+  });
+
+  /* ---------------------------------------------------------------------
+     Animated counters
+     --------------------------------------------------------------------- */
+  var reducedMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function formatCount(value, decimals) {
+    var fixed = value.toFixed(decimals);
+    var parts = fixed.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  }
+
+  function runCounter(el) {
+    var target = parseFloat(el.getAttribute("data-count-to"));
+    if (isNaN(target)) return;
+    var decimals = parseInt(el.getAttribute("data-count-decimals") || "0", 10);
+    var prefix = el.getAttribute("data-count-prefix") || "";
+    var suffix = el.getAttribute("data-count-suffix") || "";
+
+    if (reducedMotion) {
+      el.textContent = prefix + formatCount(target, decimals) + suffix;
+      return;
+    }
+
+    var duration = 1700;
+    var start = null;
+    function frame(ts) {
+      if (start === null) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = prefix + formatCount(target * eased, decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  var counters = qsa("[data-count-to]");
+  if (counters.length) {
+    if ("IntersectionObserver" in window) {
+      var countObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            runCounter(entry.target);
+            countObserver.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.4 }
+      );
+      counters.forEach(function (el) {
+        countObserver.observe(el);
+      });
+    } else {
+      counters.forEach(runCounter);
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     Phone preview — scene player with working tab bar
+     --------------------------------------------------------------------- */
+  var phone = qs("#hx-phone");
+  if (phone) {
+    var scenes = qsa("[data-scene]", phone);
+    var sceneTabs = qsa("[data-scene-target]", phone);
+    var order = scenes.map(function (s) {
+      return s.getAttribute("data-scene");
+    });
+    var current = 0;
+    var autoplay = !reducedMotion;
+    var sceneTimer = null;
+    var msgTimers = [];
+    var inView = true;
+
+    function clearTimers() {
+      if (sceneTimer) clearTimeout(sceneTimer);
+      sceneTimer = null;
+      msgTimers.forEach(clearTimeout);
+      msgTimers = [];
+    }
+
+    function playMessages(scene) {
+      var items = qsa("[data-msg]", scene);
+      if (!items.length) return;
+      if (reducedMotion) {
+        items.forEach(function (m) {
+          m.classList.add("is-shown");
+        });
+        return;
+      }
+      items.forEach(function (m) {
+        m.classList.remove("is-shown");
+      });
+      items.forEach(function (m, i) {
+        msgTimers.push(
+          setTimeout(function () {
+            m.classList.add("is-shown");
+          }, 260 + i * 620)
+        );
+      });
+    }
+
+    function show(index, fromUser) {
+      clearTimers();
+      current = (index + scenes.length) % scenes.length;
+      scenes.forEach(function (scene, i) {
+        scene.classList.toggle("is-active", i === current);
+      });
+      sceneTabs.forEach(function (tab) {
+        var isActive = tab.getAttribute("data-scene-target") === order[current];
+        tab.classList.toggle("is-active", isActive);
+        tab.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+      playMessages(scenes[current]);
+      if (fromUser) autoplay = false;
+      queueNext();
+    }
+
+    function queueNext() {
+      if (!autoplay || !inView) return;
+      var dwell = parseInt(scenes[current].getAttribute("data-dwell") || "4200", 10);
+      sceneTimer = setTimeout(function () {
+        show(current + 1);
+      }, dwell);
+    }
+
+    sceneTabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var target = tab.getAttribute("data-scene-target");
+        var index = order.indexOf(target);
+        if (index > -1) show(index, true);
+      });
+    });
+
+    phone.addEventListener("mouseenter", function () {
+      if (sceneTimer) clearTimeout(sceneTimer);
+      sceneTimer = null;
+    });
+    phone.addEventListener("mouseleave", queueNext);
+
+    if ("IntersectionObserver" in window) {
+      var phoneObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            inView = entry.isIntersecting;
+            if (inView) queueNext();
+            else clearTimers();
+          });
+        },
+        { threshold: 0.25 }
+      );
+      phoneObserver.observe(phone);
+    }
+
+    show(0);
+  }
+
+  /* ---------------------------------------------------------------------
+     Tabbed sections
+     --------------------------------------------------------------------- */
+  qsa("[data-tabs]").forEach(function (group) {
+    var tabs = qsa("[data-tab]", group);
+    var panels = qsa("[data-tabpanel]", group);
+
+    function activate(name) {
+      tabs.forEach(function (tab) {
+        var on = tab.getAttribute("data-tab") === name;
+        tab.classList.toggle("is-active", on);
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+        tab.setAttribute("tabindex", on ? "0" : "-1");
+      });
+      panels.forEach(function (panel) {
+        panel.hidden = panel.getAttribute("data-tabpanel") !== name;
+      });
+    }
+
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener("click", function () {
+        activate(tab.getAttribute("data-tab"));
+      });
+      tab.addEventListener("keydown", function (e) {
+        var step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        e.preventDefault();
+        var next = tabs[(index + step + tabs.length) % tabs.length];
+        next.focus();
+        activate(next.getAttribute("data-tab"));
+      });
+    });
+
+    if (tabs.length) activate(tabs[0].getAttribute("data-tab"));
+  });
+
+  /* ---------------------------------------------------------------------
+     Accordions — one open at a time within a group
+     --------------------------------------------------------------------- */
+  qsa("[data-accordion]").forEach(function (group) {
+    var panels = qsa("details.hx-acc", group);
+    panels.forEach(function (panel) {
+      panel.addEventListener("toggle", function () {
+        if (!panel.open) return;
+        panels.forEach(function (other) {
+          if (other !== panel) other.open = false;
+        });
+      });
+    });
+  });
+
+  /* ---------------------------------------------------------------------
+     Login form (preview only — no credentials leave the browser)
+     --------------------------------------------------------------------- */
+  var loginForm = qs("#login-form");
+  var loginStatus = qs("#login-status");
+  if (loginForm && loginStatus) {
+    wireFieldBlur(loginForm);
+    loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      loginForm.classList.add("hx-form--attempted");
+      if (!loginForm.reportValidity()) return;
+      loginStatus.textContent =
+        "This preview build has no authentication backend yet — connect your identity provider to enable sign-in.";
+    });
+  }
+
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
     closeDrawer();
     closePrefs();
     closeDemo();
+    closeMenus(null);
   });
 })();
